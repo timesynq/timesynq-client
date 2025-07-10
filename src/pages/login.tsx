@@ -11,7 +11,7 @@ export default function Login() {
     const formSubmit = async (event) => {
         event.preventDefault();
         const formData = new FormData();
-        formData.append('user', user);
+        formData.append('username', user);
         formData.append('password', password);
         let response = await login(formData);
         if(response?.status === 200){
@@ -21,9 +21,7 @@ export default function Login() {
             //clear fields
             setUser("");
             setPassword("");
-            console.log("Invalid user/password")
         }
-        console.log("That just happened..")
     }
 
     return (
