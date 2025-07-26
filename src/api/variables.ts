@@ -3,7 +3,7 @@ export const variables = {
     API_REGISTER: "https://localhost:7032/register", 
     API_LOGIN: "https://localhost:7032/login?useCookies=true&useSessionCookies=true",
     API_FORGOT_PASSWORD: "https://localhost:7032/forgotPassword",
-    API_USERS_ME: "https://localhost:7032/me",
+    API_USERS_ME: "https://localhost:7032/users/me",
     API_USER_SEARCH: "https://localhost:7032/users/search",
     API_SIGN_OUT: "https://localhost:7032/logout",
     API_UPDATE_DISPLAY_NAME: "https://localhost:7032/users/updateDisplayName?displayName=",
