@@ -22,6 +22,7 @@ export default function Login() {
             setUser("");
             setPassword("");
         }
+        console.log(response);
     }
 
     return (
