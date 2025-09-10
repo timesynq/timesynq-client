@@ -1,5 +1,3 @@
-//signup register OR profile if signed in
-
 import { User } from "@/types/usertypes";
 import { Button } from "./ui/button";
 import {
@@ -9,50 +7,82 @@ import {
   NavigationMenuList,
 } from "./ui/navigation-menu";
 import logo from '/logo/timesynq-logo-placeholder.png'
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface NavBarProps {
     user?: User
 } 
 
 export function NavBar({ user }: NavBarProps) {
+
+    const isMobile: boolean = useIsMobile();
+
     return (
-        <div className="fixed top-0 w-full z-50 shadow-md bg-card border-b border-border h-16">
-            <div className="relative flex items-center justify-between h-full px-4">
-
-                <img
-                    src={logo}
-                    alt="Logo"
-                    className="h-10 w-auto max-w-[120px] object-contain sm:max-w-[150px]"
-                />
-
-                <NavigationMenu className="absolute left-1/2 transform -translate-x-1/2 top-1/2 -translate-y-1/2">
-                    <NavigationMenuList className="flex gap-2 sm:gap-4">
-                        {["Home", "Create", "Explore", "About"].map((label) => (
-                            <NavigationMenuItem key={label}>
-                                <NavigationMenuLink asChild>
-                                    <Button variant="link" className="text-foreground cursor-pointer text-sm sm:text-base">
-                                        {label}
-                                    </Button>
-                                </NavigationMenuLink>
-                            </NavigationMenuItem>
-                        ))}
-                    </NavigationMenuList>
-                </NavigationMenu>
-
-                {user ? (
+        <>
+            <div className="fixed top-0 w-full z-50 shadow-md bg-card border-b border-border h-16">
+                <div className="flex items-center justify-between h-full px-4">
                     <img
                         src={logo}
-                        alt="User"
-                        className="h-10 w-auto max-w-[120px] object-contain sm:max-w-[150px]"
+                        alt="Logo"
+                        className="h-10 w-auto max-w-[120px] object-contain"
                     />
-                ) : (
-                    <div className="flex space-x-2">
-                        <Button variant="signin">Sign in</Button>
-                        <Button variant="register">Register</Button>
-                    </div>
-                )}
+
+                    {!isMobile && 
+                        <div className="flex-1 text-center">
+                            <NavigationMenu className="inline-block">
+                                <NavigationMenuList className="flex gap-2 sm:gap-4 justify-center">
+                                    {["Home", "Create", "Explore"].map((label) => (
+                                        <NavigationMenuItem key={label}>
+                                            <NavigationMenuLink asChild>
+                                                <Button variant="link" className="text-foreground cursor-pointer text-sm sm:text-base">
+                                                    {label}
+                                                </Button>
+                                            </NavigationMenuLink>
+                                        </NavigationMenuItem>
+                                    ))}
+                                </NavigationMenuList>
+                            </NavigationMenu>
+                        </div>
+                    }
+
+                    {user ? (
+                        <img
+                            src={logo}
+                            alt="User"
+                            className="h-10 w-auto max-w-[120px] object-contain sm:max-w-[150px]"
+                        />
+                    ) : (
+                        <div className="flex space-x-2">
+                            <Button variant="signin" className="cursor-pointer">Sign in</Button>
+                            <Button variant="register" className="cursor-pointer">Register</Button>
+                        </div>
+                    )}
+                </div>
             </div>
-        </div>
+
+            {isMobile && (
+                <div className="fixed bottom-0 w-full z-50 shadow-md bg-card border-t border-border h-20">
+                    <div className="flex items-center justify-around px-4 pt-2 pb-6">
+                        {[
+                            {
+                                label: "Home",
+                            }, 
+                            {
+                                label: "Create",
+                            }, 
+                            {
+                                label: "Explore",
+                            }
+                        ].map((option) => (
+                            <Button key={option.label} variant="ghost" size="icon" className="text-foreground">
+                                <div className="flex flex-col items-center">
+                                    {option.label}
+                                </div>
+                            </Button>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </>
     );
 }
-
