@@ -81,10 +81,10 @@ export function NavBar({ user }: NavBarProps) {
                                 label: "Explore",
                             }
                         ].map((option) => (
-                            <Button key={option.label} variant="ghost" size="icon">
+                            <Button key={option.label} variant="ghost" size="icon" className="size-14">
                                 <div className="flex flex-col items-center">
                                     <option.icon className="text-foreground"/>
-                                    <p className="text-foreground">{option.label}</p>
+                                    <p className="text-foreground pt-1">{option.label}</p>
                                 </div>
                             </Button>
                         ))}
