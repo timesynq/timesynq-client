@@ -8,6 +8,10 @@ import {
 } from "./ui/navigation-menu";
 import logo from '/logo/timesynq-logo-placeholder.png'
 import { useIsMobile } from "@/hooks/use-mobile";
+import HomeIcon from "@/assets/svg/home-icon.svg?react";
+import PlusIcon from "@/assets/svg/plus-icon.svg?react";
+import SearchIcon from "@/assets/svg/search-icon.svg?react";
+
 
 interface NavBarProps {
     user?: User
@@ -65,18 +69,22 @@ export function NavBar({ user }: NavBarProps) {
                     <div className="flex items-center justify-around px-4 pt-2 pb-6">
                         {[
                             {
+                                icon: HomeIcon,
                                 label: "Home",
                             }, 
                             {
+                                icon: PlusIcon,
                                 label: "Create",
                             }, 
                             {
+                                icon: SearchIcon,
                                 label: "Explore",
                             }
                         ].map((option) => (
-                            <Button key={option.label} variant="ghost" size="icon" className="text-foreground">
+                            <Button key={option.label} variant="ghost" size="icon">
                                 <div className="flex flex-col items-center">
-                                    {option.label}
+                                    <option.icon className="text-foreground"/>
+                                    <p className="text-foreground">{option.label}</p>
                                 </div>
                             </Button>
                         ))}
