@@ -9,22 +9,25 @@ import PublicProfile from './pages/public-profile';
 import Register from './pages/register';
 import Room from './pages/room';
 import UserSearch from './pages/user-search';
+import { ThemeProvider } from './components/theme-provider';
 
 // For PublicProfile and Room, routes will need to be modified in order to include the username and room IDs respectively.
 
 export default function App() {
     return (
-        <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/create" element={<Create />} />
-            <Route path="/email-confirmed" element={<EmailConfirmed />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/public-profile" element={<PublicProfile />} /> 
-            <Route path="/register" element={<Register />} />
-            <Route path="/room" element={<Room />} />
-            <Route path="/user-search" element={<UserSearch />} />
-        </Routes>
+        <ThemeProvider>
+            <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/create" element={<Create />} />
+                <Route path="/email-confirmed" element={<EmailConfirmed />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/public-profile" element={<PublicProfile />} /> 
+                <Route path="/register" element={<Register />} />
+                <Route path="/room" element={<Room />} />
+                <Route path="/user-search" element={<UserSearch />} />
+            </Routes>
+        </ThemeProvider>
     );
 }
