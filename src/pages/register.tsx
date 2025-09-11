@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { routes } from "../api/routes";
 import { register } from "../api/userapi";
+import { NavBar } from "@/components/nav-bar";
+
 
 export default function Register () {
 
@@ -8,7 +10,7 @@ export default function Register () {
     const [user, setUser] = useState('');
     const [password, setPassword] = useState('');
 
-    const formSubmit = async (event) => {
+    const formSubmit = async (event: any) => {
         event.preventDefault();
         const formData = new FormData();
         formData.append('email', email);
@@ -28,20 +30,21 @@ export default function Register () {
     }
 
     return (
-        <main className="flex">
+        <>
+            <NavBar></NavBar>
             <form onSubmit={formSubmit}>
-                        <label htmlFor="email"><b>Username</b></label>
-                        <input type="username" placeholder="Enter Email Address" name="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                <label htmlFor="email"><b>Username</b></label>
+                <input type="username" placeholder="Enter Email Address" name="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
 
-                        <label htmlFor="user"><b>Username</b></label>
-                        <input type="username" placeholder="Enter Username" name="user" value={user} onChange={(e) => setUser(e.target.value)} required />
+                <label htmlFor="user"><b>Username</b></label>
+                <input type="username" placeholder="Enter Username" name="user" value={user} onChange={(e) => setUser(e.target.value)} required />
 
-                        <label htmlFor="password"><b>Password</b></label>
-                        <input type="password" placeholder="Enter Password" name="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                <label htmlFor="password"><b>Password</b></label>
+                <input type="password" placeholder="Enter Password" name="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
 
                 <button type="submit" value="Submit">Register</button>
 
             </form>
-        </main>
+        </>
     );
 }
