@@ -11,6 +11,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import HomeIcon from "@/assets/svg/home-icon.svg?react";
 import PlusIcon from "@/assets/svg/plus-icon.svg?react";
 import SearchIcon from "@/assets/svg/search-icon.svg?react";
+import { ProfileDropdown } from "./profile-dropdown";
 
 
 interface NavBarProps {
@@ -50,11 +51,7 @@ export function NavBar({ user }: NavBarProps) {
                     }
 
                     {user ? (
-                        <img
-                            src={logo}
-                            alt="User"
-                            className="h-10 w-auto max-w-[120px] object-contain sm:max-w-[150px]"
-                        />
+                        <ProfileDropdown user={user} />
                     ) : (
                         <div className="flex space-x-2">
                             <Button variant="signin" className="cursor-pointer">Sign in</Button>

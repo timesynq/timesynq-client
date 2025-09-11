@@ -1,5 +1,5 @@
 import { User } from "@/types/usertypes";
-import { DropdownMenu, DropdownMenuTrigger } from "./ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { Button } from "./ui/button";
 import { ProfilePicture } from "./profile-picture";
 
@@ -23,6 +23,19 @@ export function ProfileDropdown({ user }: ProfileDropdownProps) {
                     </div>
                 </Button>
             </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56" align="end">
+                <DropdownMenuItem>
+                    Profile
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                    Account Settings
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                    Sign Out
+                </DropdownMenuItem>
+            </DropdownMenuContent>
         </DropdownMenu>
     );
 }
