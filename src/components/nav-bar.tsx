@@ -12,7 +12,7 @@ import HomeIcon from "@/assets/svg/home-icon.svg?react";
 import PlusIcon from "@/assets/svg/plus-icon.svg?react";
 import SearchIcon from "@/assets/svg/search-icon.svg?react";
 import { ProfileDropdown } from "./profile-dropdown";
-
+import { Link } from "react-router-dom";
 
 interface NavBarProps {
     user?: User
@@ -26,24 +26,40 @@ export function NavBar({ user }: NavBarProps) {
         <>
             <div className="fixed top-0 w-full z-50 shadow-md bg-card border-b border-border h-16">
                 <div className="flex items-center justify-between h-full px-4">
-                    <img
-                        src={logo}
-                        alt="Logo"
-                        className="h-10 w-auto max-w-[120px] object-contain"
-                    />
+                    <Link to="/">
+                        <img
+                            src={logo}
+                            alt="Logo"
+                            className="h-10 w-auto max-w-[120px] object-contain"
+                        />
+                    </Link>
 
                     {!isMobile && 
                         <div className="flex-1 text-center">
                             <NavigationMenu className="inline-block">
                                 <NavigationMenuList className="flex gap-2 sm:gap-4 justify-center">
-                                    {["Home", "Create", "Explore"].map((label) => (
-                                        <NavigationMenuItem key={label}>
-                                            <NavigationMenuLink asChild>
-                                                <Button variant="link" className="text-foreground cursor-pointer text-sm sm:text-base">
-                                                    {label}
-                                                </Button>
-                                            </NavigationMenuLink>
-                                        </NavigationMenuItem>
+                                    {[                            
+                                    {
+                                        label: "Home",
+                                        link: "/"
+                                    }, 
+                                    {
+                                        label: "Create",
+                                        link: "/create"
+                                    }, 
+                                    {
+                                        label: "Explore",
+                                        link: "/user-search"
+                                    }].map((option) => (
+                                        <Link to={option.link}>
+                                            <NavigationMenuItem key={option.label}>
+                                                <NavigationMenuLink asChild>
+                                                    <Button variant="link" className="text-foreground cursor-pointer text-sm sm:text-base">
+                                                        {option.label}
+                                                    </Button>
+                                                </NavigationMenuLink>
+                                            </NavigationMenuItem>
+                                        </Link>
                                     ))}
                                 </NavigationMenuList>
                             </NavigationMenu>
@@ -54,8 +70,13 @@ export function NavBar({ user }: NavBarProps) {
                         <ProfileDropdown user={user} />
                     ) : (
                         <div className="flex space-x-2">
-                            <Button variant="signin" className="cursor-pointer">Sign in</Button>
-                            <Button variant="register" className="cursor-pointer">Register</Button>
+                            <Link to={"/login"}>
+                                <Button variant="signin" className="cursor-pointer">Sign in</Button>
+                            </Link>
+
+                            <Link to={"/register"}>
+                                <Button variant="register" className="cursor-pointer">Register</Button>
+                            </Link>
                         </div>
                     )}
                 </div>
@@ -68,26 +89,32 @@ export function NavBar({ user }: NavBarProps) {
                             {
                                 icon: HomeIcon,
                                 label: "Home",
+                                link: "/"
                             }, 
                             {
                                 icon: PlusIcon,
                                 label: "Create",
+                                link: "/create"
                             }, 
                             {
                                 icon: SearchIcon,
                                 label: "Explore",
+                                link: "/user-search"
                             }
                         ].map((option) => (
-                            <Button key={option.label} variant="ghost" size="icon" className="size-14">
-                                <div className="flex flex-col items-center">
-                                    <option.icon className="text-foreground"/>
-                                    <p className="text-foreground pt-1">{option.label}</p>
-                                </div>
-                            </Button>
+                            <Link to={option.link}>
+                                <Button key={option.label} variant="ghost" size="icon" className="size-14">
+                                    <div className="flex flex-col items-center">
+                                        <option.icon className="text-foreground"/>
+                                        <a className="text-foreground pt-1">{option.label}</a>
+                                    </div>
+                                </Button>
+                            </Link>
                         ))}
                     </div>
                 </div>
             )}
+            <div className="h-20" />
         </>
     );
 }
