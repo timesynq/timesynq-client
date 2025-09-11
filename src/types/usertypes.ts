@@ -1,6 +1,6 @@
 export type User = {
     id: string;
     userName: string;
-    profilePicture: string;
+    profilePicture: number;
     createdOnUTC: string;
 }
