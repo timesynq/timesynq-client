@@ -30,6 +30,7 @@ export const login = async (loginRequest: LoginRequest): Promise<void | LoginErr
 
         const response = await fetch(endpoints.auth.login(), {
             method: "POST",
+            credentials: 'include',
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
