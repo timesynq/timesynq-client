@@ -53,7 +53,7 @@ export function NavBar({ user }: NavBarProps) {
                                         label: "Explore",
                                         link: "/user-search"
                                     }].map((option) => (
-                                        <Link to={option.link}>
+                                        <Link to={option.link} key={option.link}>
                                             <NavigationMenuItem key={option.label}>
                                                 <NavigationMenuLink asChild>
                                                     <Button variant="link" className="text-foreground cursor-pointer text-sm sm:text-base">
@@ -99,11 +99,11 @@ export function NavBar({ user }: NavBarProps) {
                                 link: "/user-search"
                             }
                         ].map((option) => (
-                            <Link to={option.link}>
+                            <Link to={option.link} key={option.link}>
                                 <Button key={option.label} variant="ghost" size="icon" className="size-14">
                                     <div className="flex flex-col items-center">
                                         <option.icon className="text-foreground"/>
-                                        <a className="text-foreground pt-1">{option.label}</a>
+                                        <p className="text-foreground pt-1">{option.label}</p>
                                     </div>
                                 </Button>
                             </Link>
