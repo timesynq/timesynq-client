@@ -1,4 +1,5 @@
 import { endpoints } from "../endpoints";
+import { AuthFieldValidation } from "./validation";
 
 export type RegisterRequest = {
     username: string
@@ -16,28 +17,9 @@ const validateInputs = (registerRequest: RegisterRequest): string[] => {
 
     const errors: string[] = [];
 
-    if(registerRequest.username.length < 3 || registerRequest.username.length > 24){
-        errors.push("Username must be 3-24 characters long.");
-    }
-
-    const usernameRegex = /^[a-zA-Z0-9_]+$/;
-    if (!usernameRegex.test(registerRequest.username)) {
-        errors.push("Username can only contain letters, numbers, and underscores.");
-    }
-
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    if (!emailRegex.test(registerRequest.email)) {
-        errors.push("Email address is invalid.");
-    }
-
-    if(registerRequest.password.length < 12){
-        errors.push("Password must be at least 12 characters long.");
-    }
-
-    const passwordRegex = /^[\x21-\x7E]*$/;
-    if (!passwordRegex.test(registerRequest.password)) {
-        errors.push("Password contains invalid characters.");
-    }
+    errors.push(...AuthFieldValidation.ValidateUsername(registerRequest.username));
+    errors.push(...AuthFieldValidation.ValidateEmail(registerRequest.email));
+    errors.push(...AuthFieldValidation.ValidatePassword(registerRequest.password));
 
     if(registerRequest.password != registerRequest.confirmPassword){
         errors.push("Passwords do not match.");

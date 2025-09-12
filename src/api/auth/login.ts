@@ -1,4 +1,5 @@
 import { endpoints } from "../endpoints";
+import { AuthFieldValidation } from "./validation";
 
 export type LoginRequest = {
     username: string
@@ -11,29 +12,10 @@ export type LoginError = {
 }
 
 const validateInputs = (loginRequest: LoginRequest): string[] => {
-
     const errors: string[] = [];
-
-    if(loginRequest.username.length < 3 || loginRequest.username.length > 24){
-        errors.push("Username is not 3-24 characters long.")
-    }
-
-    const usernameRegex = /^[a-zA-Z0-9_]+$/;
-    if (!usernameRegex.test(loginRequest.username)) {
-        errors.push("Username can only contain letters, numbers, and underscores.");
-    }
-
-    if(loginRequest.password.length < 12){
-        errors.push("Password must be at least 12 characters long.");
-    }
-
-    const passwordRegex = /^[\x21-\x7E]*$/;
-    if (!passwordRegex.test(loginRequest.password)) {
-        errors.push("Password contains invalid characters.");
-    }
-    
+    errors.push(...AuthFieldValidation.ValidateUsername(loginRequest.username));
+    errors.push(...AuthFieldValidation.ValidatePassword(loginRequest.password));
     return errors;
-
 }
 
 export const login = async (loginRequest: LoginRequest): Promise<void | LoginError> => {
