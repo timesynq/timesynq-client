@@ -13,6 +13,8 @@ import PlusIcon from "@/assets/svg/plus-icon.svg?react";
 import SearchIcon from "@/assets/svg/search-icon.svg?react";
 import { ProfileDropdown } from "./profile-dropdown";
 import { Link } from "react-router-dom";
+import { SignInDialog } from "./sign-in-dialog";
+import { RegisterDialog } from "./register-dialog";
 
 interface NavBarProps {
     user?: User
@@ -51,7 +53,7 @@ export function NavBar({ user }: NavBarProps) {
                                         label: "Explore",
                                         link: "/user-search"
                                     }].map((option) => (
-                                        <Link to={option.link}>
+                                        <Link to={option.link} key={option.link}>
                                             <NavigationMenuItem key={option.label}>
                                                 <NavigationMenuLink asChild>
                                                     <Button variant="link" className="text-foreground cursor-pointer text-sm sm:text-base">
@@ -70,13 +72,8 @@ export function NavBar({ user }: NavBarProps) {
                         <ProfileDropdown user={user} />
                     ) : (
                         <div className="flex space-x-2">
-                            <Link to={"/login"}>
-                                <Button variant="signin" className="cursor-pointer">Sign in</Button>
-                            </Link>
-
-                            <Link to={"/register"}>
-                                <Button variant="register" className="cursor-pointer">Register</Button>
-                            </Link>
+                            <SignInDialog />
+                            <RegisterDialog />
                         </div>
                     )}
                 </div>
@@ -102,11 +99,11 @@ export function NavBar({ user }: NavBarProps) {
                                 link: "/user-search"
                             }
                         ].map((option) => (
-                            <Link to={option.link}>
+                            <Link to={option.link} key={option.link}>
                                 <Button key={option.label} variant="ghost" size="icon" className="size-14">
                                     <div className="flex flex-col items-center">
                                         <option.icon className="text-foreground"/>
-                                        <a className="text-foreground pt-1">{option.label}</a>
+                                        <p className="text-foreground pt-1">{option.label}</p>
                                     </div>
                                 </Button>
                             </Link>
