@@ -4,6 +4,7 @@ import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogT
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { register, RegisterError, RegisterRequest } from "@/api/auth/register";
+import { login, LoginRequest } from "@/api/auth/login";
 
 export function RegisterDialog() {
 
@@ -21,22 +22,34 @@ export function RegisterDialog() {
         event.preventDefault();
 
         const formData = new FormData(event.currentTarget);
-        const request: RegisterRequest = {
+        const registerRequest: RegisterRequest = {
             username: formData.get("username") as string,
             email: formData.get("email") as string,
             password: formData.get("password") as string,
             confirmPassword: formData.get("confirm-password") as string,
         };
 
-        const registerError = await register(request);
+        const registerError = await register(registerRequest);
 
         if (registerError) {
             setErrors(registerError);
-        } else {
-            //todo: proper successful registration flow (log user in, reroute to a different page, notify the user to verify their email to access full functionality)
-            console.log("successful registration");
-            setErrors(null);
+            return;
         }
+
+        const loginRequest: LoginRequest = {
+            username: registerRequest.username,
+            password: registerRequest.password,
+        }
+
+        const loginError = await login(loginRequest);
+        
+        if (loginError) {
+            loginError.detail = `Login failed after successful registration. ${loginError.detail}`;
+            setErrors(loginError);
+            return;
+        }
+
+        setIsOpen(false);
     };
 
     return (

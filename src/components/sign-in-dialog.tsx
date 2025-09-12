@@ -26,15 +26,14 @@ export function SignInDialog() {
             password: formData.get("password") as string,
         };
 
-        const registerError = await login(request);
+        const loginError = await login(request);
 
-        if (registerError) {
-            setErrors(registerError);
-        } else {
-            //todo: login flow
-            console.log("successful login");
-            setIsOpen(false);
+        if (loginError) {
+            setErrors(loginError);
+            return;
         }
+
+        setIsOpen(false);
     };
 
     return (
