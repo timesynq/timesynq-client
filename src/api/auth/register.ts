@@ -17,7 +17,7 @@ const validateInputs = (registerRequest: RegisterRequest): string[] => {
     const errors: string[] = [];
 
     if(registerRequest.username.length < 3 || registerRequest.username.length > 24){
-        errors.push("Username is not 3-24 characters long.")
+        errors.push("Username must be 3-24 characters long.");
     }
 
     const usernameRegex = /^[a-zA-Z0-9_]+$/;
@@ -28,6 +28,10 @@ const validateInputs = (registerRequest: RegisterRequest): string[] => {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!emailRegex.test(registerRequest.email)) {
         errors.push("Email address is invalid.");
+    }
+
+    if(registerRequest.password.length < 12){
+        errors.push("Password must be at least 12 characters long.");
     }
 
     const passwordRegex = /^[\x21-\x7E]*$/;
