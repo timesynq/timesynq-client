@@ -1,0 +1,26 @@
+const API_BASE_URL = "https://localhost:7032";
+
+const addBaseToPath = (path: string): string => `${API_BASE_URL}${path}`;
+
+export const endpoints = {
+    auth: {
+        register: () => addBaseToPath("/register"),
+        login: (useCookies: boolean = true, useSessionCookies: boolean = true) => 
+            addBaseToPath(`/login?useCookies=${useCookies}&useSessionCookies=${useSessionCookies}`),
+        forgotPassword: () => addBaseToPath("/forgotPassword"),
+    },
+    users: {
+        me: () => addBaseToPath("/users/me"),
+        getById: (id: string) => addBaseToPath(`/users/${id}`),
+        search: (searchString: string) => addBaseToPath(`/users/search/${searchString}`),
+        changeUsername: () => addBaseToPath(`/users/username`),
+        delete: () => addBaseToPath("/users"), 
+    },
+    follow: {
+        amIFollowing: (followeeId: string) => addBaseToPath(`/follows/${followeeId}`),
+        followers: (userId: string) => addBaseToPath(`/follows/${userId}/followers`),
+        followees: (userId: string) => addBaseToPath(`/follows/${userId}/followees`),
+        follow: () => addBaseToPath("/follows"),
+        unfollow: () => addBaseToPath("/follows"),
+    },
+}
