@@ -1,4 +1,3 @@
-import { User } from "@/types/usertypes";
 import { Button } from "./ui/button";
 import {
   NavigationMenu,
@@ -15,13 +14,11 @@ import { ProfileDropdown } from "./profile-dropdown";
 import { Link } from "react-router-dom";
 import { SignInDialog } from "./sign-in-dialog";
 import { RegisterDialog } from "./register-dialog";
+import { useAuthStore } from "@/hooks/use-auth-store";
 
-interface NavBarProps {
-    user?: User
-} 
+export function NavBar() {
 
-export function NavBar({ user }: NavBarProps) {
-
+    const { user } = useAuthStore();
     const isMobile: boolean = useIsMobile();
 
     return (

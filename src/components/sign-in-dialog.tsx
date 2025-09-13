@@ -3,12 +3,14 @@ import { Button } from "./ui/button";
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import { login, LoginError, LoginRequest } from "@/api/auth/login";
+import { LoginError, LoginRequest } from "@/api/auth/login";
+import { useAuthStore } from "@/hooks/use-auth-store";
 
 export function SignInDialog() {
 
     const [errors, setErrors] = useState<LoginError | null>(null);
     const [isOpen, setIsOpen] = useState<boolean>(false);
+    const { login } = useAuthStore();
 
     const handleOpenChange = (open: boolean) => {
         if(open){

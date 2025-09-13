@@ -4,12 +4,14 @@ import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogT
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { register, RegisterError, RegisterRequest } from "@/api/auth/register";
-import { login, LoginRequest } from "@/api/auth/login";
+import { LoginRequest } from "@/api/auth/login";
+import { useAuthStore } from "@/hooks/use-auth-store";
 
 export function RegisterDialog() {
 
     const [errors, setErrors] = useState<RegisterError | null>(null);
     const [isOpen, setIsOpen] = useState<boolean>(false);
+    const { login } = useAuthStore();
 
     const handleOpenChange = (open: boolean) => {
         if(open){
