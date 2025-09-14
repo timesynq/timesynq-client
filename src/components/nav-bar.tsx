@@ -1,5 +1,4 @@
 import { Button } from "./ui/button";
-import { useLocation } from "react-router-dom";
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -21,8 +20,6 @@ export function NavBar() {
 
     const { user } = useAuthStore();
     const isMobile: boolean = useIsMobile();
-    const location = useLocation();
-    window.history.replaceState({}, '');
 
     return (
         <>
@@ -38,35 +35,33 @@ export function NavBar() {
 
                     {!isMobile && 
                         <div className="flex-1 text-center">
-                            {user ? (
-                                <NavigationMenu className="inline-block">
-                                    <NavigationMenuList className="flex gap-2 sm:gap-4 justify-center">
-                                        {[                            
-                                        {
-                                            label: "Home",
-                                            link: "/"
-                                        }, 
-                                        {
-                                            label: "Create",
-                                            link: "/create"
-                                        }, 
-                                        {
-                                            label: "Explore",
-                                            link: "/user-search"
-                                        }].map((option) => (
-                                            <Link to={option.link} key={option.link}>
-                                                <NavigationMenuItem key={option.label}>
-                                                    <NavigationMenuLink asChild>
-                                                        <Button variant="link" className="text-foreground cursor-pointer text-sm sm:text-base">
-                                                            {option.label}
-                                                        </Button>
-                                                    </NavigationMenuLink>
-                                                </NavigationMenuItem>
-                                            </Link>
-                                        ))}
-                                    </NavigationMenuList>
-                                </NavigationMenu>
-                            ) : <p className="text-xl">Welcome to Timesynq!</p>} 
+                            <NavigationMenu className="inline-block">
+                                <NavigationMenuList className="flex gap-2 sm:gap-4 justify-center">
+                                    {[                            
+                                    {
+                                        label: "Home",
+                                        link: "/"
+                                    }, 
+                                    {
+                                        label: "Create",
+                                        link: "/create"
+                                    }, 
+                                    {
+                                        label: "Explore",
+                                        link: "/user-search"
+                                    }].map((option) => (
+                                        <Link to={option.link} key={option.link}>
+                                            <NavigationMenuItem key={option.label}>
+                                                <NavigationMenuLink asChild>
+                                                    <Button variant="link" className="text-foreground cursor-pointer text-sm sm:text-base">
+                                                        {option.label}
+                                                    </Button>
+                                                </NavigationMenuLink>
+                                            </NavigationMenuItem>
+                                        </Link>
+                                    ))}
+                                </NavigationMenuList>
+                            </NavigationMenu>
                         </div>
                     }
 
@@ -74,7 +69,7 @@ export function NavBar() {
                         <ProfileDropdown user={user} />
                     ) : (
                         <div className="flex space-x-2">
-                            <SignInDialog autoOpen={location.state?.open === "signin"} />
+                            <SignInDialog />
                             <RegisterDialog />
                         </div>
                     )}
@@ -84,8 +79,7 @@ export function NavBar() {
             {isMobile && (
                 <div className="fixed bottom-0 w-full z-50 shadow-md bg-card border-t border-border h-20">
                     <div className="flex items-center justify-around px-4 pt-2 pb-6">
-                        {user ? (
-                            [
+                        {[
                             {
                                 icon: HomeIcon,
                                 label: "Home",
@@ -110,7 +104,7 @@ export function NavBar() {
                                     </div>
                                 </Button>
                             </Link>
-                        ))) : <p className="flex pt-4 text-xl">Welcome to Timesynq!</p>}
+                        ))}
                     </div>
                 </div>
             )}

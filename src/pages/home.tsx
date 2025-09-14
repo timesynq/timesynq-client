@@ -14,9 +14,8 @@ export default function Home() {
         <>
             <NavBar />
             <main className="flex flex-col items-center justify-center">
-                {user?.userName}
+                {user && user.userName}
             </main>
         </>
     );
-
 }
