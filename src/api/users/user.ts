@@ -1,5 +1,5 @@
 import { User } from "@/types/usertypes";
-import { ApiError } from "../apierror";
+import { ApiError } from "../api-error";
 import { endpoints } from "../endpoints";
 
 export namespace UserApi {
