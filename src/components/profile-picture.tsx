@@ -87,6 +87,7 @@ const DecodeBitfield = (encodedBitfield: number) : boolean[][] => {
 
 interface PixelProps {
     color: string
+    size: number
 }
 
 const ColorToHex = (color: Color): string => {
@@ -96,17 +97,24 @@ const ColorToHex = (color: Color): string => {
     return `#${toHex(color.r)}${toHex(color.g)}${toHex(color.b)}`;
 } 
 
-const Pixel = ({color} : PixelProps): React.ReactElement => {
+const Pixel = ({ color, size }: PixelProps): React.ReactElement => {
     return (
-        <div className="w-1.5 h-1.5" style={{ backgroundColor: color }} />
+        <div
+            style={{
+                backgroundColor: color,
+                width: size,
+                height: size,
+            }}
+        />
     );
-}
+};
 
 interface ProfilePictureProps {
     data: number;
+    size: number;
 }
 
-export const ProfilePicture = ({ data }: ProfilePictureProps): React.ReactElement => {
+export const ProfilePicture = ({ data, size = 6 }: ProfilePictureProps): React.ReactElement => {
     
     const color: Color = DecodeColor(data & 0xFFFF)
     const bitfield: boolean[][] = DecodeBitfield((data >> 16) & 0x7FFF)
@@ -121,11 +129,11 @@ export const ProfilePicture = ({ data }: ProfilePictureProps): React.ReactElemen
     const whiteHexString: string = ColorToHex(white);
 
     return (
-        <div className="flex flex-col border">
+        <div className="flex flex-col">
             {bitfield.map((row, i) => (
                 <div key={i} className="flex flex-row">
                 {row.map((cell, j) => (
-                    <Pixel key={j} color={cell ? colorHexString : whiteHexString} />
+                    <Pixel key={j} color={cell ? colorHexString : whiteHexString} size={size}/>
                 ))}
                 </div>
             ))}
