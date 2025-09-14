@@ -3,12 +3,14 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { Button } from "./ui/button";
 import { ProfilePicture } from "./profile-picture";
 import { Link } from "react-router-dom";
+import { Logout } from "@/api/auth/logout";
 
 interface ProfileDropdownProps {
     user: User
 } 
 
 export function ProfileDropdown({ user }: ProfileDropdownProps) {
+
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -35,7 +37,7 @@ export function ProfileDropdown({ user }: ProfileDropdownProps) {
                     Account Settings
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={Logout.handler}>
                     Sign Out
                 </DropdownMenuItem>
             </DropdownMenuContent>

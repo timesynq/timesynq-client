@@ -8,6 +8,7 @@ export const endpoints = {
         login: (useCookies: boolean = true, useSessionCookies: boolean = true) => 
             addBaseToPath(`/login?useCookies=${useCookies}&useSessionCookies=${useSessionCookies}`),
         forgotPassword: () => addBaseToPath("/forgotPassword"),
+        logout: () => addBaseToPath("/logout")
     },
     users: {
         me: () => addBaseToPath("/users/me"),

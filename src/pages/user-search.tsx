@@ -1,20 +1,31 @@
 import { NavBar } from "@/components/nav-bar";
+import { useAuthStore } from "@/hooks/use-auth-store";
+import { useEffect } from "react";
+import { Navigate } from "react-router-dom";
+import { Skeleton } from "@/components/ui/skeleton";
 
 
 const UserSearch = () => {
+    const { user, isLoading, fetchUser } = useAuthStore();
+
+    useEffect(() => {
+        fetchUser();
+    }, [fetchUser]);
+
+    if (!user && !isLoading) {
+        return <Navigate to="/" state={{ open: "signin" }} replace />;
+    }
+
     return (
         <>
-            <NavBar></NavBar>
-            <div className="">
-                <section className="flex">
-                    <h1 className="text-3xl font-bold underline">
-                        user search
-                    </h1>
-                </section>
-                <footer className="absolute bottom-4 text-sm text-gray-500">
-                    copyright timesynq
-                </footer>
-            </div>
+            <NavBar />
+            <main className="flex flex-col items-center justify-center">
+                {isLoading ? (
+                    <Skeleton className="h-[125px] w-[250px] rounded-xl" />
+                ) : (
+                    <p>User Search</p>
+                )}
+            </main>
         </>
     );
 }

@@ -5,20 +5,23 @@ import { create } from 'zustand';
 
 interface AuthState {
     user: User | null;
+    isLoading: boolean;
     fetchUser: () => Promise<void>;
     login: (loginRequest: LoginRequest) => Promise<void | LoginError>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
     user: null,
+    isLoading: true,
 
     fetchUser: async () => {
+        set({ isLoading: true });
         try {
             const user = await UserApi.Me();
-            set({ user });
+            set({ user, isLoading: false });
         }
         catch(error) {
-            set({ user: null });
+            set({ user: null, isLoading:false });
         }
     },
 
