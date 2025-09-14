@@ -2,12 +2,14 @@ import { User } from "@/types/usertypes";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { Button } from "./ui/button";
 import { ProfilePicture } from "./profile-picture";
+import { Logout } from "@/api/auth/logout";
 
 interface ProfileDropdownProps {
     user: User
 } 
 
 export function ProfileDropdown({ user }: ProfileDropdownProps) {
+
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -32,7 +34,7 @@ export function ProfileDropdown({ user }: ProfileDropdownProps) {
                     Account Settings
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={Logout.handler}>
                     Sign Out
                 </DropdownMenuItem>
             </DropdownMenuContent>
