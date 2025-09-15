@@ -117,38 +117,31 @@ export namespace UserApi {
     }
 
     export const UserSearch = async (query: string): Promise<UserSearchResults | null> => {
-
-        try{
+        try {
             const response = await fetch(endpoints.users.search(query), {
                 method: "GET",
-                credentials: 'include',
-                headers: {
-                    'Accept': 'text/plain',
-                },
+                credentials: "include",
+                headers: { "Accept": "application/json" },
             });
 
             const data = await response.json();
-
-            if(response.ok){
-                console.log(data);
-                return {
-                    ...data,
-                }
-            }
-            console.error("Could not fetch user: ", data as ApiError);
-            return null;
-
-        }
-        catch (error) {
-            const apiError: ApiError = {
-                type: "FetchError",
-                title: "Unexpected error occurred",
-                status: 500,
-                detail: (error instanceof Error ? error.message : "Unknown error"),
-                instance: "User"
+            const userResults: UserSearchResults = {
+                items: data.items
+                    ? data.items.map((item: User) => ({
+                        user: item,
+                    }))
+                    : [],
             };
-            console.error("Caught exception fetching user: ", apiError);
+
+            return userResults ?? null;
+
+        } catch (error) {
+            console.error("UserSearch fetch failed:", error);
             return null;
         }
-    }
+    };
+
+
+
+
 }

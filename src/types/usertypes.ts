@@ -13,5 +13,5 @@ export type Profile = {
 }
 
 export type UserSearchResults = {
-    items: { FoundUser: User; }[];
+    items: { user: User; }[];
 }

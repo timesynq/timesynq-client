@@ -4,16 +4,16 @@ import { NavBar } from "@/components/nav-bar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { List, SearchIcon } from "lucide-react";
+import { SearchIcon } from "lucide-react";
 import { useAuthStore } from "@/hooks/use-auth-store";
 import { UserApi } from "@/api/users/user";
 
-import type { User, UserSearchResults } from "@/types/usertypes";
+import type { UserSearchResults } from "@/types/usertypes";
 
 const UserSearchPage = () => {
     const { user, isLoading, fetchUser } = useAuthStore();
     const [userQuery, setUserQuery] = useState("");
-    const [results, setResults] = useState<User[]>([]);
+    const [results, setResults] = useState<UserSearchResults | null>();
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
@@ -33,15 +33,9 @@ const UserSearchPage = () => {
             return;
         }
 
-        const data: UserSearchResults | null = await UserApi.UserSearch(userQuery);
-        if (data && data.items.length > 0) {
-            const foundUsers = data.items
-                .map((item) => item.FoundUser)
-                .filter((u): u is User => u !== undefined && u !== null); // type guard
-            setResults(foundUsers);
-        } else {
-            setError("No users found.");
-        }
+        const users = await UserApi.UserSearch(userQuery);
+        console.log(users);
+        setResults(users);
     };
 
     return (
@@ -70,14 +64,14 @@ const UserSearchPage = () => {
                 {error && <p className="text-red-500 mt-2">{error}</p>}
 
                 <ul className="mt-4 space-y-2">
-                    {results.length > 0 ? (
-                        results.map((u) => (
-                            <li key={u.id} className="text-white">
-                                {u.userName}
+                    {results && results.items.length > 0 ? (
+                        results.items.map((i) => (
+                            <li key={i.user.id} className="text-white">
+                                {i.user.userName}
                             </li>
                         ))
                     ) : (
-                        !error && <p className="text-gray-400">No results yet.</p>
+                        !error && <p className="text-gray-400">No users found.</p>
                     )}
                 </ul>
             </main>
