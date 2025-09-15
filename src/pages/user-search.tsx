@@ -1,12 +1,20 @@
-import { NavBar } from "@/components/nav-bar";
-import { useAuthStore } from "@/hooks/use-auth-store";
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Navigate } from "react-router-dom";
+import { NavBar } from "@/components/nav-bar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { List, SearchIcon } from "lucide-react";
+import { useAuthStore } from "@/hooks/use-auth-store";
+import { UserApi } from "@/api/users/user";
 
+import type { User, UserSearchResults } from "@/types/usertypes";
 
-const UserSearch = () => {
+const UserSearchPage = () => {
     const { user, isLoading, fetchUser } = useAuthStore();
+    const [userQuery, setUserQuery] = useState("");
+    const [results, setResults] = useState<User[]>([]);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         fetchUser();
@@ -16,6 +24,26 @@ const UserSearch = () => {
         return <Navigate to="/" state={{ open: "signin" }} replace />;
     }
 
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError(null);
+
+        if (userQuery.trim().length < 3) {
+            setError("Please enter at least 3 letters.");
+            return;
+        }
+
+        const data: UserSearchResults | null = await UserApi.UserSearch(userQuery);
+        if (data && data.items.length > 0) {
+            const foundUsers = data.items
+                .map((item) => item.FoundUser)
+                .filter((u): u is User => u !== undefined && u !== null); // type guard
+            setResults(foundUsers);
+        } else {
+            setError("No users found.");
+        }
+    };
+
     return (
         <>
             <NavBar />
@@ -23,11 +51,38 @@ const UserSearch = () => {
                 {isLoading ? (
                     <Skeleton className="h-[125px] w-[250px] rounded-xl" />
                 ) : (
-                    <p>User Search</p>
+                    <form onSubmit={handleSubmit} className="flex m-2">
+                        <Input
+                            className="w-75"
+                            placeholder="Search..."
+                            value={userQuery}
+                            onChange={(e) => setUserQuery(e.target.value)}
+                        />
+                        <Button
+                            type="submit"
+                            className="bg-transparent hover:bg-blue-900/30 text-white font-bold py-2 px-4 ml-2 rounded border-none"
+                        >
+                            <SearchIcon className="text-foreground" />
+                        </Button>
+                    </form>
                 )}
+
+                {error && <p className="text-red-500 mt-2">{error}</p>}
+
+                <ul className="mt-4 space-y-2">
+                    {results.length > 0 ? (
+                        results.map((u) => (
+                            <li key={u.id} className="text-white">
+                                {u.userName}
+                            </li>
+                        ))
+                    ) : (
+                        !error && <p className="text-gray-400">No results yet.</p>
+                    )}
+                </ul>
             </main>
         </>
     );
-}
+};
 
-export default UserSearch
+export default UserSearchPage;
