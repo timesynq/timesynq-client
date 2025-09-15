@@ -60,8 +60,9 @@ export default function Profile() {
             setDisplayedUser({
                 ...displayedUser,
                 followerCount: displayedUser.followerCount + 1,
-            })
+            });
             setIsFollowing(true);
+            setIsHoveringFollowButton(false);
         }
     }
 
@@ -76,7 +77,7 @@ export default function Profile() {
             setDisplayedUser({
                 ...displayedUser,
                 followerCount: displayedUser.followerCount - 1,
-            })
+            });
             setIsFollowing(false);
         }
     }
