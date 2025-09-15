@@ -11,3 +11,7 @@ export type Profile = {
     user: User;
     isFollowing: boolean;
 }
+
+export type UserSearchResults = {
+    items: { user: User; }[];
+}

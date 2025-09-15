@@ -1,4 +1,4 @@
-import { Profile, User } from "@/types/usertypes";
+import { Profile, User, UserSearchResults } from "@/types/usertypes";
 import { ApiError } from "../api-error";
 import { endpoints } from "../endpoints";
 
@@ -115,5 +115,33 @@ export namespace UserApi {
             return null;
         }
     }
+
+    export const UserSearch = async (query: string): Promise<UserSearchResults | null> => {
+        try {
+            const response = await fetch(endpoints.users.search(query), {
+                method: "GET",
+                credentials: "include",
+                headers: { "Accept": "application/json" },
+            });
+
+            const data = await response.json();
+            const userResults: UserSearchResults = {
+                items: data.items
+                    ? data.items.map((item: User) => ({
+                        user: item,
+                    }))
+                    : [],
+            };
+
+            return userResults ?? null;
+
+        } catch (error) {
+            console.error("UserSearch fetch failed:", error);
+            return null;
+        }
+    };
+
+
+
 
 }
