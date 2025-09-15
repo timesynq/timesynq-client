@@ -3,4 +3,11 @@ export type User = {
     userName: string;
     profilePicture: number;
     createdOnUTC: Date;
+    followerCount: number;
+    followeeCount: number;
+}
+
+export type Profile = {
+    user: User;
+    isFollowing: boolean;
 }
