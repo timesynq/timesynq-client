@@ -61,11 +61,11 @@ export default function Profile() {
                             <Separator />
                             <CardContent className="flex flex-row items-center justify-around py-2">
                                 <div className="flex flex-col items-center space-y-1">
-                                <p className="text-foreground text-lg font-medium">24,500</p>
+                                <p className="text-foreground text-lg font-medium">{displayedUser.followerCount}</p>
                                 <p className="text-muted-foreground text-sm">Followers</p>
                                 </div>
                                 <div className="flex flex-col items-center space-y-1">
-                                <p className="text-foreground text-lg font-medium">892</p>
+                                <p className="text-foreground text-lg font-medium">{displayedUser.followeeCount}</p>
                                 <p className="text-muted-foreground text-sm">Following</p>
                                 </div>
                             </CardContent>
