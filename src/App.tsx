@@ -7,10 +7,27 @@ import Profile from './pages/profile';
 import Room from './pages/room';
 import UserSearch from './pages/user-search';
 import { ThemeProvider } from './components/theme-provider';
+import { Toaster } from 'sonner';
 
 export default function App() {
     return (
         <ThemeProvider>
+            <Toaster
+                visibleToasts={1}
+                duration={4000}
+                toastOptions={{
+                    style: {
+                        color: 'var(--destructive)',
+                        background: 'var(--card)',
+                        borderColor: 'var(--border)',
+                        fontFamily: 'Pixuf, sans-serif',
+                    },
+                    classNames: {
+                        title: 'text-lg',
+                        description: '!text-(--foreground) text-base',
+                    }
+                }}
+            />
             <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/create" element={<Create />} />
