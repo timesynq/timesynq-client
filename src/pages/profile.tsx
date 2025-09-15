@@ -1,6 +1,7 @@
 import { UserApi } from "@/api/users/user";
 import { NavBar } from "@/components/nav-bar";
 import { ProfilePicture } from "@/components/profile-picture";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useAuthStore } from "@/hooks/use-auth-store";
@@ -8,12 +9,17 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { User } from "@/types/usertypes";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import CheckIcon from "@/assets/svg/check-icon.svg?react";
+import XIcon from "@/assets/svg/x-icon.svg?react";
+import { FollowApi, FollowRequest, UnfollowRequest } from "@/api/follows/follow";
 
 export default function Profile() {
     
     const { user, fetchUser } = useAuthStore(); 
     const { displayedUserId } = useParams();
     const [displayedUser, setDisplayedUser] = useState<User | null>(null);
+    const [isFollowing, setIsFollowing] = useState<boolean>(false);
+    const [isHoveringFollowButton, setIsHoveringFollowButton] = useState<boolean>(false);
     const isMobile: boolean = useIsMobile();
 
     useEffect(() => {
@@ -28,8 +34,9 @@ export default function Profile() {
                 setDisplayedUser(user);
             }
             else{
-                const otherUser = await UserApi.User(displayedUserId);
-                setDisplayedUser(otherUser);
+                const profile = await UserApi.Profile(displayedUserId);
+                setDisplayedUser(profile ? profile.user : null);
+                setIsFollowing(profile ? profile.isFollowing : false);
             }
         };
         fetchDisplayedUser();
@@ -41,6 +48,38 @@ export default function Profile() {
     }
 
     const isViewingOwnProfile: boolean = user.id === displayedUserId;
+
+    const handleFollow = async (): Promise<void> => {
+        if(!displayedUser)
+            return;
+        const request: FollowRequest = {
+            followeeId: displayedUser.id
+        }
+        const followResult = await FollowApi.Follow(request);
+        if(followResult){
+            setDisplayedUser({
+                ...displayedUser,
+                followerCount: displayedUser.followerCount + 1,
+            })
+            setIsFollowing(true);
+        }
+    }
+
+    const handleUnfollow = async (): Promise<void> => {
+        if(!displayedUser)
+            return;
+        const request: UnfollowRequest = {
+            followeeId: displayedUser.id,
+        }
+        const unfollowResult = await FollowApi.Unfollow(request);
+        if(unfollowResult){
+            setDisplayedUser({
+                ...displayedUser,
+                followerCount: displayedUser.followerCount - 1,
+            })
+            setIsFollowing(false);
+        }
+    }
 
     return (
         <>
@@ -70,9 +109,36 @@ export default function Profile() {
                                 </div>
                             </CardContent>
                             <Separator />
-                            <CardFooter className="flex flex-col items-center justify-center pt-6">
+                            <CardFooter className="flex flex-col items-center justify-center space-y-3 p-4">
+                                {!isViewingOwnProfile && 
+                                    <Button 
+                                        variant={
+                                            isFollowing ? (isHoveringFollowButton ? "register" : "signin") : "outline"
+                                        } 
+                                        className="flex flex-row items-center justify-center text-md cursor-pointer"
+                                        onMouseEnter={() => setIsHoveringFollowButton(true)}
+                                        onMouseLeave={() => setIsHoveringFollowButton(false)}
+                                        onClick={isFollowing ? handleUnfollow : handleFollow}
+                                    > 
+                                        {!isFollowing &&
+                                            <p>+ Follow</p>
+                                        }
+                                        {isFollowing && !isHoveringFollowButton &&
+                                            <>
+                                                <CheckIcon className="text-chart-2" />
+                                                <p>Following</p>
+                                            </>
+                                        }
+                                        {isFollowing && isHoveringFollowButton &&
+                                            <>
+                                                <XIcon className="text-chart-4" />
+                                                <p>Unfollow?</p>
+                                            </> 
+                                        }
+                                    </Button>
+                                }
                                 <p className="text-muted-foreground text-sm">
-                                Joined {user.createdOnUTC.toLocaleDateString()}
+                                    Joined {user.createdOnUTC.toLocaleDateString()}
                                 </p>
                             </CardFooter>
                         </Card>

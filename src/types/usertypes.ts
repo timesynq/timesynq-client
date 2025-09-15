@@ -6,3 +6,8 @@ export type User = {
     followerCount: number;
     followeeCount: number;
 }
+
+export type Profile = {
+    user: User;
+    isFollowing: boolean;
+}
