@@ -57,7 +57,7 @@ export function RegisterDialog() {
     return (
         <Dialog open={isOpen} onOpenChange={handleOpenChange}>
             <DialogTrigger asChild>
-                <Button variant="register" className="cursor-pointer">Register</Button>
+                <Button variant="register" className="cursor-pointer w-20">Register</Button>
             </DialogTrigger>
             <DialogContent className="max-w-[425px]">
                 <DialogHeader>

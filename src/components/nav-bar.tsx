@@ -54,7 +54,7 @@ export function NavBar() {
                                             <Link to={option.link} key={option.link}>
                                                 <NavigationMenuItem key={option.label}>
                                                     <NavigationMenuLink asChild>
-                                                        <Button variant="link" className="text-foreground cursor-pointer text-sm sm:text-base">
+                                                        <Button variant="link" className="text-foreground cursor-pointer text-sm sm:text-base w-20">
                                                             {option.label}
                                                         </Button>
                                                     </NavigationMenuLink>
@@ -63,7 +63,7 @@ export function NavBar() {
                                         ))}
                                     </NavigationMenuList>
                                 </NavigationMenu>
-                            ) : <p className="text-xl">Welcome to Timesynq!</p>} 
+                            ) : <p className="text-xl pl-8">Welcome to Timesynq!</p>} 
                         </div>
                     }
 

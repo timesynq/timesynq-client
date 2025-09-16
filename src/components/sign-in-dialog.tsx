@@ -47,7 +47,7 @@ export function SignInDialog({ autoOpen = false }: { autoOpen?: boolean }) {
     return (
         <Dialog open={isOpen} onOpenChange={handleOpenChange}>
             <DialogTrigger asChild>
-                <Button variant="signin" className="cursor-pointer">Sign in</Button>
+                <Button variant="signin" className="cursor-pointer w-16">Sign in</Button>
             </DialogTrigger>
             <DialogContent className="max-w-[425px]">
                 <DialogHeader>
