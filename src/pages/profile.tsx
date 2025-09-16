@@ -12,6 +12,7 @@ import { useParams } from "react-router-dom";
 import CheckIcon from "@/assets/svg/check-icon.svg?react";
 import XIcon from "@/assets/svg/x-icon.svg?react";
 import { FollowApi, FollowRequest, UnfollowRequest } from "@/api/follows/follow";
+import { Toasts } from "@/utils/toasts";
 
 export default function Profile() {
     
@@ -55,7 +56,7 @@ export default function Profile() {
         const request: FollowRequest = {
             followeeId: displayedUser.id
         }
-        const followResult = await FollowApi.Follow(request);
+        const followResult = await FollowApi.Follow(request, (description: string) => {Toasts.Error(description)});
         if(followResult){
             setDisplayedUser({
                 ...displayedUser,
@@ -72,7 +73,7 @@ export default function Profile() {
         const request: UnfollowRequest = {
             followeeId: displayedUser.id,
         }
-        const unfollowResult = await FollowApi.Unfollow(request);
+        const unfollowResult = await FollowApi.Unfollow(request, (description: string) => {Toasts.Error(description)});
         if(unfollowResult){
             setDisplayedUser({
                 ...displayedUser,
