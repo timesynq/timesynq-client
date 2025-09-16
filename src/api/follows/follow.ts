@@ -10,7 +10,7 @@ export type UnfollowRequest = FollowRequest;
 
 export namespace FollowApi {
 
-    export const Follow = async (followRequest: FollowRequest): Promise<Follow | null> => {
+    export const Follow = async (followRequest: FollowRequest, onError: (description: string) => void): Promise<Follow | null> => {
         try {    
             const response = await fetch(endpoints.follow.follow(), {
                 method: "POST",
@@ -31,7 +31,10 @@ export namespace FollowApi {
                     createdOnUTC: new Date(trimmedTimestamp),
                 }
             }
-            console.error("Could not follow user: ", data as ApiError);
+            
+            const error = data as ApiError;
+            onError(error.detail);
+            console.error("Could not follow user: ", error);
             return null;
         }
         
@@ -43,12 +46,13 @@ export namespace FollowApi {
                 detail: (error instanceof Error ? error.message : "Unknown error"),
                 instance: "Follow"
             };
+            onError(apiError.detail);
             console.error("Caught exception following user: ", apiError);
             return null;
         }
     }
 
-    export const Unfollow = async (unfollowRequest: UnfollowRequest): Promise<boolean> => {
+    export const Unfollow = async (unfollowRequest: UnfollowRequest, onError: (description: string) => void): Promise<boolean> => {
         try {    
             const response = await fetch(endpoints.follow.unfollow(), {
                 method: "DELETE",
@@ -64,7 +68,9 @@ export namespace FollowApi {
                 return true;
             }
             const data = await response.json();
-            console.error("Could not unfollow user: ", data as ApiError);
+            const error = data as ApiError;
+            onError(error.detail);
+            console.error("Could not unfollow user: ", error);
             return false;
         }
         
@@ -76,6 +82,7 @@ export namespace FollowApi {
                 detail: (error instanceof Error ? error.message : "Unknown error"),
                 instance: "Unfollow"
             };
+            onError(apiError.detail);
             console.error("Caught exception unfollowing user: ", apiError);
             return false;
         }
