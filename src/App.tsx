@@ -1,10 +1,10 @@
 import { Routes, Route } from 'react-router-dom';
-import Home from './pages/home';
-import Create from './pages/create';
-import EmailConfirmed from './pages/email-confirmed';
-import ForgotPassword from './pages/forgot-password';
-import Profile from './pages/profile';
-import Room from './pages/room';
+import { Home } from './pages/home';
+import { Create } from './pages/create';
+import { EmailConfirmed } from './pages/email-confirmed';
+import { ForgotPassword } from './pages/forgot-password';
+import { Profile } from './pages/profile';
+import { Room } from './pages/room';
 import UserSearch from './pages/user-search';
 import { ThemeProvider } from './components/theme-provider';
 import { Toaster } from 'sonner';

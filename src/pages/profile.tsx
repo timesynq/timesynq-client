@@ -13,8 +13,9 @@ import CheckIcon from "@/assets/svg/check-icon.svg?react";
 import XIcon from "@/assets/svg/x-icon.svg?react";
 import { FollowApi, FollowRequest, UnfollowRequest } from "@/api/follows/follow";
 import { Toasts } from "@/utils/toasts";
+import { NavBarFooter } from "@/components/nav-bar-footer";
 
-export default function Profile() {
+export const Profile = () => {
     
     const { user, fetchUser } = useAuthStore(); 
     const { displayedUserId } = useParams();
@@ -84,9 +85,9 @@ export default function Profile() {
     }
 
     return (
-        <>
+        <div className="flex flex-col min-h-screen">
             <NavBar></NavBar>
-            <main className="flex flex-col items-center justify-center">
+            <main className="flex flex-col items-center justify-center m-4">
                 
                 {!displayedUser && 
                     <h1>User not found.</h1>
@@ -151,6 +152,9 @@ export default function Profile() {
                 }
 
             </main>
-        </>
+            {isMobile &&
+                <NavBarFooter />
+            }
+        </div>
     );
 }

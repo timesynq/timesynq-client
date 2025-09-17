@@ -9,9 +9,12 @@ import { Input } from "@/components/ui/input";
 import MusicIcon from "@/assets/svg/music-icon.svg?react";
 import PlusIcon from "@/assets/svg/plus-icon.svg?react";
 import HeartIcon from "@/assets/svg/heart-icon.svg?react";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { NavBarFooter } from "@/components/nav-bar-footer";
 
-const Create = () => {
+export const Create = () => {
     const { user, isLoading, fetchUser } = useAuthStore();
+    const isMobile: boolean = useIsMobile();
 
     useEffect(() => {
         fetchUser();
@@ -22,13 +25,13 @@ const Create = () => {
     }
 
     return (
-        <>
+        <div className="flex flex-col min-h-screen">
             <NavBar />
-            <main className="flex flex-col items-center justify-center">
+            <main className="flex-1 flex flex-col items-center justify-center m-4 mt-4">
                 {isLoading ? (
                     <Skeleton className="h-[125px] w-[250px] rounded-xl" />
                 ) : (
-                    <div className="flex items-center justify-center px-4">
+                    <div className="flex items-center justify-center px-4 mb-4">
                         <div className="flex flex-col items-center justify-center space-y-6 max-w-5xl w-full">
                             <div className="text-center">
                                 <h2 className="text-2xl font-bold">Create Session</h2>
@@ -80,8 +83,9 @@ const Create = () => {
                     </div>
                 )}
             </main>
-        </>
+            {isMobile &&
+                <NavBarFooter />
+            }
+        </div>
     );
 };
-
-export default Create

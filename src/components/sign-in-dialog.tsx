@@ -6,7 +6,7 @@ import { Label } from "./ui/label";
 import { LoginError, LoginRequest } from "@/api/auth/login";
 import { useAuthStore } from "@/hooks/use-auth-store";
 
-export function SignInDialog({ autoOpen = false }: { autoOpen?: boolean }) {
+export const SignInDialog = ({ autoOpen = false }: { autoOpen?: boolean }) => {
 
     const [errors, setErrors] = useState<LoginError | null>(null);
     const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -47,7 +47,7 @@ export function SignInDialog({ autoOpen = false }: { autoOpen?: boolean }) {
     return (
         <Dialog open={isOpen} onOpenChange={handleOpenChange}>
             <DialogTrigger asChild>
-                <Button variant="signin" className="cursor-pointer">Sign in</Button>
+                <Button variant="signin" className="cursor-pointer w-16">Sign in</Button>
             </DialogTrigger>
             <DialogContent className="max-w-[425px]">
                 <DialogHeader>

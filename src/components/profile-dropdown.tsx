@@ -9,7 +9,7 @@ interface ProfileDropdownProps {
     user: User
 } 
 
-export function ProfileDropdown({ user }: ProfileDropdownProps) {
+export const ProfileDropdown = ({ user }: ProfileDropdownProps) => {
 
     return (
         <DropdownMenu>

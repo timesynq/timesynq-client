@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { Navigate } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const Room = () => {
+export const Room = () => {
     const { user, isLoading, fetchUser } = useAuthStore();
 
     useEffect(() => {
@@ -28,5 +28,3 @@ const Room = () => {
         </>
     );
 }
-
-export default Room
