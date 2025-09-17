@@ -1,4 +1,4 @@
-import { Profile, User, UserSearchResults } from "@/types/usertypes";
+import { Profile, User, UserSearchResults } from "@/types/user-types";
 import { ApiError } from "../api-error";
 import { endpoints } from "../endpoints";
 
@@ -116,7 +116,7 @@ export namespace UserApi {
         }
     }
 
-    export const UserSearch = async (query: string): Promise<UserSearchResults | null> => {
+    export const Search = async (query: string): Promise<UserSearchResults | null> => {
         try {
             const response = await fetch(endpoints.users.search(query), {
                 method: "GET",
@@ -140,8 +140,5 @@ export namespace UserApi {
             return null;
         }
     };
-
-
-
 
 }

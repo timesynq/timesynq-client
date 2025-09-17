@@ -1,6 +1,6 @@
 import { login, LoginError, LoginRequest } from '@/api/auth/login';
 import { UserApi } from '@/api/users/user';
-import { User } from '@/types/usertypes';
+import { User } from '@/types/user-types';
 import { create } from 'zustand';
 
 interface AuthState {
