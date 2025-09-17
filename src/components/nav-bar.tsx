@@ -14,7 +14,7 @@ import { SignInDialog } from "./sign-in-dialog";
 import { RegisterDialog } from "./register-dialog";
 import { useAuthStore } from "@/hooks/use-auth-store";
 
-export function NavBar() {
+export const NavBar = () => {
 
     const { user } = useAuthStore();
     const isMobile: boolean = useIsMobile();

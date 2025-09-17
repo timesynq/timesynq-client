@@ -1,7 +1,7 @@
 import { NavBar } from "@/components/nav-bar";
 
 
-const EmailConfirmed = () => {
+export const EmailConfirmed = () => {
     return (
         <main className="flex">
             <NavBar></NavBar>
@@ -16,5 +16,3 @@ const EmailConfirmed = () => {
         </main>
     );
 }
-
-export default EmailConfirmed

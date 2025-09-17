@@ -7,7 +7,7 @@ import { register, RegisterError, RegisterRequest } from "@/api/auth/register";
 import { LoginRequest } from "@/api/auth/login";
 import { useAuthStore } from "@/hooks/use-auth-store";
 
-export function RegisterDialog() {
+export const RegisterDialog = () => {
 
     const [errors, setErrors] = useState<RegisterError | null>(null);
     const [isOpen, setIsOpen] = useState<boolean>(false);

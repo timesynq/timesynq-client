@@ -15,7 +15,7 @@ import { FollowApi, FollowRequest, UnfollowRequest } from "@/api/follows/follow"
 import { Toasts } from "@/utils/toasts";
 import { NavBarFooter } from "@/components/nav-bar-footer";
 
-export default function Profile() {
+export const Profile = () => {
     
     const { user, fetchUser } = useAuthStore(); 
     const { displayedUserId } = useParams();

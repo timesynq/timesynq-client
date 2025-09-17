@@ -6,7 +6,7 @@ import { Label } from "./ui/label";
 import { LoginError, LoginRequest } from "@/api/auth/login";
 import { useAuthStore } from "@/hooks/use-auth-store";
 
-export function SignInDialog({ autoOpen = false }: { autoOpen?: boolean }) {
+export const SignInDialog = ({ autoOpen = false }: { autoOpen?: boolean }) => {
 
     const [errors, setErrors] = useState<LoginError | null>(null);
     const [isOpen, setIsOpen] = useState<boolean>(false);

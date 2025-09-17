@@ -1,7 +1,7 @@
 import { NavBar } from "@/components/nav-bar";
 
 
-const ForgotPassword = () => {
+export const ForgotPassword = () => {
     return (
         <>
             <NavBar></NavBar>
@@ -16,5 +16,3 @@ const ForgotPassword = () => {
         </>
     );
 }
-
-export default ForgotPassword

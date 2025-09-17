@@ -4,7 +4,7 @@ import { useAuthStore } from "@/hooks/use-auth-store";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useEffect } from "react";
 
-export default function Home() {
+export const Home = () => {
 
     const { user, fetchUser } = useAuthStore();
     const isMobile: boolean = useIsMobile();

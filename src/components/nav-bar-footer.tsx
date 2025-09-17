@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
 import { useAuthStore } from "@/hooks/use-auth-store";
 
-export function NavBarFooter() {
+export const NavBarFooter = () => {
     const { user } = useAuthStore();
     const isMobile: boolean = useIsMobile();
 

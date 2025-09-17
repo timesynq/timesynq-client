@@ -12,7 +12,7 @@ import HeartIcon from "@/assets/svg/heart-icon.svg?react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { NavBarFooter } from "@/components/nav-bar-footer";
 
-const Create = () => {
+export const Create = () => {
     const { user, isLoading, fetchUser } = useAuthStore();
     const isMobile: boolean = useIsMobile();
 
@@ -89,5 +89,3 @@ const Create = () => {
         </div>
     );
 };
-
-export default Create
