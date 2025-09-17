@@ -1,4 +1,4 @@
-import { User } from "@/types/usertypes";
+import { User } from "@/types/user-types";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { Button } from "./ui/button";
 import { ProfilePicture } from "./profile-picture";

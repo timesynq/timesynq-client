@@ -8,9 +8,9 @@ import { SearchIcon } from "lucide-react";
 import { useAuthStore } from "@/hooks/use-auth-store";
 import { UserApi } from "@/api/users/user";
 
-import type { UserSearchResults } from "@/types/usertypes";
+import type { UserSearchResults } from "@/types/user-types";
 
-const UserSearchPage = () => {
+export default function UserSearch () {
     const { user, isLoading, fetchUser } = useAuthStore();
     const [userQuery, setUserQuery] = useState("");
     const [results, setResults] = useState<UserSearchResults | null>();
@@ -33,7 +33,7 @@ const UserSearchPage = () => {
             return;
         }
 
-        const users = await UserApi.UserSearch(userQuery);
+        const users = await UserApi.Search(userQuery);
         console.log(users);
         setResults(users);
     };
@@ -78,5 +78,3 @@ const UserSearchPage = () => {
         </>
     );
 };
-
-export default UserSearchPage;

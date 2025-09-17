@@ -6,7 +6,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator";
 import { useAuthStore } from "@/hooks/use-auth-store";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { User } from "@/types/usertypes";
+import { User } from "@/types/user-types";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import CheckIcon from "@/assets/svg/check-icon.svg?react";
