@@ -116,7 +116,7 @@ export const Profile = () => {
                                 {!isViewingOwnProfile && 
                                     <Button 
                                         variant={
-                                            isFollowing ? (isHoveringFollowButton ? "register" : "signin") : "outline"
+                                            isFollowing ? (isHoveringFollowButton ? "negative" : "positive") : "outline"
                                         } 
                                         className="flex flex-row items-center justify-center text-md cursor-pointer"
                                         onMouseEnter={() => setIsHoveringFollowButton(true)}

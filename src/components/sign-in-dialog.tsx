@@ -47,7 +47,7 @@ export const SignInDialog = ({ autoOpen = false }: { autoOpen?: boolean }) => {
     return (
         <Dialog open={isOpen} onOpenChange={handleOpenChange}>
             <DialogTrigger asChild>
-                <Button variant="signin" className="cursor-pointer w-16">Sign in</Button>
+                <Button variant="positive" className="cursor-pointer w-16">Sign in</Button>
             </DialogTrigger>
             <DialogContent className="max-w-[425px]">
                 <DialogHeader>
@@ -79,7 +79,7 @@ export const SignInDialog = ({ autoOpen = false }: { autoOpen?: boolean }) => {
                         <DialogClose asChild>
                             <Button variant="outline">Close</Button>
                         </DialogClose>
-                        <Button type="submit" variant="signin">Sign in</Button>
+                        <Button type="submit" variant="positive">Sign in</Button>
                     </DialogFooter>
                 </form>
             </DialogContent>
