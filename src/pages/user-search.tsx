@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, Link } from "react-router-dom";
 import { NavBar } from "@/components/nav-bar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -7,10 +7,11 @@ import { Input } from "@/components/ui/input";
 import { SearchIcon } from "lucide-react";
 import { useAuthStore } from "@/hooks/use-auth-store";
 import { UserApi } from "@/api/users/user";
+import { ProfilePicture } from "@/components/profile-picture";
 
 import type { UserSearchResults } from "@/types/user-types";
 
-export default function UserSearch () {
+export const UserSearch = () => {
     const { user, isLoading, fetchUser } = useAuthStore();
     const [userQuery, setUserQuery] = useState("");
     const [results, setResults] = useState<UserSearchResults | null>();
@@ -66,8 +67,36 @@ export default function UserSearch () {
                 <ul className="mt-4 space-y-2">
                     {results && results.items.length > 0 ? (
                         results.items.map((i) => (
-                            <li key={i.user.id} className="text-white">
-                                {i.user.userName}
+                            <li key={i.user.id} className="w-full">
+                                <Link
+                                    to={`/profile/${i.user.id}`}
+                                    className="block bg-gray-800 p-4 shadow-md hover:shadow-lg hover:bg-gray-700 transition-all duration-200 w-150 border-2"
+                                >
+                                    <div className="flex items-center gap-4">
+                                        <ProfilePicture data={i.user.profilePicture} size={12} />
+
+                                        <div className="flex flex-col">
+                                            <span className="text-lg font-semibold text-white">
+                                                {i.user.userName}
+                                            </span>
+
+                                            <div className="flex gap-6 text-sm text-gray-300 mt-1">
+                                                <span>
+                                                    <span className="font-medium text-white">
+                                                        {i.user.followerCount}
+                                                    </span>{" "}
+                                                    Followers
+                                                </span>
+                                                <span>
+                                                    <span className="font-medium text-white">
+                                                        {i.user.followeeCount}
+                                                    </span>{" "}
+                                                    Following
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </Link>
                             </li>
                         ))
                     ) : (
@@ -78,3 +107,4 @@ export default function UserSearch () {
         </>
     );
 };
+
