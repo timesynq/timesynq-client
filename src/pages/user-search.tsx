@@ -6,10 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SearchIcon } from "lucide-react";
 import { useAuthStore } from "@/hooks/use-auth-store";
-import { UserApi } from "@/api/users/user";
 import { ProfilePicture } from "@/components/profile-picture";
-
-import type { UserSearchResults } from "@/types/user-types";
+import { UserSearchResults, UserService } from "@/api/users/user";
 
 export const UserSearch = () => {
     const { user, isLoading, fetchUser } = useAuthStore();
@@ -34,7 +32,7 @@ export const UserSearch = () => {
             return;
         }
 
-        const users = await UserApi.Search(userQuery);
+        const users = await UserService.search(userQuery);
         console.log(users);
         setResults(users);
     };

@@ -1,4 +1,3 @@
-import { UserApi } from "@/api/users/user";
 import { NavBar } from "@/components/nav-bar";
 import { ProfilePicture } from "@/components/profile-picture";
 import { Button } from "@/components/ui/button";
@@ -6,7 +5,6 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator";
 import { useAuthStore } from "@/hooks/use-auth-store";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { User } from "@/types/user-types";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import CheckIcon from "@/assets/svg/check-icon.svg?react";
@@ -14,6 +12,7 @@ import XIcon from "@/assets/svg/x-icon.svg?react";
 import { FollowService, FollowRequest, UnfollowRequest } from "@/api/follows/follow";
 import { Toasts } from "@/utils/toasts";
 import { NavBarFooter } from "@/components/nav-bar-footer";
+import { User, UserService } from "@/api/users/user";
 
 export const Profile = () => {
     
@@ -36,7 +35,7 @@ export const Profile = () => {
                 setDisplayedUser(user);
             }
             else{
-                const profile = await UserApi.Profile(displayedUserId);
+                const profile = await UserService.profile(displayedUserId);
                 setDisplayedUser(profile ? profile.user : null);
                 setIsFollowing(profile ? profile.isFollowing : false);
             }

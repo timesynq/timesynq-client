@@ -1,9 +1,9 @@
-import { User } from "@/types/user-types";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { Button } from "./ui/button";
 import { ProfilePicture } from "./profile-picture";
 import { Link } from "react-router-dom";
 import { Logout } from "@/api/auth/logout";
+import { User } from "@/api/users/user";
 
 interface ProfileDropdownProps {
     user: User
