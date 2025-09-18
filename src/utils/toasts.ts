@@ -1,8 +1,14 @@
 import { toast } from "sonner"
 
-export namespace Toasts {
+export const Toasts = {
 
-    export const Error = (description: string): void => {
+    success: (description: string): void => {
+        toast("Success", {
+            description: description,
+        })
+    },
+
+    error: (description: string): void => {
         toast("Error", {
             description: description,
         })

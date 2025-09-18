@@ -57,7 +57,7 @@ export const Profile = () => {
         const request: FollowRequest = {
             followeeId: displayedUser.id
         }
-        const followResult = await FollowService.follow(request, (description: string) => {Toasts.Error(description)});
+        const followResult = await FollowService.follow(request, (description: string) => {Toasts.error(description)});
         if(followResult){
             setDisplayedUser({
                 ...displayedUser,
@@ -74,7 +74,7 @@ export const Profile = () => {
         const request: UnfollowRequest = {
             followeeId: displayedUser.id,
         }
-        const unfollowResult = await FollowService.unfollow(request, (description: string) => {Toasts.Error(description)});
+        const unfollowResult = await FollowService.unfollow(request, (description: string) => {Toasts.error(description)});
         if(unfollowResult){
             setDisplayedUser({
                 ...displayedUser,
