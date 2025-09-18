@@ -17,9 +17,9 @@ const validateInputs = (registerRequest: RegisterRequest): string[] => {
 
     const errors: string[] = [];
 
-    errors.push(...AuthFieldValidation.ValidateUsername(registerRequest.username));
-    errors.push(...AuthFieldValidation.ValidateEmail(registerRequest.email));
-    errors.push(...AuthFieldValidation.ValidatePassword(registerRequest.password));
+    errors.push(...AuthFieldValidation.validateUsername(registerRequest.username));
+    errors.push(...AuthFieldValidation.validateEmail(registerRequest.email));
+    errors.push(...AuthFieldValidation.validatePassword(registerRequest.password));
 
     if(registerRequest.password != registerRequest.confirmPassword){
         errors.push("Passwords do not match.");
