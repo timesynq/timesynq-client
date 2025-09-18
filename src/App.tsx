@@ -17,7 +17,7 @@ export default function App() {
                 duration={4000}
                 toastOptions={{
                     style: {
-                        color: 'var(--destructive)',
+                        color: 'var(--foreground)',
                         background: 'var(--card)',
                         borderColor: 'var(--border)',
                         fontFamily: 'Pixuf, sans-serif',

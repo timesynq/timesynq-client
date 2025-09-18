@@ -6,6 +6,7 @@ import { Label } from "./ui/label";
 import { register, RegisterError, RegisterRequest } from "@/api/auth/register";
 import { LoginRequest } from "@/api/auth/login";
 import { useAuthStore } from "@/hooks/use-auth-store";
+import { Toasts } from "@/utils/toasts";
 
 export const RegisterDialog = () => {
 
@@ -31,7 +32,7 @@ export const RegisterDialog = () => {
             confirmPassword: formData.get("confirm-password") as string,
         };
 
-        const registerError = await register(registerRequest);
+        const registerError = await register(registerRequest, (description: string) => {Toasts.success(description)});
 
         if (registerError) {
             setErrors(registerError);
