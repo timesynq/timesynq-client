@@ -1,4 +1,4 @@
-import { ApiError } from "../api-error";
+import { ApiError, ApiErrorFactory } from "../api-error";
 import { endpoints } from "../endpoints";
 
 export type User = {
@@ -41,19 +41,12 @@ export const UserService = {
                     createdOnUTC: new Date(trimmedTimestamp),
                 }
             }
-            console.error("Could not fetch me: ", data as ApiError);
+
             return null;
-            
         }
         
         catch (error) {
-            const apiError: ApiError = {
-                type: "FetchError",
-                title: "Unexpected error occurred",
-                status: 500,
-                detail: (error instanceof Error ? error.message : "Unknown error"),
-                instance: "Me"
-            };
+            const apiError: ApiError = ApiErrorFactory.createFetchError(error, "me");
             console.error("Caught exception fetching me: ", apiError);
             return null;
         }
@@ -79,17 +72,11 @@ export const UserService = {
                     createdOnUTC: new Date(trimmedTimestamp),
                 }
             }
-            console.error("Could not fetch user: ", data as ApiError);
+
             return null;
         }
         catch (error) {
-            const apiError: ApiError = {
-                type: "FetchError",
-                title: "Unexpected error occurred",
-                status: 500,
-                detail: (error instanceof Error ? error.message : "Unknown error"),
-                instance: "User"
-            };
+            const apiError: ApiError = ApiErrorFactory.createFetchError(error, "user");
             console.error("Caught exception fetching user: ", apiError);
             return null;
         }
@@ -117,17 +104,11 @@ export const UserService = {
                     user: user,
                 }
             }
-            console.error("Could not fetch user profile: ", data as ApiError);
+
             return null;
         }
         catch (error) {
-            const apiError: ApiError = {
-                type: "FetchError",
-                title: "Unexpected error occurred",
-                status: 500,
-                detail: (error instanceof Error ? error.message : "Unknown error"),
-                instance: "User Profile"
-            };
+            const apiError: ApiError = ApiErrorFactory.createFetchError(error, "profile");
             console.error("Caught exception fetching user profile: ", apiError);
             return null;
         }
@@ -153,7 +134,8 @@ export const UserService = {
             return userResults ?? null;
 
         } catch (error) {
-            console.error("UserSearch fetch failed:", error);
+            const apiError: ApiError = ApiErrorFactory.createFetchError(error, "search");
+            console.error("UserSearch fetch failed:", apiError);
             return null;
         }
     }

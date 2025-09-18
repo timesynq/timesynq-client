@@ -1,5 +1,5 @@
 import { endpoints } from "../endpoints";
-import { ApiError } from "../api-error";
+import { ApiError, ApiErrorFactory } from "../api-error";
 
 export type Follow = {
     followerId: string;
@@ -39,20 +39,12 @@ export const FollowService = {
             
             const error = data as ApiError;
             onError(error.detail);
-            console.error("Could not follow user: ", error);
             return null;
         }
         
         catch (error) {
-            const apiError: ApiError = {
-                type: "FetchError",
-                title: "Unexpected error occurred",
-                status: 500,
-                detail: (error instanceof Error ? error.message : "Unknown error"),
-                instance: "Follow"
-            };
+            const apiError: ApiError = ApiErrorFactory.createFetchError(error, "follow");
             onError(apiError.detail);
-            console.error("Caught exception following user: ", apiError);
             return null;
         }
     },
@@ -75,20 +67,12 @@ export const FollowService = {
             const data = await response.json();
             const error = data as ApiError;
             onError(error.detail);
-            console.error("Could not unfollow user: ", error);
             return false;
         }
         
         catch (error) {
-            const apiError: ApiError = {
-                type: "FetchError",
-                title: "Unexpected error occurred",
-                status: 500,
-                detail: (error instanceof Error ? error.message : "Unknown error"),
-                instance: "Unfollow"
-            };
+            const apiError: ApiError = ApiErrorFactory.createFetchError(error, "unfollow");
             onError(apiError.detail);
-            console.error("Caught exception unfollowing user: ", apiError);
             return false;
         }
     }
