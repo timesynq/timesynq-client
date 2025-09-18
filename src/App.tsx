@@ -17,7 +17,7 @@ export default function App() {
                 duration={4000}
                 toastOptions={{
                     style: {
-                        color: 'var(--destructive)',
+                        color: 'var(--foreground)',
                         background: 'var(--card)',
                         borderColor: 'var(--border)',
                         fontFamily: 'Pixuf, sans-serif',
@@ -34,6 +34,7 @@ export default function App() {
                 <Route path="/email-confirmed" element={<EmailConfirmed />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/profile/:displayedUserId" element={<Profile />} />
+                <Route path="/profile" element={<Profile />} />
                 <Route path="/room" element={<Room />} />
                 <Route path="/explore" element={<Explore />} />
             </Routes>

@@ -29,13 +29,14 @@ export const Profile = () => {
 
     useEffect(() => {
         const fetchDisplayedUser = async () => {
-            if(!user || !displayedUserId) return; //todo: redirect to home
-            const isViewingOwnProfile: boolean = user.id === displayedUserId;
+            if(!user) return;
+            const profileId = displayedUserId ?? user.id; 
+            const isViewingOwnProfile: boolean = user.id === profileId;
             if(isViewingOwnProfile){
                 setDisplayedUser(user);
             }
             else{
-                const profile = await UserService.profile(displayedUserId);
+                const profile = await UserService.profile(profileId);
                 setDisplayedUser(profile ? profile.user : null);
                 setIsFollowing(profile ? profile.isFollowing : false);
             }
@@ -56,7 +57,7 @@ export const Profile = () => {
         const request: FollowRequest = {
             followeeId: displayedUser.id
         }
-        const followResult = await FollowService.follow(request, (description: string) => {Toasts.Error(description)});
+        const followResult = await FollowService.follow(request, (description: string) => {Toasts.error(description)});
         if(followResult){
             setDisplayedUser({
                 ...displayedUser,
@@ -73,7 +74,7 @@ export const Profile = () => {
         const request: UnfollowRequest = {
             followeeId: displayedUser.id,
         }
-        const unfollowResult = await FollowService.unfollow(request, (description: string) => {Toasts.Error(description)});
+        const unfollowResult = await FollowService.unfollow(request, (description: string) => {Toasts.error(description)});
         if(unfollowResult){
             setDisplayedUser({
                 ...displayedUser,

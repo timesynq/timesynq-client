@@ -1,7 +1,6 @@
-export namespace AuthFieldValidation {
+export const AuthFieldValidation = {
 
-    export const ValidateUsername = (username: string): string[] => {
-
+    validateUsername: (username: string): string[] => {
         const MIN_USERNAME_LENGTH = 3
         const MAX_USERNAME_LENGTH = 24
         const errors: string[] = [];
@@ -16,10 +15,9 @@ export namespace AuthFieldValidation {
         }
 
         return errors;
-    } 
+    },
 
-    export const ValidateEmail = (email: string): string[] => {
-
+    validateEmail: (email: string): string[] => {
         const errors: string[] = [];
 
         const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -28,10 +26,9 @@ export namespace AuthFieldValidation {
         }
 
         return errors;
-    }
+    },
 
-    export const ValidatePassword = (password: string): string[] => {
-    
+    validatePassword: (password: string): string[] => {
         const MIN_PASSWORD_LENGTH = 12
         const errors: string[] = [];
 
@@ -45,7 +42,6 @@ export namespace AuthFieldValidation {
         }
 
         return errors;
-
-    }
+    },
 
 }
