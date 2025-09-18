@@ -5,17 +5,6 @@ export type LogoutError = {
     errors: string[]
 }
 
-export namespace Logout {
-    export const handler = async (): Promise<void> => {
-        const result = await logout();
-        if (result) {
-            console.error("Logout failed:", result);
-            return;
-        }
-        window.location.reload();
-    };
-}
-
 export const logout = async (): Promise<void | LogoutError> => {
 
     try {
