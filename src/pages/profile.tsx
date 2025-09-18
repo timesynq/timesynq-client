@@ -11,7 +11,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import CheckIcon from "@/assets/svg/check-icon.svg?react";
 import XIcon from "@/assets/svg/x-icon.svg?react";
-import { FollowApi, FollowRequest, UnfollowRequest } from "@/api/follows/follow";
+import { FollowService, FollowRequest, UnfollowRequest } from "@/api/follows/follow";
 import { Toasts } from "@/utils/toasts";
 import { NavBarFooter } from "@/components/nav-bar-footer";
 
@@ -57,7 +57,7 @@ export const Profile = () => {
         const request: FollowRequest = {
             followeeId: displayedUser.id
         }
-        const followResult = await FollowApi.Follow(request, (description: string) => {Toasts.Error(description)});
+        const followResult = await FollowService.follow(request, (description: string) => {Toasts.Error(description)});
         if(followResult){
             setDisplayedUser({
                 ...displayedUser,
@@ -74,7 +74,7 @@ export const Profile = () => {
         const request: UnfollowRequest = {
             followeeId: displayedUser.id,
         }
-        const unfollowResult = await FollowApi.Unfollow(request, (description: string) => {Toasts.Error(description)});
+        const unfollowResult = await FollowService.unfollow(request, (description: string) => {Toasts.Error(description)});
         if(unfollowResult){
             setDisplayedUser({
                 ...displayedUser,

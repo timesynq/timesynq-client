@@ -1,6 +1,11 @@
-import { Follow } from "@/types/follow-types";
 import { endpoints } from "../endpoints";
 import { ApiError } from "../api-error";
+
+export type Follow = {
+    followerId: string;
+    followeeId: string;
+    createdOnUTC: Date;
+}
 
 export type FollowRequest = {
     followeeId: string
@@ -8,9 +13,9 @@ export type FollowRequest = {
 
 export type UnfollowRequest = FollowRequest;
 
-export namespace FollowApi {
+export const FollowService = {
 
-    export const Follow = async (followRequest: FollowRequest, onError: (description: string) => void): Promise<Follow | null> => {
+    follow: async (followRequest: FollowRequest, onError: (description: string) => void): Promise<Follow | null> => {
         try {    
             const response = await fetch(endpoints.follow.follow(), {
                 method: "POST",
@@ -50,9 +55,9 @@ export namespace FollowApi {
             console.error("Caught exception following user: ", apiError);
             return null;
         }
-    }
+    },
 
-    export const Unfollow = async (unfollowRequest: UnfollowRequest, onError: (description: string) => void): Promise<boolean> => {
+    unfollow: async (unfollowRequest: UnfollowRequest, onError: (description: string) => void): Promise<boolean> => {
         try {    
             const response = await fetch(endpoints.follow.unfollow(), {
                 method: "DELETE",
