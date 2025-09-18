@@ -12,7 +12,6 @@ interface ProfileDropdownProps {
 export const ProfileDropdown = ({ user }: ProfileDropdownProps) => {
 
     const handleLogout = async (): Promise<void> => {
-        console.log("hihihihi")
         const result = await logout();
         if (result) {
             console.error("Logout failed:", result);
