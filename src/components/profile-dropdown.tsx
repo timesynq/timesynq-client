@@ -4,6 +4,7 @@ import { ProfilePicture } from "./profile-picture";
 import { Link } from "react-router-dom";
 import { User } from "@/api/users/user";
 import { logout } from "@/api/auth/logout";
+import { Toasts } from "@/utils/toasts";
 
 interface ProfileDropdownProps {
     user: User
@@ -12,9 +13,8 @@ interface ProfileDropdownProps {
 export const ProfileDropdown = ({ user }: ProfileDropdownProps) => {
 
     const handleLogout = async (): Promise<void> => {
-        const result = await logout();
-        if (result) {
-            console.error("Logout failed:", result);
+        const isLogoutSuccessful = await logout((description: string) => {Toasts.error(description)});
+        if (!isLogoutSuccessful) {
             return;
         }
         window.location.reload();
