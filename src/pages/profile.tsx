@@ -29,13 +29,14 @@ export const Profile = () => {
 
     useEffect(() => {
         const fetchDisplayedUser = async () => {
-            if(!user || !displayedUserId) return; //todo: redirect to home
-            const isViewingOwnProfile: boolean = user.id === displayedUserId;
+            if(!user) return;
+            const profileId = displayedUserId ?? user.id; 
+            const isViewingOwnProfile: boolean = user.id === profileId;
             if(isViewingOwnProfile){
                 setDisplayedUser(user);
             }
             else{
-                const profile = await UserService.profile(displayedUserId);
+                const profile = await UserService.profile(profileId);
                 setDisplayedUser(profile ? profile.user : null);
                 setIsFollowing(profile ? profile.isFollowing : false);
             }
