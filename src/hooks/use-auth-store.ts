@@ -1,6 +1,5 @@
 import { login, LoginError, LoginRequest } from '@/api/auth/login';
-import { UserApi } from '@/api/users/user';
-import { User } from '@/types/user-types';
+import { User, UserService } from '@/api/users/user';
 import { create } from 'zustand';
 
 interface AuthState {
@@ -17,7 +16,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     fetchUser: async () => {
         set({ isLoading: true });
         try {
-            const user = await UserApi.Me();
+            const user = await UserService.me();
             set({ user, isLoading: false });
         }
         catch(error) {
@@ -28,7 +27,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     login: async (request: LoginRequest) => {
         const error = await login(request);
         if (!error) {
-            const user = await UserApi.Me();
+            const user = await UserService.me();
             set({ user });
         }
         return error;

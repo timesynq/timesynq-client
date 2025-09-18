@@ -1,4 +1,3 @@
-import { UserApi } from "@/api/users/user";
 import { NavBar } from "@/components/nav-bar";
 import { ProfilePicture } from "@/components/profile-picture";
 import { Button } from "@/components/ui/button";
@@ -6,14 +5,14 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator";
 import { useAuthStore } from "@/hooks/use-auth-store";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { User } from "@/types/user-types";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import CheckIcon from "@/assets/svg/check-icon.svg?react";
 import XIcon from "@/assets/svg/x-icon.svg?react";
-import { FollowApi, FollowRequest, UnfollowRequest } from "@/api/follows/follow";
+import { FollowService, FollowRequest, UnfollowRequest } from "@/api/follows/follow";
 import { Toasts } from "@/utils/toasts";
 import { NavBarFooter } from "@/components/nav-bar-footer";
+import { User, UserService } from "@/api/users/user";
 
 export const Profile = () => {
     
@@ -36,7 +35,7 @@ export const Profile = () => {
                 setDisplayedUser(user);
             }
             else{
-                const profile = await UserApi.Profile(displayedUserId);
+                const profile = await UserService.profile(displayedUserId);
                 setDisplayedUser(profile ? profile.user : null);
                 setIsFollowing(profile ? profile.isFollowing : false);
             }
@@ -57,7 +56,7 @@ export const Profile = () => {
         const request: FollowRequest = {
             followeeId: displayedUser.id
         }
-        const followResult = await FollowApi.Follow(request, (description: string) => {Toasts.Error(description)});
+        const followResult = await FollowService.follow(request, (description: string) => {Toasts.Error(description)});
         if(followResult){
             setDisplayedUser({
                 ...displayedUser,
@@ -74,7 +73,7 @@ export const Profile = () => {
         const request: UnfollowRequest = {
             followeeId: displayedUser.id,
         }
-        const unfollowResult = await FollowApi.Unfollow(request, (description: string) => {Toasts.Error(description)});
+        const unfollowResult = await FollowService.unfollow(request, (description: string) => {Toasts.Error(description)});
         if(unfollowResult){
             setDisplayedUser({
                 ...displayedUser,
@@ -116,7 +115,7 @@ export const Profile = () => {
                                 {!isViewingOwnProfile && 
                                     <Button 
                                         variant={
-                                            isFollowing ? (isHoveringFollowButton ? "register" : "signin") : "outline"
+                                            isFollowing ? (isHoveringFollowButton ? "negative" : "positive") : "outline"
                                         } 
                                         className="flex flex-row items-center justify-center text-md cursor-pointer"
                                         onMouseEnter={() => setIsHoveringFollowButton(true)}

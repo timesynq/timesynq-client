@@ -1,6 +1,11 @@
-import { Follow } from "@/types/follow-types";
 import { endpoints } from "../endpoints";
-import { ApiError } from "../api-error";
+import { ApiError, ApiErrorFactory } from "../api-error";
+
+export type Follow = {
+    followerId: string;
+    followeeId: string;
+    createdOnUTC: Date;
+}
 
 export type FollowRequest = {
     followeeId: string
@@ -8,9 +13,9 @@ export type FollowRequest = {
 
 export type UnfollowRequest = FollowRequest;
 
-export namespace FollowApi {
+export const FollowService = {
 
-    export const Follow = async (followRequest: FollowRequest, onError: (description: string) => void): Promise<Follow | null> => {
+    follow: async (followRequest: FollowRequest, onError: (description: string) => void): Promise<Follow | null> => {
         try {    
             const response = await fetch(endpoints.follow.follow(), {
                 method: "POST",
@@ -34,25 +39,17 @@ export namespace FollowApi {
             
             const error = data as ApiError;
             onError(error.detail);
-            console.error("Could not follow user: ", error);
             return null;
         }
         
         catch (error) {
-            const apiError: ApiError = {
-                type: "FetchError",
-                title: "Unexpected error occurred",
-                status: 500,
-                detail: (error instanceof Error ? error.message : "Unknown error"),
-                instance: "Follow"
-            };
+            const apiError: ApiError = ApiErrorFactory.createFetchError(error, "follow");
             onError(apiError.detail);
-            console.error("Caught exception following user: ", apiError);
             return null;
         }
-    }
+    },
 
-    export const Unfollow = async (unfollowRequest: UnfollowRequest, onError: (description: string) => void): Promise<boolean> => {
+    unfollow: async (unfollowRequest: UnfollowRequest, onError: (description: string) => void): Promise<boolean> => {
         try {    
             const response = await fetch(endpoints.follow.unfollow(), {
                 method: "DELETE",
@@ -70,20 +67,12 @@ export namespace FollowApi {
             const data = await response.json();
             const error = data as ApiError;
             onError(error.detail);
-            console.error("Could not unfollow user: ", error);
             return false;
         }
         
         catch (error) {
-            const apiError: ApiError = {
-                type: "FetchError",
-                title: "Unexpected error occurred",
-                status: 500,
-                detail: (error instanceof Error ? error.message : "Unknown error"),
-                instance: "Unfollow"
-            };
+            const apiError: ApiError = ApiErrorFactory.createFetchError(error, "unfollow");
             onError(apiError.detail);
-            console.error("Caught exception unfollowing user: ", apiError);
             return false;
         }
     }

@@ -1,15 +1,24 @@
-import { User } from "@/types/user-types";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { Button } from "./ui/button";
 import { ProfilePicture } from "./profile-picture";
 import { Link } from "react-router-dom";
-import { Logout } from "@/api/auth/logout";
+import { User } from "@/api/users/user";
+import { logout } from "@/api/auth/logout";
 
 interface ProfileDropdownProps {
     user: User
 } 
 
 export const ProfileDropdown = ({ user }: ProfileDropdownProps) => {
+
+    const handleLogout = async (): Promise<void> => {
+        const result = await logout();
+        if (result) {
+            console.error("Logout failed:", result);
+            return;
+        }
+        window.location.reload();
+    }
 
     return (
         <DropdownMenu>
@@ -37,7 +46,7 @@ export const ProfileDropdown = ({ user }: ProfileDropdownProps) => {
                     Account Settings
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={Logout.handler}>
+                <DropdownMenuItem onClick={handleLogout}>
                     Sign Out
                 </DropdownMenuItem>
             </DropdownMenuContent>

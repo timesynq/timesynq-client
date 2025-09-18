@@ -11,10 +11,10 @@ const buttonVariants = cva(
       variant: {
         default:
           "bg-primary text-primary-foreground shadow hover:bg-primary/90",
-        signin:
-          "bg-chart-1 text-chart-2 shadow hover:bg-chart-1/90",
-        register:
-          "bg-chart-3 text-chart-4 shadow hover:bg-chart-3/90",
+        positive:
+          "bg-positive-background text-positive-foreground shadow hover:bg-positive-background/90",
+        negative:
+          "bg-negative-background text-negative-foreground shadow hover:bg-negative-background/90",
         destructive:
           "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
         outline:

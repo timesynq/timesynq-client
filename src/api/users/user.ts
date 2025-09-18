@@ -1,10 +1,27 @@
-import { Profile, User, UserSearchResults } from "@/types/user-types";
-import { ApiError } from "../api-error";
+import { ApiError, ApiErrorFactory } from "../api-error";
 import { endpoints } from "../endpoints";
 
-export namespace UserApi {
+export type User = {
+    id: string;
+    userName: string;
+    profilePicture: number;
+    createdOnUTC: Date;
+    followerCount: number;
+    followeeCount: number;
+}
 
-    export const Me = async (): Promise<User | null> => {
+export type Profile = {
+    user: User;
+    isFollowing: boolean;
+}
+
+export type UserSearchResults = {
+    items: { user: User; }[];
+}
+
+export const UserService = {
+
+    me: async (): Promise<User | null> => {
         try {    
             const response = await fetch(endpoints.users.me(), {
                 method: "GET",
@@ -24,25 +41,18 @@ export namespace UserApi {
                     createdOnUTC: new Date(trimmedTimestamp),
                 }
             }
-            console.error("Could not fetch me: ", data as ApiError);
+
             return null;
-            
         }
         
         catch (error) {
-            const apiError: ApiError = {
-                type: "FetchError",
-                title: "Unexpected error occurred",
-                status: 500,
-                detail: (error instanceof Error ? error.message : "Unknown error"),
-                instance: "Me"
-            };
+            const apiError: ApiError = ApiErrorFactory.createFetchError(error, "me");
             console.error("Caught exception fetching me: ", apiError);
             return null;
         }
-    }
+    },
 
-    export const User = async (id: string): Promise<User | null> => {
+    user: async (id: string): Promise<User | null> => {
         try {
             const response = await fetch(endpoints.users.getById(id), {
                 method: "GET",
@@ -62,23 +72,17 @@ export namespace UserApi {
                     createdOnUTC: new Date(trimmedTimestamp),
                 }
             }
-            console.error("Could not fetch user: ", data as ApiError);
+
             return null;
         }
         catch (error) {
-            const apiError: ApiError = {
-                type: "FetchError",
-                title: "Unexpected error occurred",
-                status: 500,
-                detail: (error instanceof Error ? error.message : "Unknown error"),
-                instance: "User"
-            };
+            const apiError: ApiError = ApiErrorFactory.createFetchError(error, "user");
             console.error("Caught exception fetching user: ", apiError);
             return null;
         }
-    }
+    },
 
-    export const Profile = async(id: string): Promise<Profile | null> => {
+    profile: async(id: string): Promise<Profile | null> => {
         try {
             const response = await fetch(endpoints.users.profile(id), {
                 method: "GET",
@@ -100,23 +104,17 @@ export namespace UserApi {
                     user: user,
                 }
             }
-            console.error("Could not fetch user profile: ", data as ApiError);
+
             return null;
         }
         catch (error) {
-            const apiError: ApiError = {
-                type: "FetchError",
-                title: "Unexpected error occurred",
-                status: 500,
-                detail: (error instanceof Error ? error.message : "Unknown error"),
-                instance: "User Profile"
-            };
+            const apiError: ApiError = ApiErrorFactory.createFetchError(error, "profile");
             console.error("Caught exception fetching user profile: ", apiError);
             return null;
         }
-    }
+    },
 
-    export const Search = async (query: string): Promise<UserSearchResults | null> => {
+    search: async (query: string): Promise<UserSearchResults | null> => {
         try {
             const response = await fetch(endpoints.users.search(query), {
                 method: "GET",
@@ -136,9 +134,10 @@ export namespace UserApi {
             return userResults ?? null;
 
         } catch (error) {
-            console.error("UserSearch fetch failed:", error);
+            const apiError: ApiError = ApiErrorFactory.createFetchError(error, "search");
+            console.error("UserSearch fetch failed:", apiError);
             return null;
         }
-    };
+    }
 
 }

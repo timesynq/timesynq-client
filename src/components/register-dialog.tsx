@@ -57,7 +57,7 @@ export const RegisterDialog = () => {
     return (
         <Dialog open={isOpen} onOpenChange={handleOpenChange}>
             <DialogTrigger asChild>
-                <Button variant="register" className="cursor-pointer w-20">Register</Button>
+                <Button variant="negative" className="cursor-pointer w-20">Register</Button>
             </DialogTrigger>
             <DialogContent className="max-w-[425px]">
                 <DialogHeader>
@@ -96,7 +96,7 @@ export const RegisterDialog = () => {
                         <DialogClose asChild>
                             <Button variant="outline">Close</Button>
                         </DialogClose>
-                        <Button type="submit" variant="register">Register</Button>
+                        <Button type="submit" variant="negative">Register</Button>
                     </DialogFooter>
                 </form>
             </DialogContent>

@@ -49,7 +49,7 @@ export const NavBar = () => {
                                         }, 
                                         {
                                             label: "Explore",
-                                            link: "/user-search"
+                                            link: "/explore"
                                         }].map((option) => (
                                             <Link to={option.link} key={option.link}>
                                                 <NavigationMenuItem key={option.label}>
