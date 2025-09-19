@@ -8,8 +8,11 @@ import { Room } from './pages/room';
 import { Explore } from './pages/explore';
 import { ThemeProvider } from './components/theme-provider';
 import { Toaster } from 'sonner';
+import { Tracker } from './tracker/tracker-page';
+import { Sandbox } from './sandbox/sandbox-landing-page';
 
 export default function App() {
+    const isSandbox = import.meta.env.VITE_SANDBOX_MODE === "true";
     return (
         <ThemeProvider>
             <Toaster
@@ -36,6 +39,13 @@ export default function App() {
                 <Route path="/profile/:displayedUserId" element={<Profile />} />
                 <Route path="/room" element={<Room />} />
                 <Route path="/explore" element={<Explore />} />
+                {/* Sandbox routes */}
+                {isSandbox && (
+                    <>
+                    <Route path="/sandbox" element={<Sandbox />} />
+                    <Route path="/sandbox/tracker" element={<Tracker />} />
+                    </>
+                )}
             </Routes>
         </ThemeProvider>
     );
