@@ -12,11 +12,11 @@ import { ProfileDropdown } from "./profile-dropdown";
 import { Link } from "react-router-dom";
 import { SignInDialog } from "./sign-in-dialog";
 import { RegisterDialog } from "./register-dialog";
-import { useAuthStore } from "@/hooks/use-auth-store";
+import { useAuth } from "@/contexts/auth-provider";
 
 export const NavBar = () => {
 
-    const { user } = useAuthStore();
+    const { user } = useAuth();
     const isMobile: boolean = useIsMobile();
     const location = useLocation();
     window.history.replaceState({}, '');

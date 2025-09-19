@@ -5,14 +5,14 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { register, RegisterError, RegisterRequest } from "@/api/auth/register";
 import { LoginRequest } from "@/api/auth/login";
-import { useAuthStore } from "@/hooks/use-auth-store";
 import { Toasts } from "@/utils/toasts";
+import { useAuth } from "@/contexts/auth-provider";
 
 export const RegisterDialog = () => {
 
     const [errors, setErrors] = useState<RegisterError | null>(null);
     const [isOpen, setIsOpen] = useState<boolean>(false);
-    const { login } = useAuthStore();
+    const { authLogin } = useAuth();
 
     const handleOpenChange = (open: boolean) => {
         if(open){
@@ -44,7 +44,7 @@ export const RegisterDialog = () => {
             password: registerRequest.password,
         }
 
-        const loginError = await login(loginRequest);
+        const loginError = await authLogin(loginRequest);
         
         if (loginError) {
             loginError.detail = `Login failed after successful registration. ${loginError.detail}`;
