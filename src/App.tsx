@@ -8,36 +8,75 @@ import { Room } from './pages/room';
 import { Explore } from './pages/explore';
 import { ThemeProvider } from './components/theme-provider';
 import { Toaster } from 'sonner';
+import { AuthProvider } from './contexts/auth-provider';
+import { PrivateRoute } from './private-route';
 
 export default function App() {
     return (
-        <ThemeProvider>
-            <Toaster
-                visibleToasts={1}
-                duration={4000}
-                toastOptions={{
-                    style: {
-                        color: 'var(--foreground)',
-                        background: 'var(--card)',
-                        borderColor: 'var(--border)',
-                        fontFamily: 'Pixuf, sans-serif',
-                    },
-                    classNames: {
-                        title: 'text-lg',
-                        description: '!text-(--foreground) text-base',
-                    }
-                }}
-            />
-            <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/create" element={<Create />} />
-                <Route path="/email-confirmed" element={<EmailConfirmed />} />
-                <Route path="/forgot-password" element={<ForgotPassword />} />
-                <Route path="/profile/:displayedUserId" element={<Profile />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/room" element={<Room />} />
-                <Route path="/explore" element={<Explore />} />
-            </Routes>
-        </ThemeProvider>
+        <AuthProvider>
+            <ThemeProvider>
+                <Toaster
+                    visibleToasts={1}
+                    duration={4000}
+                    toastOptions={{
+                        style: {
+                            color: 'var(--foreground)',
+                            background: 'var(--card)',
+                            borderColor: 'var(--border)',
+                            fontFamily: 'Pixuf, sans-serif',
+                        },
+                        classNames: {
+                            title: 'text-lg',
+                            description: '!text-(--foreground) text-base',
+                        }
+                    }}
+                />
+                <Routes>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/email-confirmed" element={<EmailConfirmed />} />
+                    <Route path="/forgot-password" element={<ForgotPassword />} />
+                    <Route 
+                        path="/create" 
+                        element={
+                            <PrivateRoute>
+                                <Create />
+                            </PrivateRoute>
+                        } 
+                    />
+                    <Route 
+                        path="/profile/:displayedUserId" 
+                        element={
+                            <PrivateRoute>
+                                <Profile />
+                            </PrivateRoute>
+                        } 
+                    />
+                    <Route 
+                        path="/profile"
+                        element={
+                            <PrivateRoute>
+                                <Profile />
+                            </PrivateRoute>
+                        } 
+                    />
+                    <Route 
+                        path="/room"
+                        element={
+                            <PrivateRoute>
+                                <Room />
+                            </PrivateRoute>
+                        } 
+                    />
+                    <Route 
+                        path="/explore"
+                        element={
+                            <PrivateRoute>
+                                <Explore />
+                            </PrivateRoute>
+                        } 
+                    />
+                </Routes>
+            </ThemeProvider>
+        </AuthProvider>
     );
 }
