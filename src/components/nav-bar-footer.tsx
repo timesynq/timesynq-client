@@ -4,10 +4,10 @@ import PlusIcon from "@/assets/svg/plus-icon.svg?react";
 import SearchIcon from "@/assets/svg/search-icon.svg?react";
 import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
-import { useAuthStore } from "@/hooks/use-auth-store";
+import { useAuth } from "@/contexts/auth-provider";
 
 export const NavBarFooter = () => {
-    const { user } = useAuthStore();
+    const { user } = useAuth();
     const isMobile: boolean = useIsMobile();
 
     return (

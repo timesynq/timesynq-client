@@ -1,27 +1,16 @@
-import { useState, useEffect } from "react";
-import { Navigate, Link } from "react-router-dom";
+import { useState } from "react";
+import { Link } from "react-router-dom";
 import { NavBar } from "@/components/nav-bar";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SearchIcon } from "lucide-react";
-import { useAuthStore } from "@/hooks/use-auth-store";
 import { ProfilePicture } from "@/components/profile-picture";
 import { UserSearchResults, UserService } from "@/api/users/user";
 
 export const Explore = () => {
-    const { user, isLoading, fetchUser } = useAuthStore();
     const [userQuery, setUserQuery] = useState("");
     const [results, setResults] = useState<UserSearchResults | null>();
     const [error, setError] = useState<string | null>(null);
-
-    useEffect(() => {
-        fetchUser();
-    }, [fetchUser]);
-
-    if (!user && !isLoading) {
-        return <Navigate to="/" state={{ open: "signin" }} replace />;
-    }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -41,24 +30,20 @@ export const Explore = () => {
         <>
             <NavBar />
             <main className="flex flex-col items-center justify-center">
-                {isLoading ? (
-                    <Skeleton className="h-[125px] w-[250px] rounded-xl" />
-                ) : (
-                    <form onSubmit={handleSubmit} className="flex m-2">
-                        <Input
-                            className="w-75"
-                            placeholder="Search..."
-                            value={userQuery}
-                            onChange={(e) => setUserQuery(e.target.value)}
-                        />
-                        <Button
-                            type="submit"
-                            className="bg-transparent hover:bg-blue-900/30 text-white font-bold py-2 px-4 ml-2 rounded border-none"
-                        >
-                            <SearchIcon className="text-foreground" />
-                        </Button>
-                    </form>
-                )}
+                <form onSubmit={handleSubmit} className="flex m-2">
+                    <Input
+                        className="w-75"
+                        placeholder="Search..."
+                        value={userQuery}
+                        onChange={(e) => setUserQuery(e.target.value)}
+                    />
+                    <Button
+                        type="submit"
+                        className="bg-transparent hover:bg-blue-900/30 text-white font-bold py-2 px-4 ml-2 rounded border-none"
+                    >
+                        <SearchIcon className="text-foreground" />
+                    </Button>
+                </form>
 
                 {error && <p className="text-red-500 mt-2">{error}</p>}
 
