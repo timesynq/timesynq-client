@@ -1,9 +1,9 @@
-import { useAuthStore } from "@/hooks/use-auth-store";
+import { useAuth } from "@/contexts/auth-provider";
 import { useEffect } from "react";
 
 export const Tracker = () => {
 
-    const { user, fetchUser } = useAuthStore();
+    const { user, fetchUser } = useAuth();
 
     useEffect(() => {
         fetchUser();
