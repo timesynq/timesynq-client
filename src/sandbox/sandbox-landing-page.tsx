@@ -1,10 +1,10 @@
 import { NavBar } from "@/components/nav-bar";
-import { useAuthStore } from "@/hooks/use-auth-store";
+import { useAuth } from "@/contexts/auth-provider";
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 
 export const Sandbox = () => {
-    const { fetchUser } = useAuthStore();
+    const { fetchUser } = useAuth();
 
     useEffect(() => {
         fetchUser();
