@@ -3,7 +3,7 @@ import { Button } from "./ui/button";
 import { ProfilePicture } from "./profile-picture";
 import { Link } from "react-router-dom";
 import { User } from "@/api/users/user";
-import { logout } from "@/api/auth/logout";
+import { useAuth } from "@/contexts/auth-provider";
 
 interface ProfileDropdownProps {
     user: User
@@ -11,10 +11,11 @@ interface ProfileDropdownProps {
 
 export const ProfileDropdown = ({ user }: ProfileDropdownProps) => {
 
+    const { authLogout } = useAuth();
+
     const handleLogout = async (): Promise<void> => {
-        const result = await logout();
-        if (result) {
-            console.error("Logout failed:", result);
+        const isLogoutSuccessful = await authLogout();
+        if (!isLogoutSuccessful) {
             return;
         }
         window.location.reload();

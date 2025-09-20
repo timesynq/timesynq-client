@@ -1,17 +1,12 @@
 import { NavBar } from "@/components/nav-bar";
 import { NavBarFooter } from "@/components/nav-bar-footer";
-import { useAuthStore } from "@/hooks/use-auth-store";
+import { useAuth } from "@/contexts/auth-provider";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useEffect } from "react";
 
 export const Home = () => {
 
-    const { user, fetchUser } = useAuthStore();
+    const { user } = useAuth();
     const isMobile: boolean = useIsMobile();
-
-    useEffect(() => {
-        fetchUser();
-    }, [fetchUser]);
 
     return (
         <div className="flex flex-col min-h-screen">

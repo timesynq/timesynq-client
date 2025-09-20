@@ -3,7 +3,6 @@ import { ProfilePicture } from "@/components/profile-picture";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { useAuthStore } from "@/hooks/use-auth-store";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
@@ -13,40 +12,34 @@ import { FollowService, FollowRequest, UnfollowRequest } from "@/api/follows/fol
 import { Toasts } from "@/utils/toasts";
 import { NavBarFooter } from "@/components/nav-bar-footer";
 import { User, UserService } from "@/api/users/user";
+import { useAuth } from "@/contexts/auth-provider";
 
 export const Profile = () => {
     
-    const { user, fetchUser } = useAuthStore(); 
+    const { user } = useAuth(); 
     const { displayedUserId } = useParams();
     const [displayedUser, setDisplayedUser] = useState<User | null>(null);
     const [isFollowing, setIsFollowing] = useState<boolean>(false);
     const [isHoveringFollowButton, setIsHoveringFollowButton] = useState<boolean>(false);
     const isMobile: boolean = useIsMobile();
 
-    useEffect(() => {
-        fetchUser();
-    }, [fetchUser]);
+    if(!user) return null;
 
     useEffect(() => {
         const fetchDisplayedUser = async () => {
-            if(!user || !displayedUserId) return; //todo: redirect to home
-            const isViewingOwnProfile: boolean = user.id === displayedUserId;
+            const profileId = displayedUserId ?? user.id; 
+            const isViewingOwnProfile: boolean = user.id === profileId;
             if(isViewingOwnProfile){
                 setDisplayedUser(user);
             }
             else{
-                const profile = await UserService.profile(displayedUserId);
+                const profile = await UserService.profile(profileId);
                 setDisplayedUser(profile ? profile.user : null);
                 setIsFollowing(profile ? profile.isFollowing : false);
             }
         };
         fetchDisplayedUser();
     },[user, displayedUserId]);
-
-    if(!user){
-        //todo: redirect
-        return;
-    }
 
     const isViewingOwnProfile: boolean = user.id === displayedUserId;
 
@@ -56,7 +49,7 @@ export const Profile = () => {
         const request: FollowRequest = {
             followeeId: displayedUser.id
         }
-        const followResult = await FollowService.follow(request, (description: string) => {Toasts.Error(description)});
+        const followResult = await FollowService.follow(request, (description: string) => {Toasts.error(description)});
         if(followResult){
             setDisplayedUser({
                 ...displayedUser,
@@ -73,7 +66,7 @@ export const Profile = () => {
         const request: UnfollowRequest = {
             followeeId: displayedUser.id,
         }
-        const unfollowResult = await FollowService.unfollow(request, (description: string) => {Toasts.Error(description)});
+        const unfollowResult = await FollowService.unfollow(request, (description: string) => {Toasts.error(description)});
         if(unfollowResult){
             setDisplayedUser({
                 ...displayedUser,

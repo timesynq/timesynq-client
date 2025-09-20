@@ -4,13 +4,13 @@ import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogT
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { LoginError, LoginRequest } from "@/api/auth/login";
-import { useAuthStore } from "@/hooks/use-auth-store";
+import { useAuth } from "@/contexts/auth-provider";
 
 export const SignInDialog = ({ autoOpen = false }: { autoOpen?: boolean }) => {
 
     const [errors, setErrors] = useState<LoginError | null>(null);
     const [isOpen, setIsOpen] = useState<boolean>(false);
-    const { login } = useAuthStore();
+    const { authLogin } = useAuth();
 
     useEffect(() => {
         if (autoOpen) {
@@ -34,7 +34,7 @@ export const SignInDialog = ({ autoOpen = false }: { autoOpen?: boolean }) => {
             password: formData.get("password") as string,
         };
 
-        const loginError = await login(request);
+        const loginError = await authLogin(request);
 
         if (loginError) {
             setErrors(loginError);

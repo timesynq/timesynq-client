@@ -13,8 +13,8 @@ export type LoginError = {
 
 const validateInputs = (loginRequest: LoginRequest): string[] => {
     const errors: string[] = [];
-    errors.push(...AuthFieldValidation.ValidateUsername(loginRequest.username));
-    errors.push(...AuthFieldValidation.ValidatePassword(loginRequest.password));
+    errors.push(...AuthFieldValidation.validateUsername(loginRequest.username));
+    errors.push(...AuthFieldValidation.validatePassword(loginRequest.password));
     return errors;
 }
 
