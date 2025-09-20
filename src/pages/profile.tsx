@@ -13,6 +13,7 @@ import { Toasts } from "@/utils/toasts";
 import { NavBarFooter } from "@/components/nav-bar-footer";
 import { User, UserService } from "@/api/users/user";
 import { useAuth } from "@/contexts/auth-provider";
+import { useIsLg } from "@/hooks/use-lg";
 
 export const Profile = () => {
     
@@ -22,6 +23,7 @@ export const Profile = () => {
     const [isFollowing, setIsFollowing] = useState<boolean>(false);
     const [isHoveringFollowButton, setIsHoveringFollowButton] = useState<boolean>(false);
     const isMobile: boolean = useIsMobile();
+    const isLg: boolean = useIsLg();
 
     if(!user) return null;
 
@@ -86,8 +88,8 @@ export const Profile = () => {
                 }
 
                 {displayedUser && 
-                    <div className={`w-[50%] flex ${isMobile ? 'flex-col w-[90%]' : 'flex-row'} gap-4`}>
-                        <Card className={`${isMobile ? 'w-full h-[50%]' : 'w-[350px]'} bg-muted rounded-lg shrink-0`}>
+                    <div className={`flex ${!isLg ? 'flex-col w-[90%]' : 'flex-row min-w-[50%]'} gap-4`}>
+                        <Card className={`${!isLg ? 'w-full h-[50%]' : 'w-[350px]'} bg-muted rounded-lg shrink-0`}>
                             <CardHeader className="flex flex-col items-center justify-center">
                                 <ProfilePicture data={displayedUser.profilePicture} size={15} />
                                 <p className="text-2xl mt-2">{displayedUser.userName}</p>
@@ -120,13 +122,13 @@ export const Profile = () => {
                                         }
                                         {isFollowing && !isHoveringFollowButton &&
                                             <>
-                                                <CheckIcon className="text-chart-2" />
+                                                <CheckIcon className="text-positive-foreground" />
                                                 <p>Following</p>
                                             </>
                                         }
                                         {isFollowing && isHoveringFollowButton &&
                                             <>
-                                                <XIcon className="text-chart-4" />
+                                                <XIcon className="text-negative-foreground" />
                                                 <p>Unfollow?</p>
                                             </> 
                                         }
@@ -137,7 +139,7 @@ export const Profile = () => {
                                 </p>
                             </CardFooter>
                         </Card>
-                        <div className={`${isMobile ? 'w-full' : 'flex-1'} bg-muted p-4 rounded-lg`}>
+                        <div className={`${!isLg ? 'w-full' : 'min-w-[600px] flex-1'} bg-muted p-4 rounded-lg`}>
                             <p>Right section</p>
                         </div>
                     </div>
