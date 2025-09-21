@@ -10,8 +10,14 @@ import { ThemeProvider } from './components/theme-provider';
 import { Toaster } from 'sonner';
 import { AuthProvider } from './contexts/auth-provider';
 import { PrivateRoute } from './private-route';
+import { NavBar } from './components/nav-bar';
+import { useIsMobile } from './hooks/use-mobile';
+import { NavBarFooter } from './components/nav-bar-footer';
 
 export default function App() {
+
+    const isMobile = useIsMobile();
+
     return (
         <AuthProvider>
             <ThemeProvider>
@@ -31,51 +37,55 @@ export default function App() {
                         }
                     }}
                 />
-                <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/email-confirmed" element={<EmailConfirmed />} />
-                    <Route path="/forgot-password" element={<ForgotPassword />} />
-                    <Route 
-                        path="/create" 
-                        element={
-                            <PrivateRoute>
-                                <Create />
-                            </PrivateRoute>
-                        } 
-                    />
-                    <Route 
-                        path="/profile/:displayedUserId" 
-                        element={
-                            <PrivateRoute>
-                                <Profile />
-                            </PrivateRoute>
-                        } 
-                    />
-                    <Route 
-                        path="/profile"
-                        element={
-                            <PrivateRoute>
-                                <Profile />
-                            </PrivateRoute>
-                        } 
-                    />
-                    <Route 
-                        path="/room"
-                        element={
-                            <PrivateRoute>
-                                <Room />
-                            </PrivateRoute>
-                        } 
-                    />
-                    <Route 
-                        path="/explore"
-                        element={
-                            <PrivateRoute>
-                                <Explore />
-                            </PrivateRoute>
-                        } 
-                    />
-                </Routes>
+                <div className="flex flex-col min-h-screen">
+                    <NavBar />
+                    <Routes>
+                        <Route path="/" element={<Home />} />
+                        <Route path="/email-confirmed" element={<EmailConfirmed />} />
+                        <Route path="/forgot-password" element={<ForgotPassword />} />
+                        <Route 
+                            path="/create" 
+                            element={
+                                <PrivateRoute>
+                                    <Create />
+                                </PrivateRoute>
+                            } 
+                        />
+                        <Route 
+                            path="/profile/:displayedUserId" 
+                            element={
+                                <PrivateRoute>
+                                    <Profile />
+                                </PrivateRoute>
+                            } 
+                        />
+                        <Route 
+                            path="/profile"
+                            element={
+                                <PrivateRoute>
+                                    <Profile />
+                                </PrivateRoute>
+                            } 
+                        />
+                        <Route 
+                            path="/room"
+                            element={
+                                <PrivateRoute>
+                                    <Room />
+                                </PrivateRoute>
+                            } 
+                        />
+                        <Route 
+                            path="/explore"
+                            element={
+                                <PrivateRoute>
+                                    <Explore />
+                                </PrivateRoute>
+                            } 
+                        />
+                    </Routes>
+                    {isMobile && <NavBarFooter />}
+                </div>
             </ThemeProvider>
         </AuthProvider>
     );
