@@ -34,7 +34,7 @@ export const AuthProvider = ({children}: AuthProviderProps) => {
         setUser(null);
     }
     finally{
-      await new Promise(f => setTimeout(f, 1000));
+      //await new Promise(f => setTimeout(f, 1000)); //todo: only run this in dev environment
       setIsLoading(false);
     }
   }
