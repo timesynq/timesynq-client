@@ -11,11 +11,9 @@ export const PrivateRoute = ({ children } : PrivateRouteProps) => {
 
     if(isLoading) {
         return (
-            <div className="flex flex-col min-h-screen">
-                <main className="flex-1 flex flex-col items-center justify-center m-4">
-                    <LoadingSpinner className="w-8 text-foreground"/>
-                </main>
-            </div>
+            <main className="flex-1 flex flex-col items-center justify-center m-4">
+                <LoadingSpinner className="w-8 text-foreground"/>
+            </main>
         );
     }
 
