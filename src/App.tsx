@@ -8,10 +8,13 @@ import { Room } from './pages/room';
 import { Explore } from './pages/explore';
 import { ThemeProvider } from './components/theme-provider';
 import { Toaster } from 'sonner';
+import { Tracker } from './tracker/tracker-page';
+import { Sandbox } from './sandbox/sandbox-landing-page';
 import { AuthProvider } from './contexts/auth-provider';
 import { PrivateRoute } from './private-route';
 
 export default function App() {
+    const isSandbox = import.meta.env.VITE_SANDBOX_MODE === "true";
     return (
         <AuthProvider>
             <ThemeProvider>
@@ -75,6 +78,13 @@ export default function App() {
                             </PrivateRoute>
                         } 
                     />
+                    {/* Sandbox routes */}
+                    {isSandbox && (
+                        <>
+                        <Route path="/sandbox" element={<Sandbox />} />
+                        <Route path="/sandbox/tracker" element={<Tracker />} />
+                        </>
+                    )}
                 </Routes>
             </ThemeProvider>
         </AuthProvider>
