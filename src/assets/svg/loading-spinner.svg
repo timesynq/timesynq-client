@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <rect x="0" y="0" width="40" height="40" fill="none"/>
+  <rect x="40" y="0" width="40" height="40" fill="none"/>
+  <rect x="80" y="0" width="40" height="40" fill="none"/>
+  
+  <rect x="0" y="40" width="40" height="40" fill="none"/>
+  <rect x="40" y="40" width="40" height="40" fill="none"/>
+  <rect x="80" y="40" width="40" height="40" fill="none"/>
+  
+  <rect x="0" y="80" width="40" height="40" fill="none"/>
+  <rect x="40" y="80" width="40" height="40" fill="none"/>
+  <rect x="80" y="80" width="40" height="40" fill="none"/>
+  
+  <rect x="0" y="0" width="40" height="40" fill="currentColor">
+    <animate attributeName="visibility" values="visible;hidden;hidden;hidden;hidden;visible;visible;visible;hidden" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1" dur="1s" repeatCount="indefinite"/>
+  </rect>
+  
+  <rect x="40" y="0" width="40" height="40" fill="currentColor">
+    <animate attributeName="visibility" values="visible;visible;hidden;hidden;hidden;hidden;visible;visible;hidden" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1" dur="1s" repeatCount="indefinite"/>
+  </rect>
+  
+  <rect x="80" y="0" width="40" height="40" fill="currentColor">
+    <animate attributeName="visibility" values="visible;visible;visible;hidden;hidden;hidden;hidden;visible;hidden" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1" dur="1s" repeatCount="indefinite"/>
+  </rect>
+  
+  <rect x="80" y="40" width="40" height="40" fill="currentColor">
+    <animate attributeName="visibility" values="visible;visible;visible;visible;hidden;hidden;hidden;hidden;hidden" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1" dur="1s" repeatCount="indefinite"/>
+  </rect>
+  
+  <rect x="80" y="80" width="40" height="40" fill="currentColor">
+    <animate attributeName="visibility" values="hidden;visible;visible;visible;visible;hidden;hidden;hidden;hidden" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1" dur="1s" repeatCount="indefinite"/>
+  </rect>
+  
+  <rect x="40" y="80" width="40" height="40" fill="currentColor">
+    <animate attributeName="visibility" values="hidden;hidden;visible;visible;visible;visible;hidden;hidden;hidden" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1" dur="1s" repeatCount="indefinite"/>
+  </rect>
+  
+  <rect x="0" y="80" width="40" height="40" fill="currentColor">
+    <animate attributeName="visibility" values="hidden;hidden;hidden;visible;visible;visible;visible;hidden;hidden" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1" dur="1s" repeatCount="indefinite"/>
+  </rect>
+  
+  <rect x="0" y="40" width="40" height="40" fill="currentColor">
+    <animate attributeName="visibility" values="hidden;hidden;hidden;hidden;visible;visible;visible;visible;hidden" keyTimes="0;0.125;0.25;0.375;0.5;0.625;0.75;0.875;1" dur="1s" repeatCount="indefinite"/>
+  </rect>
+</svg>

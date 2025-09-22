@@ -14,6 +14,7 @@
 
 body {
   font-family: 'Pixuf', sans-serif;
+  background-color: oklch(0.14 0.015 290);
 }
 
 @theme inline {

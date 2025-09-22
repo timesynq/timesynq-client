@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { NavBar } from "@/components/nav-bar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SearchIcon } from "lucide-react";
@@ -28,7 +27,6 @@ export const Explore = () => {
 
     return (
         <>
-            <NavBar />
             <main className="flex flex-col items-center justify-center">
                 <form onSubmit={handleSubmit} className="flex m-2">
                     <Input
