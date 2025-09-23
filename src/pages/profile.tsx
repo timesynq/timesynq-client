@@ -11,11 +11,13 @@ import { Toasts } from "@/utils/toasts";
 import { User, UserService } from "@/api/users/user";
 import { useAuth } from "@/contexts/auth-provider";
 import { useIsLg } from "@/hooks/use-lg";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const Profile = () => {
     
     const { user } = useAuth(); 
     const { displayedUserId } = useParams();
+    const [isDisplayedUserLoading, setIsDisplayedUserLoading] = useState<boolean>(true);
     const [displayedUser, setDisplayedUser] = useState<User | null>(null);
     const [isFollowing, setIsFollowing] = useState<boolean>(false);
     const [isHoveringFollowButton, setIsHoveringFollowButton] = useState<boolean>(false);
@@ -35,6 +37,7 @@ export const Profile = () => {
                 setDisplayedUser(profile ? profile.user : null);
                 setIsFollowing(profile ? profile.isFollowing : false);
             }
+            setIsDisplayedUserLoading(false);
         };
         fetchDisplayedUser();
     },[user, displayedUserId]);
@@ -77,11 +80,18 @@ export const Profile = () => {
     return (
         <main className="flex flex-col items-center justify-center m-4 mt-8">
             
-            {!displayedUser && 
+            {isDisplayedUserLoading && 
+                <div className={`flex ${!isLg ? 'flex-col w-[90%]' : 'flex-row min-w-[50%]'} gap-8`}>
+                    <Skeleton className={`${!isLg ? 'w-full h-[50%]' : 'w-[350px] min-h-[300px]'} bg-muted rounded-lg shrink-0 border-border border-1`} />
+                    <Skeleton className={`${!isLg ? 'w-full' : 'min-w-[600px] flex-1'} bg-muted p-4 rounded-lg border-border border-1`} />
+                </div>
+            }
+
+            {!displayedUser && !isDisplayedUserLoading &&
                 <h1>User not found.</h1>
             }
 
-            {displayedUser && 
+            {displayedUser && !isDisplayedUserLoading && 
                 <div className={`flex ${!isLg ? 'flex-col w-[90%]' : 'flex-row min-w-[50%]'} gap-8`}>
                     <Card className={`${!isLg ? 'w-full h-[50%]' : 'w-[350px] min-h-[300px]'} bg-muted rounded-lg shrink-0`}>
                         <CardHeader className="flex flex-col items-center justify-center">
