@@ -23,7 +23,7 @@ export const NavBar = () => {
 
     return (
         <>
-            <div className="fixed top-0 w-full z-50 shadow-md bg-card border-b border-border h-16" style={{backgroundColor: "oklch(0.21 0.02 290)", borderBottom: "1px solid oklch(1 0 0 / 10%)"}}>
+            <div className="fixed top-0 w-full z-50 shadow-md bg-card border-b border-border h-16" style={{backgroundColor: "oklch(20.019% 0.04696 287.092)", borderBottom: "1px solid oklch(1 0 0 / 10%)"}}>
                 <div className="flex items-center justify-between h-full px-4">
                     <Link to="/">
                         <img

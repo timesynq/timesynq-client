@@ -50,7 +50,7 @@ export const Create = () => {
                             <CardFooter className="w-full mt-4 flex flex-col items-center justify-center space-y-4">
                                 <div className="flex w-full max-w-sm items-center gap-2">
                                     <Input placeholder="Enter room code" />
-                                    <Button type="submit" variant="positive">
+                                    <Button type="submit" variant="positive" className="cursor-pointer">
                                         Join
                                     </Button>
                                 </div>
