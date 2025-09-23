@@ -25,14 +25,13 @@ export type ChangeUsernameRequest = {
 
 export const UserService = {
 
-    me: async (): Promise<User | null> => {
+    me: async (onError?: (description: string) => void): Promise<User | null> => {
         try {    
             const response = await fetch(endpoints.users.me(), {
                 method: "GET",
                 credentials: 'include',
                 headers: {
                     'Accept': 'application/json',
-                    'Content-Type': 'application/json'
                 },
             });
             
@@ -51,12 +50,12 @@ export const UserService = {
         
         catch (error) {
             const apiError: ApiError = ApiErrorFactory.createFetchError(error, "me");
-            console.error("Caught exception fetching me: ", apiError);
+            onError && onError(apiError.detail);
             return null;
         }
     },
 
-    user: async (id: string): Promise<User | null> => {
+    user: async (id: string, onError?: (description: string) => void): Promise<User | null> => {
         try {
             const response = await fetch(endpoints.users.getById(id), {
                 method: "GET",
@@ -81,12 +80,12 @@ export const UserService = {
         }
         catch (error) {
             const apiError: ApiError = ApiErrorFactory.createFetchError(error, "user");
-            console.error("Caught exception fetching user: ", apiError);
+            onError && onError(apiError.detail);
             return null;
         }
     },
 
-    profile: async(id: string): Promise<Profile | null> => {
+    profile: async(id: string, onError?: (description: string) => void): Promise<Profile | null> => {
         try {
             const response = await fetch(endpoints.users.profile(id), {
                 method: "GET",
@@ -113,12 +112,12 @@ export const UserService = {
         }
         catch (error) {
             const apiError: ApiError = ApiErrorFactory.createFetchError(error, "profile");
-            console.error("Caught exception fetching user profile: ", apiError);
+            onError && onError(apiError.detail);
             return null;
         }
     },
 
-    search: async (query: string): Promise<UserSearchResults | null> => {
+    search: async (query: string, onError?: (description: string) => void): Promise<UserSearchResults | null> => {
         try {
             const response = await fetch(endpoints.users.search(query), {
                 method: "GET",
@@ -140,7 +139,7 @@ export const UserService = {
         } 
         catch (error) {
             const apiError: ApiError = ApiErrorFactory.createFetchError(error, "search");
-            console.error("UserSearch fetch failed:", apiError);
+            onError && onError(apiError.detail);
             return null;
         }
     },
