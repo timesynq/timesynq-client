@@ -172,6 +172,32 @@ export const UserService = {
             onError(apiError.detail);
             return false;
         }
+    },
+    
+    delete: async (onError: (description: string) => void): Promise<boolean> => {
+        try{
+            const response = await fetch(endpoints.users.delete(), {
+                method: "DELETE",
+                credentials: "include",
+                headers: {
+                    'Accept': 'application/json',
+                },
+            });
+
+            if(response.ok){
+                return true;
+            }
+
+            const data = await response.json();
+            const error = data as ApiError;
+            onError(error.detail);
+            return false;
+        }
+        catch (error){
+            const apiError: ApiError = ApiErrorFactory.createFetchError(error, "changeUsername");
+            onError(apiError.detail);
+            return false;
+        }
     }
 
 }

@@ -9,6 +9,7 @@ import { useIsLg } from "@/hooks/use-lg";
 import CheckIcon from "@/assets/svg/check-icon.svg?react";
 import { Toasts } from "@/utils/toasts";
 import { ChangeUsernameRequest, UserService } from "@/api/users/user";
+import { DeleteAccountDialog } from "@/components/delete-account-dialog";
 
 export const AccountSettings = () => {
 
@@ -36,6 +37,7 @@ export const AccountSettings = () => {
 
         const _ = await UserService.changeUsername(changeUsernameRequest, onSuccess, onError);
     }
+
 
     return (
         <main className="flex flex-col items-center justify-center m-4 mt-8">
@@ -90,8 +92,12 @@ export const AccountSettings = () => {
                         <CardHeader className="text-lg">
                             Account Actions
                         </CardHeader>
-                        <CardContent>
-                            
+                        <CardContent className="flex flex-col items-center space-y-4">
+                            <Separator />
+                            <div className="flex flex-row items-center justify-between w-full">
+                                <p>Delete Account</p>
+                                <DeleteAccountDialog />
+                            </div>
                         </CardContent>
                     </Card>
                 </div>
