@@ -35,7 +35,7 @@ export const NavBarFooter = () => {
                             }
                         ].map((option) => (
                             <Link to={option.link} key={option.link}>
-                                <Button key={option.label} variant="ghost" size="icon" className="size-14">
+                                <Button key={option.label} variant="ghost" size="icon" className="size-14 cursor-pointer">
                                     <div className="flex flex-col items-center">
                                         <option.icon className="text-foreground"/>
                                         <p className="text-foreground pt-1">{option.label}</p>
