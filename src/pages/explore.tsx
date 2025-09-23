@@ -51,25 +51,25 @@ export const Explore = () => {
                             <li key={i.user.id} className="w-full">
                                 <Link
                                     to={`/profile/${i.user.id}`}
-                                    className="block bg-gray-800 p-4 shadow-md hover:shadow-lg hover:bg-gray-700 transition-all duration-200 w-150 border-2"
+                                    className="block bg-popover p-4 shadow-md hover:shadow-lg hover:bg-accent transition-all duration-200 w-150 border-border border-1"
                                 >
                                     <div className="flex items-center gap-4">
                                         <ProfilePicture data={i.user.profilePicture} size={12} />
 
                                         <div className="flex flex-col">
-                                            <span className="text-lg font-semibold text-white">
+                                            <span className="text-lg font-semibold text-foreground">
                                                 {i.user.userName}
                                             </span>
 
-                                            <div className="flex gap-6 text-sm text-gray-300 mt-1">
+                                            <div className="flex gap-6 text-sm text-muted-foreground mt-1">
                                                 <span>
-                                                    <span className="font-medium text-white">
+                                                    <span className="font-medium text-foreground">
                                                         {i.user.followerCount}
                                                     </span>{" "}
                                                     Followers
                                                 </span>
                                                 <span>
-                                                    <span className="font-medium text-white">
+                                                    <span className="font-medium text-foreground">
                                                         {i.user.followeeCount}
                                                     </span>{" "}
                                                     Following
