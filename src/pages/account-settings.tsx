@@ -1,0 +1,101 @@
+import { ProfilePicture } from "@/components/profile-picture";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { useAuth } from "@/contexts/auth-provider";
+import { useIsLg } from "@/hooks/use-lg";
+import CheckIcon from "@/assets/svg/check-icon.svg?react";
+import { Toasts } from "@/utils/toasts";
+import { ChangeUsernameRequest, UserService } from "@/api/users/user";
+
+export const AccountSettings = () => {
+
+    const { user } = useAuth(); 
+    const isLg: boolean = useIsLg();
+
+    if(!user) return;
+
+    const handleUsernameChange = async (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        
+        const formData = new FormData(event.currentTarget);
+
+        const changeUsernameRequest: ChangeUsernameRequest = {
+            newUserName: formData.get("username") as string
+        }
+
+        const onSuccess = (description: string) => {Toasts.success(description)};
+        const onError = (description: string) => {Toasts.error(description)};
+
+        if(changeUsernameRequest.newUserName == user.userName){
+            onError("Already using username.");
+            return;
+        }
+
+        const _ = await UserService.changeUsername(changeUsernameRequest, onSuccess, onError);
+    }
+
+    return (
+        <main className="flex flex-col items-center justify-center m-4 mt-8">
+            <div className={`flex ${!isLg ? 'flex-col w-[90%]' : 'flex-row min-w-[50%]'} gap-8`}>
+                <Card className={`${!isLg ? 'w-full h-[50%]' : 'w-[350px] max-h-[300px]'} bg-muted rounded-lg shrink-0`}>
+                    <CardHeader className="flex flex-col items-center justify-center">
+                        <ProfilePicture data={user.profilePicture} size={15} />
+                        <p className="text-2xl mt-2">{user.userName}</p>
+                    </CardHeader>
+                    <Separator />
+                    <CardContent className="flex flex-row items-center justify-around py-2">
+                        <div className="flex flex-col items-center space-y-1">
+                        <p className="text-foreground text-lg font-medium">{user.followerCount}</p>
+                        <p className="text-muted-foreground text-sm">Followers</p>
+                        </div>
+                        <div className="flex flex-col items-center space-y-1">
+                        <p className="text-foreground text-lg font-medium">{user.followeeCount}</p>
+                        <p className="text-muted-foreground text-sm">Following</p>
+                        </div>
+                    </CardContent>
+                    <Separator />
+                    <CardFooter className="flex flex-col items-center justify-center space-y-3 p-4">
+                        <p className="text-muted-foreground text-sm">
+                            Joined {user.createdOnUTC.toLocaleDateString()}
+                        </p>
+                    </CardFooter>
+                </Card>
+                <div className={`${!isLg ? 'w-full' : 'min-w-[600px] flex-1 mt-16'} flex-col space-y-8`}>
+                    <Card>
+                        <CardHeader className="text-lg">
+                            Profile Information
+                        </CardHeader>
+                        <CardContent className="flex flex-col items-center">
+                            <form onSubmit={handleUsernameChange} className="flex flex-row items-center justify-start w-full space-x-2">
+                                <Label htmlFor="username">Username</Label>
+                                <Input id="username" name="username" defaultValue={user.userName} />
+                                <Button type="submit" variant="positive" size="icon" className="min-w-[36px] cursor-pointer">
+                                    <CheckIcon className="mr-0.5"/>
+                                </Button>
+                            </form>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardHeader className="text-lg">
+                            Security
+                        </CardHeader>
+                        <CardContent>
+                            
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardHeader className="text-lg">
+                            Account Actions
+                        </CardHeader>
+                        <CardContent>
+                            
+                        </CardContent>
+                    </Card>
+                </div>
+            </div>
+        </main>
+    );
+}

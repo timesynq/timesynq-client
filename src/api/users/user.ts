@@ -19,6 +19,10 @@ export type UserSearchResults = {
     items: { user: User; }[];
 }
 
+export type ChangeUsernameRequest = {
+    newUserName: string;
+}
+
 export const UserService = {
 
     me: async (): Promise<User | null> => {
@@ -133,10 +137,40 @@ export const UserService = {
 
             return userResults ?? null;
 
-        } catch (error) {
+        } 
+        catch (error) {
             const apiError: ApiError = ApiErrorFactory.createFetchError(error, "search");
             console.error("UserSearch fetch failed:", apiError);
             return null;
+        }
+    },
+
+    changeUsername: async (changeUsernameRequest: ChangeUsernameRequest, onSuccess: (description: string) => void, onError: (description: string) => void): Promise<boolean> => {
+        try{
+            const response = await fetch(endpoints.users.changeUsername(), {
+                method: "POST",
+                credentials: "include",
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(changeUsernameRequest),
+            });
+
+            const data = await response.json();
+            if(response.ok){
+                onSuccess("Username changed successfully.");
+                return true;
+            }
+            
+            const error = data as ApiError;
+            onError(error.detail);
+            return false;
+        }
+        catch (error) {
+            const apiError: ApiError = ApiErrorFactory.createFetchError(error, "changeUsername");
+            onError(apiError.detail);
+            return false;
         }
     }
 
