@@ -15,6 +15,7 @@ import { PrivateRoute } from './private-route';
 import { NavBar } from './components/nav-bar';
 import { useIsMobile } from './hooks/use-mobile';
 import { NavBarFooter } from './components/nav-bar-footer';
+import { AccountSettings } from './pages/account-settings';
 
 export default function App() {
 
@@ -70,6 +71,14 @@ export default function App() {
                                 </PrivateRoute>
                             } 
                         />
+                        <Route
+                            path="/account-settings"
+                            element={
+                                <PrivateRoute>
+                                    <AccountSettings />
+                                </PrivateRoute>
+                            } 
+                        /> 
                         <Route 
                             path="/room"
                             element={

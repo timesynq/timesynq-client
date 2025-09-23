@@ -75,15 +75,15 @@ export const Profile = () => {
     }
 
     return (
-        <main className="flex flex-col items-center justify-center m-4">
+        <main className="flex flex-col items-center justify-center m-4 mt-8">
             
             {!displayedUser && 
                 <h1>User not found.</h1>
             }
 
             {displayedUser && 
-                <div className={`flex ${!isLg ? 'flex-col w-[90%]' : 'flex-row min-w-[50%]'} gap-4`}>
-                    <Card className={`${!isLg ? 'w-full h-[50%]' : 'w-[350px]'} bg-muted rounded-lg shrink-0`}>
+                <div className={`flex ${!isLg ? 'flex-col w-[90%]' : 'flex-row min-w-[50%]'} gap-8`}>
+                    <Card className={`${!isLg ? 'w-full h-[50%]' : 'w-[350px] min-h-[300px]'} bg-muted rounded-lg shrink-0`}>
                         <CardHeader className="flex flex-col items-center justify-center">
                             <ProfilePicture data={displayedUser.profilePicture} size={15} />
                             <p className="text-2xl mt-2">{displayedUser.userName}</p>
@@ -133,7 +133,7 @@ export const Profile = () => {
                             </p>
                         </CardFooter>
                     </Card>
-                    <div className={`${!isLg ? 'w-full' : 'min-w-[600px] flex-1'} bg-muted p-4 rounded-lg`}>
+                    <div className={`${!isLg ? 'w-full' : 'min-w-[600px] flex-1'} bg-muted p-4 rounded-lg border-border border-1`}>
                         <p>Right section</p>
                     </div>
                 </div>

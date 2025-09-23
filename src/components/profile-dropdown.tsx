@@ -43,9 +43,11 @@ export const ProfileDropdown = ({ user }: ProfileDropdownProps) => {
                     </DropdownMenuItem>
                 </Link>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                    Account Settings
-                </DropdownMenuItem>
+                <Link to={"/account-settings"}>
+                    <DropdownMenuItem>
+                        Account Settings
+                    </DropdownMenuItem>
+                </Link>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout}>
                     Sign Out
