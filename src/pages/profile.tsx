@@ -83,7 +83,7 @@ export const Profile = () => {
 
             {displayedUser && 
                 <div className={`flex ${!isLg ? 'flex-col w-[90%]' : 'flex-row min-w-[50%]'} gap-8`}>
-                    <Card className={`${!isLg ? 'w-full h-[50%]' : 'w-[350px]'} bg-muted rounded-lg shrink-0`}>
+                    <Card className={`${!isLg ? 'w-full h-[50%]' : 'w-[350px] min-h-[300px]'} bg-muted rounded-lg shrink-0`}>
                         <CardHeader className="flex flex-col items-center justify-center">
                             <ProfilePicture data={displayedUser.profilePicture} size={15} />
                             <p className="text-2xl mt-2">{displayedUser.userName}</p>

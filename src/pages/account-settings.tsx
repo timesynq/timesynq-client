@@ -35,7 +35,10 @@ export const AccountSettings = () => {
             return;
         }
 
-        const _ = await UserService.changeUsername(changeUsernameRequest, onSuccess, onError);
+        const changeUsernameResult = await UserService.changeUsername(changeUsernameRequest, onSuccess, onError);
+        if(changeUsernameResult){
+            //todo:
+        }
     }
 
 
