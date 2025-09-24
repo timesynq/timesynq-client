@@ -8,6 +8,7 @@ import { Toasts } from "@/utils/toasts";
 import SearchIcon from "@/assets/svg/search-icon.svg?react";
 import SettingsIcon from "@/assets/svg/settings-icon.svg?react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 
 export const Explore = () => {
 
@@ -49,8 +50,21 @@ export const Explore = () => {
                     <SettingsIcon />
                 </Button>
             </form>
-            <div className={`${isMobile ? 'w-full' : 'min-w-[700px]'} flex flex-row items-center justify-between`}>
-                <p>{searchResultMessage}</p>
+            <div className={`${isMobile ? 'w-full' : 'min-w-[700px]'} flex flex-row items-end justify-between space-x-8`}>
+                <p className="w-[50%] text-sm">{searchResultMessage}</p>
+                <Pagination className="w-[50%] justify-end">
+                    <PaginationContent className="space-x-2">
+                        <PaginationItem>
+                            <PaginationPrevious href="#" />
+                        </PaginationItem>
+                        <PaginationItem>
+                            <p>Page 1 of 3</p>
+                        </PaginationItem>
+                        <PaginationItem>
+                            <PaginationNext href="#" />
+                        </PaginationItem>
+                    </PaginationContent>
+                </Pagination>
             </div>
             <ul className={`${isMobile ? 'w-full' : 'min-w-[600px]'} mt-4 space-y-2 flex flex-col items-center justify-center`}>
                 {userSearchResults && userSearchResults.items.length > 0 ? (
@@ -61,7 +75,7 @@ export const Explore = () => {
                                 className="block bg-popover p-4 shadow-md hover:shadow-lg hover:bg-accent transition-all duration-200 border-border border-1"
                             >
                                 <div className="flex items-center gap-4">
-                                    <ProfilePicture data={i.user.profilePicture} size={12} />
+                                    <ProfilePicture data={i.user.profilePicture} size={8} />
 
                                     <div className="flex flex-col">
                                         <span className="text-lg font-semibold text-foreground">
