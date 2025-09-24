@@ -13,6 +13,7 @@ export const Explore = () => {
 
     const isMobile = useIsMobile();
     const [userQuery, setUserQuery] = useState<string>("");
+    const [searchResultMessage, setSearchResultMessage] = useState<string>("");
     const [userSearchResults, setUserSearchResults] = useState<UserSearchResults | null>();
     const [error, setError] = useState<string | null>(null);
 
@@ -29,11 +30,12 @@ export const Explore = () => {
 
         const users = await UserService.search(userQuery, onError);
         setUserSearchResults(users);
+        setSearchResultMessage(`User search results for "${userQuery}"`);
     };
 
     return (
         <main className="flex flex-col items-center justify-center m-4">
-            <form onSubmit={handleSubmit} className={`${isMobile ? 'w-full' : 'min-w-[700px]'} flex flex-row space-x-2 m-2`}>
+            <form onSubmit={handleSubmit} className={`${isMobile ? 'w-full' : 'min-w-[700px]'} flex flex-row space-x-2 m-2 pb-4`}>
                 <Input
                     className="w-full"
                     placeholder="Search..."
@@ -47,6 +49,9 @@ export const Explore = () => {
                     <SettingsIcon />
                 </Button>
             </form>
+            <div className={`${isMobile ? 'w-full' : 'min-w-[700px]'} flex flex-row items-center justify-between`}>
+                <p>{searchResultMessage}</p>
+            </div>
             <ul className={`${isMobile ? 'w-full' : 'min-w-[600px]'} mt-4 space-y-2 flex flex-col items-center justify-center`}>
                 {userSearchResults && userSearchResults.items.length > 0 ? (
                     userSearchResults.items.map((i) => (
