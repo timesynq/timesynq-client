@@ -135,9 +135,9 @@ export const UserService = {
             };
 
             return userResults ?? null;
-
         } 
         catch (error) {
+            console.log(error)
             const apiError: ApiError = ApiErrorFactory.createFetchError(error, "search");
             onError && onError(apiError.detail);
             return null;
