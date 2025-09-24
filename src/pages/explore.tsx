@@ -47,7 +47,7 @@ export const Explore = () => {
                     <SettingsIcon />
                 </Button>
             </form>
-            <ul className={`${isMobile ? 'w-full' : 'min-w-[600px]'} mt-4 space-y-2`}>
+            <ul className={`${isMobile ? 'w-full' : 'min-w-[600px]'} mt-4 space-y-2 flex flex-col items-center justify-center`}>
                 {userSearchResults && userSearchResults.items.length > 0 ? (
                     userSearchResults.items.map((i) => (
                         <li key={i.user.id} className={`${isMobile ? 'w-full' : 'min-w-[700px] flex-1'}`}>
@@ -83,7 +83,7 @@ export const Explore = () => {
                         </li>
                     ))
                 ) : (
-                    !error && <p className="text-gray-400">No users found.</p>
+                    !error && <p className="text-muted-foreground">No users found.</p>
                 )}
             </ul>
         </main>
