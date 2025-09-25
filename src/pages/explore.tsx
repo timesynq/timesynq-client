@@ -3,19 +3,20 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ProfilePicture } from "@/components/profile-picture";
-import { UserSearchResults, UserService } from "@/api/users/user";
+import { User, UserService } from "@/api/users/user";
 import { Toasts } from "@/utils/toasts";
 import SearchIcon from "@/assets/svg/search-icon.svg?react";
 import SettingsIcon from "@/assets/svg/settings-icon.svg?react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import { PagedList } from "@/api/paged-list";
 
 export const Explore = () => {
 
     const isMobile = useIsMobile();
     const [userQuery, setUserQuery] = useState<string>("");
     const [searchResultMessage, setSearchResultMessage] = useState<string>("");
-    const [userSearchResults, setUserSearchResults] = useState<UserSearchResults | null>();
+    const [userSearchHypermediaResource, setUserSearchHypermediaResource] = useState<PagedList<User> | null>();
     const [error, setError] = useState<string | null>(null);
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -29,8 +30,8 @@ export const Explore = () => {
             return;
         }
 
-        const users = await UserService.search(userQuery, onError);
-        setUserSearchResults(users);
+        const pagedUsers = await UserService.search(userQuery, onError);
+        setUserSearchHypermediaResource(pagedUsers);
         setSearchResultMessage(`User search results for "${userQuery}"`);
     };
 
@@ -67,31 +68,31 @@ export const Explore = () => {
                 </Pagination>
             </div>
             <ul className={`${isMobile ? 'w-full' : 'min-w-[600px]'} mt-4 space-y-2 flex flex-col items-center justify-center`}>
-                {userSearchResults && userSearchResults.items.length > 0 ? (
-                    userSearchResults.items.map((i) => (
-                        <li key={i.user.id} className={`${isMobile ? 'w-full' : 'min-w-[700px] flex-1'}`}>
+                {userSearchHypermediaResource && userSearchHypermediaResource.items().length > 0 ? (
+                    userSearchHypermediaResource.items().map((entry) => (
+                        <li key={entry.id} className={`${isMobile ? 'w-full' : 'min-w-[700px] flex-1'}`}>
                             <Link
-                                to={`/profile/${i.user.id}`}
+                                to={`/profile/${entry.id}`}
                                 className="block bg-popover p-4 shadow-md hover:shadow-lg hover:bg-accent transition-all duration-200 border-border border-1"
                             >
                                 <div className="flex items-center gap-4">
-                                    <ProfilePicture data={i.user.profilePicture} size={8} />
+                                    <ProfilePicture data={entry.profilePicture} size={8} />
 
                                     <div className="flex flex-col">
                                         <span className="text-lg font-semibold text-foreground">
-                                            {i.user.userName}
+                                            {entry.userName}
                                         </span>
 
                                         <div className="flex gap-6 text-sm text-muted-foreground mt-1">
                                             <span>
                                                 <span className="font-medium text-foreground">
-                                                    {i.user.followerCount}
+                                                    {entry.followerCount}
                                                 </span>{" "}
                                                 Followers
                                             </span>
                                             <span>
                                                 <span className="font-medium text-foreground">
-                                                    {i.user.followeeCount}
+                                                    {entry.followeeCount}
                                                 </span>{" "}
                                                 Following
                                             </span>

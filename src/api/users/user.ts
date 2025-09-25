@@ -1,5 +1,6 @@
 import { ApiError, ApiErrorFactory } from "../api-error";
 import { endpoints } from "../endpoints";
+import { PagedList } from "../paged-list";
 
 export type User = {
     id: string;
@@ -13,10 +14,6 @@ export type User = {
 export type Profile = {
     user: User;
     isFollowing: boolean;
-}
-
-export type UserSearchResults = {
-    items: { user: User; }[];
 }
 
 export type ChangeUsernameRequest = {
@@ -117,7 +114,7 @@ export const UserService = {
         }
     },
 
-    search: async (query: string, onError?: (description: string) => void): Promise<UserSearchResults | null> => {
+    search: async (query: string, onError?: (description: string) => void): Promise<PagedList<User> | null> => {
         try {
             const response = await fetch(endpoints.users.search(query), {
                 method: "GET",
@@ -126,15 +123,19 @@ export const UserService = {
             });
 
             const data = await response.json();
-            const userResults: UserSearchResults = {
-                items: data.items
-                    ? data.items.map((item: User) => ({
-                        user: item,
-                    }))
-                    : [],
-            };
-
-            return userResults ?? null;
+            const pagedListFields = {
+                items: data.items ?? [],
+                pageNumber: data.pageNumber,
+                pageSize: data.pageSize,
+                totalItems: data.totalItems,
+                totalPages: data.totalPages,
+                firstPageUrl: data.firstPageUrl ?? null,
+                lastPageUrl: data.lastPageUrl ?? null,
+                previousPageUrl: data.previousPageUrl ?? null,
+                nextPageUrl: data.nextPageUrl ?? null,
+            }
+ 
+            return new PagedList<User>(pagedListFields);
         } 
         catch (error) {
             console.log(error)
