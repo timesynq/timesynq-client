@@ -7,7 +7,7 @@ import { Button } from "./ui/button";
 import { useAuth } from "@/contexts/auth-provider";
 
 export const NavBarFooter = () => {
-    const { user } = useAuth();
+    const { user, isLoading } = useAuth();
     const isMobile: boolean = useIsMobile();
 
     return (
@@ -15,35 +15,37 @@ export const NavBarFooter = () => {
             <div className="h-20" />
             {isMobile && (
                 <div className="fixed bottom-0 w-full z-50 shadow-md bg-card border-t border-border h-20">
-                    <div className="flex items-center justify-around px-4 pt-2 pb-6">
-                        {user ? (
-                            [
-                            {
-                                icon: HomeIcon,
-                                label: "Home",
-                                link: "/"
-                            }, 
-                            {
-                                icon: PlusIcon,
-                                label: "Create",
-                                link: "/create"
-                            }, 
-                            {
-                                icon: SearchIcon,
-                                label: "Explore",
-                                link: "/explore"
-                            }
-                        ].map((option) => (
-                            <Link to={option.link} key={option.link}>
-                                <Button key={option.label} variant="ghost" size="icon" className="size-14">
-                                    <div className="flex flex-col items-center">
-                                        <option.icon className="text-foreground"/>
-                                        <p className="text-foreground pt-1">{option.label}</p>
-                                    </div>
-                                </Button>
-                            </Link>
-                        ))) : <p className="flex pt-4 text-xl">Welcome to Timesynq!</p>}
-                    </div>
+                    {!isLoading && 
+                        <div className="flex items-center justify-around px-4 pt-2 pb-6">
+                            {user ? (
+                                [
+                                {
+                                    icon: HomeIcon,
+                                    label: "Home",
+                                    link: "/"
+                                }, 
+                                {
+                                    icon: PlusIcon,
+                                    label: "Create",
+                                    link: "/create"
+                                }, 
+                                {
+                                    icon: SearchIcon,
+                                    label: "Explore",
+                                    link: "/explore"
+                                }
+                            ].map((option) => (
+                                <Link to={option.link} key={option.link}>
+                                    <Button key={option.label} variant="ghost" size="icon" className="size-14 cursor-pointer">
+                                        <div className="flex flex-col items-center">
+                                            <option.icon className="text-foreground"/>
+                                            <p className="text-foreground pt-1">{option.label}</p>
+                                        </div>
+                                    </Button>
+                                </Link>
+                            ))) : <p className="flex pt-4 text-xl">Welcome to Timesynq!</p>}
+                        </div>
+                    }
                 </div>
             )}
         </>

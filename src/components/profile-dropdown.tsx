@@ -26,7 +26,7 @@ export const ProfileDropdown = ({ user }: ProfileDropdownProps) => {
             <DropdownMenuTrigger asChild>
                 <Button
                     variant="outline"
-                    className="h-12 px-4 flex items-center justify-between"
+                    className="h-12 px-4 flex items-center justify-between cursor-pointer"
                 >
                     <div className="flex items-center w-full gap-3">
                         <div className="w-8 overflow-hidden flex-shrink-0">
@@ -38,18 +38,18 @@ export const ProfileDropdown = ({ user }: ProfileDropdownProps) => {
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56" align="end">
                 <Link to={`/profile/${user.id}`}>
-                    <DropdownMenuItem>
+                    <DropdownMenuItem className="cursor-pointer">
                             Profile
                     </DropdownMenuItem>
                 </Link>
                 <DropdownMenuSeparator />
                 <Link to={"/account-settings"}>
-                    <DropdownMenuItem>
+                    <DropdownMenuItem className="cursor-pointer">
                         Account Settings
                     </DropdownMenuItem>
                 </Link>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout}>
+                <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
                     Sign Out
                 </DropdownMenuItem>
             </DropdownMenuContent>

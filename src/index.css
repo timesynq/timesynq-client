@@ -12,6 +12,10 @@
   font-style: normal;
 }
 
+html {
+  scrollbar-width: none;
+}
+
 body {
   font-family: 'Pixuf', sans-serif;
   background-color: oklch(14.623% 0.04042 288.257);

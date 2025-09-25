@@ -1,5 +1,6 @@
 import { ApiError, ApiErrorFactory } from "../api-error";
 import { endpoints } from "../endpoints";
+import { PagedList } from "../paged-list";
 
 export type User = {
     id: string;
@@ -15,24 +16,19 @@ export type Profile = {
     isFollowing: boolean;
 }
 
-export type UserSearchResults = {
-    items: { user: User; }[];
-}
-
 export type ChangeUsernameRequest = {
     newUserName: string;
 }
 
 export const UserService = {
 
-    me: async (): Promise<User | null> => {
+    me: async (onError?: (description: string) => void): Promise<User | null> => {
         try {    
             const response = await fetch(endpoints.users.me(), {
                 method: "GET",
                 credentials: 'include',
                 headers: {
                     'Accept': 'application/json',
-                    'Content-Type': 'application/json'
                 },
             });
             
@@ -51,12 +47,12 @@ export const UserService = {
         
         catch (error) {
             const apiError: ApiError = ApiErrorFactory.createFetchError(error, "me");
-            console.error("Caught exception fetching me: ", apiError);
+            onError && onError(apiError.detail);
             return null;
         }
     },
 
-    user: async (id: string): Promise<User | null> => {
+    user: async (id: string, onError?: (description: string) => void): Promise<User | null> => {
         try {
             const response = await fetch(endpoints.users.getById(id), {
                 method: "GET",
@@ -81,12 +77,12 @@ export const UserService = {
         }
         catch (error) {
             const apiError: ApiError = ApiErrorFactory.createFetchError(error, "user");
-            console.error("Caught exception fetching user: ", apiError);
+            onError && onError(apiError.detail);
             return null;
         }
     },
 
-    profile: async(id: string): Promise<Profile | null> => {
+    profile: async(id: string, onError?: (description: string) => void): Promise<Profile | null> => {
         try {
             const response = await fetch(endpoints.users.profile(id), {
                 method: "GET",
@@ -113,34 +109,46 @@ export const UserService = {
         }
         catch (error) {
             const apiError: ApiError = ApiErrorFactory.createFetchError(error, "profile");
-            console.error("Caught exception fetching user profile: ", apiError);
+            onError && onError(apiError.detail);
             return null;
         }
     },
 
-    search: async (query: string): Promise<UserSearchResults | null> => {
+    search: async (query: string, pageNumber: number = 1, pageSize: number = 20, onError?: (description: string) => void): Promise<PagedList<User> | null> => {
         try {
-            const response = await fetch(endpoints.users.search(query), {
+
+            const url = new URL(endpoints.users.search(query));
+            url.search = new URLSearchParams({
+                pageNumber: `${pageNumber}`,
+                pageSize: `${pageSize}`,
+            }).toString();
+
+            const response = await fetch(url, {
                 method: "GET",
                 credentials: "include",
                 headers: { "Accept": "application/json" },
             });
 
             const data = await response.json();
-            const userResults: UserSearchResults = {
-                items: data.items
-                    ? data.items.map((item: User) => ({
-                        user: item,
-                    }))
-                    : [],
-            };
-
-            return userResults ?? null;
-
+            const pagedListFields = {
+                items: data.items ?? [],
+                pageNumber: data.pageNumber,
+                pageSize: data.pageSize,
+                totalItems: data.totalItems,
+                totalPages: data.totalPages,
+                firstPageUrl: data.firstPageUrl ?? null,
+                lastPageUrl: data.lastPageUrl ?? null,
+                previousPageUrl: data.previousPageUrl ?? null,
+                nextPageUrl: data.nextPageUrl ?? null,
+                onError: onError,
+            }
+ 
+            return new PagedList<User>(pagedListFields);
         } 
         catch (error) {
+            console.log(error)
             const apiError: ApiError = ApiErrorFactory.createFetchError(error, "search");
-            console.error("UserSearch fetch failed:", apiError);
+            onError && onError(apiError.detail);
             return null;
         }
     },
