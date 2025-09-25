@@ -48,28 +48,52 @@ export class PagedList<T> {
         return this._totalItems;
     }
 
-    public totalpages(): number {
+    public totalPages(): number {
         return this._totalPages;
     }
 
-    public getFirstPage(): PagedList<T> | null {
+    public async getFirstPage(): Promise<PagedList<T> | null> {
         return this._firstPageUrl ? this.fetchHypermedia(this._firstPageUrl) : null;
     }
 
-    public getLastPage(): PagedList<T> | null {
+    public async getLastPage(): Promise<PagedList<T> | null> {
         return this._lastPageUrl ? this.fetchHypermedia(this._lastPageUrl) : null;
     }
 
-    public getPreviousPage(): PagedList<T> | null {
+    public async getPreviousPage(): Promise<PagedList<T> | null> {
         return this._previousPageUrl ? this.fetchHypermedia(this._previousPageUrl) : null;
     }
 
-    public getNextPage(): PagedList<T> | null {
+    public async getNextPage(): Promise<PagedList<T> | null> {
         return this._nextPageUrl ? this.fetchHypermedia(this._nextPageUrl) : null;
     }
 
-    private fetchHypermedia(link: string): PagedList<T> | null {
-        return null;
+    private async fetchHypermedia(url: string): Promise<PagedList<T> | null> {
+        try {
+            const response = await fetch(url, {
+                method: "GET",
+                credentials: "include",
+                headers: { "Accept": "application/json" },
+            });
+            
+            const data = await response.json();
+            const pagedListFields = {
+                items: data.items ?? [],
+                pageNumber: data.pageNumber,
+                pageSize: data.pageSize,
+                totalItems: data.totalItems,
+                totalPages: data.totalPages,
+                firstPageUrl: data.firstPageUrl ?? null,
+                lastPageUrl: data.lastPageUrl ?? null,
+                previousPageUrl: data.previousPageUrl ?? null,
+                nextPageUrl: data.nextPageUrl ?? null,
+            }
+             
+            return new PagedList<T>(pagedListFields);
+        }
+        catch (error) {
+            return null;
+        }
     }
 
 }

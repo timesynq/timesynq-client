@@ -15,13 +15,12 @@ export const Explore = () => {
 
     const isMobile = useIsMobile();
     const [userQuery, setUserQuery] = useState<string>("");
+    const [requestedPageSize, setRequestedPageSize] = useState<number>(10);
     const [searchResultMessage, setSearchResultMessage] = useState<string>("");
     const [userSearchHypermediaResource, setUserSearchHypermediaResource] = useState<PagedList<User> | null>();
-    const [error, setError] = useState<string | null>(null);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError(null);
 
         const onError = (description: string) => {Toasts.error(description)};
 
@@ -30,10 +29,31 @@ export const Explore = () => {
             return;
         }
 
-        const pagedUsers = await UserService.search(userQuery, onError);
+        const pagedUsers = await UserService.search(userQuery, 1, requestedPageSize, onError);
         setUserSearchHypermediaResource(pagedUsers);
         setSearchResultMessage(`User search results for "${userQuery}"`);
     };
+
+    const pageNumber = userSearchHypermediaResource?.pageNumber();
+    const totalPages = userSearchHypermediaResource? userSearchHypermediaResource.totalPages() : 0;
+
+    const handleGetPreviousPage = async () => {
+        if(!userSearchHypermediaResource || userSearchHypermediaResource.pageNumber() == 1)
+            return;
+        const previousPageResource = await userSearchHypermediaResource.getPreviousPage();
+        if(previousPageResource != null){
+            setUserSearchHypermediaResource(previousPageResource);
+        }
+    }
+
+    const handleGetNextPage = async () => {
+        if(!userSearchHypermediaResource || userSearchHypermediaResource.pageNumber() == userSearchHypermediaResource.totalPages())
+            return;
+        const nextPageResource = await userSearchHypermediaResource.getNextPage();
+        if(nextPageResource != null){
+            setUserSearchHypermediaResource(nextPageResource);
+        }
+    }
 
     return (
         <main className="flex flex-col items-center justify-center m-4">
@@ -53,19 +73,21 @@ export const Explore = () => {
             </form>
             <div className={`${isMobile ? 'w-full' : 'min-w-[700px]'} flex flex-row items-end justify-between space-x-8`}>
                 <p className="w-[50%] text-sm">{searchResultMessage}</p>
-                <Pagination className="w-[50%] justify-end">
-                    <PaginationContent className="space-x-2">
-                        <PaginationItem>
-                            <PaginationPrevious href="#" />
-                        </PaginationItem>
-                        <PaginationItem>
-                            <p>Page 1 of 3</p>
-                        </PaginationItem>
-                        <PaginationItem>
-                            <PaginationNext href="#" />
-                        </PaginationItem>
-                    </PaginationContent>
-                </Pagination>
+                {!!totalPages && totalPages > 0 && 
+                    <Pagination className="w-[50%] justify-end">
+                        <PaginationContent className="space-x-2">
+                            <PaginationItem>
+                                <PaginationPrevious onClick={handleGetPreviousPage} className={`${pageNumber == 1 ? 'hover:bg-background hover:text-muted-foreground text-muted-foreground' : 'cursor-pointer'}`} />
+                            </PaginationItem>
+                            <PaginationItem>
+                                <p>Page {pageNumber} of {totalPages}</p>
+                            </PaginationItem>
+                            <PaginationItem>
+                                <PaginationNext onClick={handleGetNextPage} className={`${pageNumber == totalPages ? 'hover:bg-background hover:text-muted-foreground text-muted-foreground' : 'cursor-pointer'}`}/>
+                            </PaginationItem>
+                        </PaginationContent>
+                    </Pagination>
+                }
             </div>
             <ul className={`${isMobile ? 'w-full' : 'min-w-[600px]'} mt-4 space-y-2 flex flex-col items-center justify-center`}>
                 {userSearchHypermediaResource && userSearchHypermediaResource.items().length > 0 ? (
@@ -103,7 +125,7 @@ export const Explore = () => {
                         </li>
                     ))
                 ) : (
-                    !error && <p className="text-muted-foreground">No users found.</p>
+                    userSearchHypermediaResource && userSearchHypermediaResource.items().length == 0 && <p className="text-muted-foreground">No users found.</p>
                 )}
             </ul>
         </main>

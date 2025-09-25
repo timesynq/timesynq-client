@@ -114,9 +114,16 @@ export const UserService = {
         }
     },
 
-    search: async (query: string, onError?: (description: string) => void): Promise<PagedList<User> | null> => {
+    search: async (query: string, pageNumber: number = 1, pageSize: number = 20, onError?: (description: string) => void): Promise<PagedList<User> | null> => {
         try {
-            const response = await fetch(endpoints.users.search(query), {
+
+            const url = new URL(endpoints.users.search(query));
+            url.search = new URLSearchParams({
+                pageNumber: `${pageNumber}`,
+                pageSize: `${pageSize}`,
+            }).toString();
+
+            const response = await fetch(url, {
                 method: "GET",
                 credentials: "include",
                 headers: { "Accept": "application/json" },
