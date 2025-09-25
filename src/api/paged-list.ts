@@ -1,3 +1,5 @@
+import { ApiError, ApiErrorFactory } from "./api-error";
+
 export class PagedList<T> {
     
     private _items: T[];
@@ -9,6 +11,7 @@ export class PagedList<T> {
     private _lastPageUrl?: string;
     private _previousPageUrl?: string;
     private _nextPageUrl?: string;
+    private _onError?: (description: string) => void;
     
     constructor(pagedListFields: {
         items: T[],
@@ -20,6 +23,7 @@ export class PagedList<T> {
         lastPageUrl?: string,
         previousPageUrl?: string,
         nextPageUrl?: string,
+        onError?: (description: string) => void;
     }) {
         this._items = pagedListFields.items;
         this._pageNumber = pagedListFields.pageNumber;
@@ -30,6 +34,7 @@ export class PagedList<T> {
         this._lastPageUrl = pagedListFields.lastPageUrl;
         this._previousPageUrl = pagedListFields.previousPageUrl;
         this._nextPageUrl = pagedListFields.nextPageUrl;
+        this._onError = pagedListFields.onError;
     }
 
     public items(): T[] {
@@ -87,11 +92,14 @@ export class PagedList<T> {
                 lastPageUrl: data.lastPageUrl ?? null,
                 previousPageUrl: data.previousPageUrl ?? null,
                 nextPageUrl: data.nextPageUrl ?? null,
+                onError: this._onError,
             }
              
             return new PagedList<T>(pagedListFields);
         }
         catch (error) {
+            const apiError: ApiError = ApiErrorFactory.createFetchError(error, "fetchHypermedia");
+            this._onError && this._onError(apiError.detail);
             return null;
         }
     }

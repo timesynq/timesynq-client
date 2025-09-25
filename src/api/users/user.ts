@@ -140,6 +140,7 @@ export const UserService = {
                 lastPageUrl: data.lastPageUrl ?? null,
                 previousPageUrl: data.previousPageUrl ?? null,
                 nextPageUrl: data.nextPageUrl ?? null,
+                onError: onError,
             }
  
             return new PagedList<User>(pagedListFields);
