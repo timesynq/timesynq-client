@@ -42,6 +42,7 @@ export const RegisterDialog = () => {
         const loginRequest: LoginRequest = {
             username: registerRequest.username,
             password: registerRequest.password,
+            rememberMe: false,
         }
 
         const loginError = await authLogin(loginRequest);
