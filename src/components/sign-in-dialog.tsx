@@ -5,6 +5,7 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { LoginError, LoginRequest } from "@/api/auth/login";
 import { useAuth } from "@/contexts/auth-provider";
+import { Checkbox } from "./ui/checkbox";
 
 export const SignInDialog = ({ autoOpen = false }: { autoOpen?: boolean }) => {
 
@@ -32,6 +33,7 @@ export const SignInDialog = ({ autoOpen = false }: { autoOpen?: boolean }) => {
         const request: LoginRequest = {
             username: formData.get("username") as string,
             password: formData.get("password") as string,
+            rememberMe: formData.get("remember-me") === "on",
         };
 
         const loginError = await authLogin(request);
@@ -65,6 +67,10 @@ export const SignInDialog = ({ autoOpen = false }: { autoOpen?: boolean }) => {
                             <Label htmlFor="password">Password</Label>
                             <Input type="password" id="password" name="password" defaultValue="" />
                         </div>
+                    </div>
+                    <div className="flex flex-row items-center space-x-2">
+                        <Checkbox id="remember-me" name="remember-me" className="cursor-pointer" defaultChecked={false}/>
+                        <Label htmlFor="remember-me" className="cursor-pointer">Remember me</Label>
                     </div>
                     {errors && (
                         <div className="text-destructive text-sm">
