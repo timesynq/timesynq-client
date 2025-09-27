@@ -4,6 +4,7 @@ import { AuthFieldValidation } from "./validation";
 export type LoginRequest = {
     username: string
     password: string
+    rememberMe: boolean
 }
 
 export type LoginError = {
@@ -28,7 +29,7 @@ export const login = async (loginRequest: LoginRequest): Promise<void | LoginErr
             };
         }
 
-        const response = await fetch(endpoints.auth.login(), {
+        const response = await fetch(endpoints.auth.login(true, !loginRequest.rememberMe), {
             method: "POST",
             credentials: 'include',
             headers: {
