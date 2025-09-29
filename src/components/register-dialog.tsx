@@ -7,9 +7,11 @@ import { register, RegisterError, RegisterRequest } from "@/api/auth/register";
 import { LoginRequest } from "@/api/auth/login";
 import { Toasts } from "@/utils/toasts";
 import { useAuth } from "@/contexts/auth-provider";
+import { Checkbox } from "./ui/checkbox";
 
 export const RegisterDialog = () => {
 
+    const [dialogShowPassword, setDialogShowPassword] = useState<boolean>(false);
     const [errors, setErrors] = useState<RegisterError | null>(null);
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const { authLogin } = useAuth();
@@ -20,6 +22,11 @@ export const RegisterDialog = () => {
         }
         setIsOpen(open);
     }
+
+    const handleDialogShowPassword = (checked: boolean) => {
+        setDialogShowPassword(checked);
+    }
+
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -79,12 +86,16 @@ export const RegisterDialog = () => {
                         </div>
                         <div className="grid gap-3">
                             <Label htmlFor="password">Password</Label>
-                            <Input type="password" id="password" name="password" defaultValue="" placeholder="must be at least 12 characters"/>
+                            <Input type={dialogShowPassword ? "text" : "password"} id="password" name="password" defaultValue="" placeholder="must be at least 12 characters"/>
                         </div>
                         <div className="grid gap-3">
                             <Label htmlFor="confirm-password">Confirm Password</Label>
-                            <Input type="password" id="confirm-password" name="confirm-password" defaultValue="" />
+                            <Input type={dialogShowPassword ? "text" : "password"} id="confirm-password" name="confirm-password" defaultValue="" />
                         </div>
+                    </div>
+                    <div className="flex flex-row items-center space-x-2">
+                        <Checkbox id="show-password" name="show-password" className="cursor-pointer" defaultChecked={false} onCheckedChange={handleDialogShowPassword}/>
+                        <Label htmlFor="show-password" className="cursor-pointer">Show password</Label>
                     </div>
                     {errors && (
                         <div className="text-destructive text-sm">

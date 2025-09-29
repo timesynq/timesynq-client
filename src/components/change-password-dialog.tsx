@@ -6,9 +6,11 @@ import { Input } from "./ui/input";
 import { RegisterError } from "@/api/auth/register";
 import { changePassword, ChangePasswordRequest } from "@/api/auth/password";
 import { Toasts } from "@/utils/toasts";
+import { Checkbox } from "./ui/checkbox";
 
 export const ChangePasswordDialog = () => {
 
+    const [dialogShowPassword, setDialogShowPassword] = useState<boolean>(false);
     const [errors, setErrors] = useState<RegisterError | null>(null);
     const [isOpen, setIsOpen] = useState<boolean>(false);
 
@@ -17,6 +19,10 @@ export const ChangePasswordDialog = () => {
             setErrors(null);
         }
         setIsOpen(open);
+    }
+
+    const handleDialogShowPassword = (checked: boolean) => {
+        setDialogShowPassword(checked);
     }
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -55,12 +61,16 @@ export const ChangePasswordDialog = () => {
                     <div className="grid gap-4">
                         <div className="grid gap-3">
                             <Label htmlFor="old-password">Old Password</Label>
-                            <Input type="password" id="old-password" name="old-password" defaultValue="" />
+                            <Input type={dialogShowPassword ? "text" : "password"} id="old-password" name="old-password" defaultValue="" />
                         </div>
                         <div className="grid gap-3">
                             <Label htmlFor="new-password">New Password</Label>
-                            <Input type="password" id="new-password" name="new-password" defaultValue="" />
+                            <Input type={dialogShowPassword ? "text" : "password"} id="new-password" name="new-password" defaultValue="" />
                         </div>
+                    </div>
+                    <div className="flex flex-row items-center space-x-2">
+                        <Checkbox id="dialog-show-password" className="cursor-pointer" defaultChecked={false} onCheckedChange={handleDialogShowPassword}/>
+                        <Label htmlFor="dialog-show-password" className="cursor-pointer">Show password</Label>
                     </div>
                     {errors && (
                         <div className="text-destructive text-sm">
