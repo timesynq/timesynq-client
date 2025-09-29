@@ -13,7 +13,7 @@ import { DeleteAccountDialog } from "@/components/delete-account-dialog";
 import { ChangePasswordDialog } from "@/components/change-password-dialog";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { email, EmailStatus } from "@/api/auth/email";
+import { changeEmail, ChangeEmailRequest, email, EmailStatus } from "@/api/auth/email";
 
 export const AccountSettings = () => {
 
@@ -56,6 +56,22 @@ export const AccountSettings = () => {
 
     const handleEmailChange = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
+
+        const formData = new FormData(event.currentTarget);
+
+        const changeEmailRequest: ChangeEmailRequest = {
+            oldEmail: emailStatus ? emailStatus.email : "", 
+            newEmail: formData.get("email") as string
+        }
+
+        const onSuccess = (description: string) => {Toasts.success(description)};
+        const onError = (description: string) => {Toasts.error(description)};
+
+        const newEmailStatus = await changeEmail(changeEmailRequest, onSuccess, onError);
+
+        if(newEmailStatus){
+            setEmailStatus(newEmailStatus);
+        }
     } 
 
     return (
@@ -107,15 +123,17 @@ export const AccountSettings = () => {
                             <div className="flex flex-row items-center justify-between w-full">
                                 <form onSubmit={handleEmailChange} className="flex flex-row items-center justify-start w-full space-x-2">
                                     <Label htmlFor="email" className="w-20">Email</Label>
-                                    <Input type="email" id="email" name="email" defaultValue={emailStatus?.email} />
+                                    <Input type="email" id="email" name="email" disabled={!emailStatus?.isEmailConfirmed} defaultValue={emailStatus?.email} />
                                     {!emailStatus?.isEmailConfirmed && 
                                         <Button type="button" variant="negative" className="cursor-pointer text-xs">
                                             Resend Confirmation Email
                                         </Button> 
                                     }
-                                    <Button type="submit" variant="positive" size="icon" className="min-w-[36px] cursor-pointer">
-                                        <CheckIcon className="mr-0.5"/>
-                                    </Button>
+                                    {emailStatus?.isEmailConfirmed &&
+                                        <Button type="submit" variant="positive" size="icon" className="min-w-[36px] cursor-pointer">
+                                            <CheckIcon className="mr-0.5"/>
+                                        </Button>
+                                    }
                                 </form>
                             </div>
                             <Separator />

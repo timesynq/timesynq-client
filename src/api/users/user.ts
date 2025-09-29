@@ -202,7 +202,7 @@ export const UserService = {
             return false;
         }
         catch (error){
-            const apiError: ApiError = ApiErrorFactory.createFetchError(error, "changeUsername");
+            const apiError: ApiError = ApiErrorFactory.createFetchError(error, "delete");
             onError(apiError.detail);
             return false;
         }
