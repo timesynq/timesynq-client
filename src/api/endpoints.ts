@@ -10,7 +10,10 @@ export const endpoints = {
         forgotPassword: () => addBaseToPath("/forgotPassword"),
         logout: () => addBaseToPath("/logout"),
         changePassword: () => addBaseToPath("/manage/info"),
-        resetPassword: () => addBaseToPath("/resetPassword")
+        resetPassword: () => addBaseToPath("/resetPassword"),
+        email: () => addBaseToPath("/manage/info"),
+        changeEmail: () => addBaseToPath("/manage/info"),
+        resendConfirmationEmail: () => addBaseToPath("/resendConfirmationEmail")
     },
     users: {
         me: () => addBaseToPath("/users/me"),

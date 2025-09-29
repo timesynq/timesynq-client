@@ -12,13 +12,24 @@ import { ChangeUsernameRequest, UserService } from "@/api/users/user";
 import { DeleteAccountDialog } from "@/components/delete-account-dialog";
 import { ChangePasswordDialog } from "@/components/change-password-dialog";
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { changeEmail, ChangeEmailRequest, email, EmailStatus, resendConfirmationEmail, ResendConfirmationEmailRequest } from "@/api/auth/email";
 
 export const AccountSettings = () => {
 
     const { user } = useAuth(); 
     const isLg: boolean = useIsLg();
+    const [emailStatus, setEmailStatus] = useState<EmailStatus | null>(null); //todo: fix the flicker caused by the fetch for this with a skeleton
 
     if(!user) return;
+
+    useEffect(() => {
+        const fetchEmailStatus = async () => {
+            const emailStatus = await email();
+            setEmailStatus(emailStatus);
+        }
+        fetchEmailStatus();
+    }, []);
 
     const handleUsernameChange = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -43,6 +54,40 @@ export const AccountSettings = () => {
         }
     }
 
+    const handleEmailChange = async (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+
+        const formData = new FormData(event.currentTarget);
+
+        const changeEmailRequest: ChangeEmailRequest = {
+            oldEmail: emailStatus ? emailStatus.email : "", 
+            newEmail: formData.get("email") as string
+        }
+
+        const onSuccess = (description: string) => {Toasts.success(description)};
+        const onError = (description: string) => {Toasts.error(description)};
+
+        const newEmailStatus = await changeEmail(changeEmailRequest, onSuccess, onError);
+
+        if(newEmailStatus){
+            setEmailStatus(newEmailStatus);
+        }
+    } 
+
+    const handleResendConfirmationEmail = async () => {
+        if(!emailStatus){
+            return;
+        }
+
+        const request: ResendConfirmationEmailRequest = {
+            email: emailStatus.email,
+        }
+
+        const isResendSuccessful = await resendConfirmationEmail(request, (description: string) => {Toasts.error(description)});
+        if(isResendSuccessful){
+            Toasts.success("Verification email sent!");
+        }
+    }
 
     return (
         <main className="flex flex-col items-center justify-center m-4 mt-8">
@@ -77,7 +122,7 @@ export const AccountSettings = () => {
                         </CardHeader>
                         <CardContent className="flex flex-col items-center">
                             <form onSubmit={handleUsernameChange} className="flex flex-row items-center justify-start w-full space-x-2">
-                                <Label htmlFor="username">Username</Label>
+                                <Label htmlFor="username" className="w-20">Username</Label>
                                 <Input id="username" name="username" defaultValue={user.userName} />
                                 <Button type="submit" variant="positive" size="icon" className="min-w-[36px] cursor-pointer">
                                     <CheckIcon className="mr-0.5"/>
@@ -90,6 +135,22 @@ export const AccountSettings = () => {
                             Security
                         </CardHeader>
                         <CardContent className="flex flex-col items-center space-y-4">
+                            <div className="flex flex-row items-center justify-between w-full">
+                                <form onSubmit={handleEmailChange} className="flex flex-row items-center justify-start w-full space-x-2">
+                                    <Label htmlFor="email" className="w-20">Email</Label>
+                                    <Input type="email" id="email" name="email" disabled={!emailStatus?.isEmailConfirmed} defaultValue={emailStatus?.email} />
+                                    {!emailStatus?.isEmailConfirmed && 
+                                        <Button type="button" onClick={handleResendConfirmationEmail} variant="negative" className="cursor-pointer text-xs">
+                                            Resend Confirmation Email
+                                        </Button> 
+                                    }
+                                    {emailStatus?.isEmailConfirmed &&
+                                        <Button type="submit" variant="positive" size="icon" className="min-w-[36px] cursor-pointer">
+                                            <CheckIcon className="mr-0.5"/>
+                                        </Button>
+                                    }
+                                </form>
+                            </div>
                             <Separator />
                             <div className="flex flex-row items-center justify-between w-full">
                                 <p>Password</p>

@@ -82,11 +82,13 @@ export const SignInDialog = ({ autoOpen = false }: { autoOpen?: boolean }) => {
                         </div>
                     )}
                     <DialogFooter>
-                        <Link to="/forgot-password">
-                            <Button variant="link" className="cursor-pointer">Forgot password?</Button>
-                        </Link>
                         <DialogClose asChild>
-                            <Button variant="outline">Close</Button>
+                            <div>
+                                <Link to="/forgot-password">
+                                    <Button type="button" variant="link" onClick={() => handleOpenChange(false)} className="cursor-pointer">Forgot password?</Button>
+                                </Link>
+                                <Button type="button" variant="outline">Close</Button>
+                            </div>
                         </DialogClose>
                         <Button type="submit" variant="positive">Sign in</Button>
                     </DialogFooter>
