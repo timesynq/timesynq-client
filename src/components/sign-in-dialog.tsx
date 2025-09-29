@@ -6,6 +6,7 @@ import { Label } from "./ui/label";
 import { LoginError, LoginRequest } from "@/api/auth/login";
 import { useAuth } from "@/contexts/auth-provider";
 import { Checkbox } from "./ui/checkbox";
+import { Link } from "react-router-dom";
 
 export const SignInDialog = ({ autoOpen = false }: { autoOpen?: boolean }) => {
 
@@ -81,7 +82,9 @@ export const SignInDialog = ({ autoOpen = false }: { autoOpen?: boolean }) => {
                         </div>
                     )}
                     <DialogFooter>
-                        <Button variant="link" className="cursor-pointer">Forgot password?</Button>
+                        <Link to="/forgot-password">
+                            <Button variant="link" className="cursor-pointer">Forgot password?</Button>
+                        </Link>
                         <DialogClose asChild>
                             <Button variant="outline">Close</Button>
                         </DialogClose>

@@ -11,6 +11,7 @@ import { Toasts } from "@/utils/toasts";
 import { ChangeUsernameRequest, UserService } from "@/api/users/user";
 import { DeleteAccountDialog } from "@/components/delete-account-dialog";
 import { ChangePasswordDialog } from "@/components/change-password-dialog";
+import { Link } from "react-router-dom";
 
 export const AccountSettings = () => {
 
@@ -93,9 +94,11 @@ export const AccountSettings = () => {
                             <div className="flex flex-row items-center justify-between w-full">
                                 <p>Password</p>
                                 <div className="flex flex-row space-x-1">
-                                    <Button variant="link" className="cursor-pointer text-xs">
-                                        Forgot Password
-                                    </Button>
+                                    <Link to="/forgot-password">
+                                        <Button variant="link" className="cursor-pointer text-xs">
+                                            Forgot Password
+                                        </Button>
+                                    </Link>
                                     <ChangePasswordDialog />
                                 </div>
                             </div>
