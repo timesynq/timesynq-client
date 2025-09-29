@@ -13,7 +13,7 @@ import { DeleteAccountDialog } from "@/components/delete-account-dialog";
 import { ChangePasswordDialog } from "@/components/change-password-dialog";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { changeEmail, ChangeEmailRequest, email, EmailStatus } from "@/api/auth/email";
+import { changeEmail, ChangeEmailRequest, email, EmailStatus, resendConfirmationEmail, ResendConfirmationEmailRequest } from "@/api/auth/email";
 
 export const AccountSettings = () => {
 
@@ -74,6 +74,21 @@ export const AccountSettings = () => {
         }
     } 
 
+    const handleResendConfirmationEmail = async () => {
+        if(!emailStatus){
+            return;
+        }
+
+        const request: ResendConfirmationEmailRequest = {
+            email: emailStatus.email,
+        }
+
+        const isResendSuccessful = await resendConfirmationEmail(request, (description: string) => {Toasts.error(description)});
+        if(isResendSuccessful){
+            Toasts.success("Verification email sent!");
+        }
+    }
+
     return (
         <main className="flex flex-col items-center justify-center m-4 mt-8">
             <div className={`flex ${!isLg ? 'flex-col w-[90%]' : 'flex-row min-w-[50%]'} gap-8`}>
@@ -125,7 +140,7 @@ export const AccountSettings = () => {
                                     <Label htmlFor="email" className="w-20">Email</Label>
                                     <Input type="email" id="email" name="email" disabled={!emailStatus?.isEmailConfirmed} defaultValue={emailStatus?.email} />
                                     {!emailStatus?.isEmailConfirmed && 
-                                        <Button type="button" variant="negative" className="cursor-pointer text-xs">
+                                        <Button type="button" onClick={handleResendConfirmationEmail} variant="negative" className="cursor-pointer text-xs">
                                             Resend Confirmation Email
                                         </Button> 
                                     }

@@ -110,6 +110,27 @@ export type ResendConfirmationEmailRequest = {
 
 export type ResendConfirmationEmailError = ChangeEmailError;
 
-export const resendConfirmationEmail = async(): Promise<void | ResendConfirmationEmailError> => {
+export const resendConfirmationEmail = async(resendConfirmationEmailRequest: ResendConfirmationEmailRequest, onError: (description: string) => void): Promise<boolean> => {
+    try {
+        const response = await fetch(endpoints.auth.resendConfirmationEmail(), {
+            method: "POST",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(resendConfirmationEmailRequest)
+        });
+        
+        if (response.ok){
+            return true;
+        }
 
+        onError("Resend failed.");
+        return false;
+    }
+    catch (error) {
+        const apiError: ApiError = ApiErrorFactory.createFetchError(error, "resendConfirmationEmail");
+        onError(apiError.detail);
+        return false;
+    }
 }

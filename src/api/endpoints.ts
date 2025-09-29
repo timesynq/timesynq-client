@@ -13,7 +13,7 @@ export const endpoints = {
         resetPassword: () => addBaseToPath("/resetPassword"),
         email: () => addBaseToPath("/manage/info"),
         changeEmail: () => addBaseToPath("/manage/info"),
-        resentConfirmationEmail: () => addBaseToPath("/resendConfirmationEmail")
+        resendConfirmationEmail: () => addBaseToPath("/resendConfirmationEmail")
     },
     users: {
         me: () => addBaseToPath("/users/me"),
