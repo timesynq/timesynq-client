@@ -153,7 +153,7 @@ export const UserService = {
         }
     },
 
-    changeUsername: async (changeUsernameRequest: ChangeUsernameRequest, onSuccess: (description: string) => void, onError: (description: string) => void): Promise<boolean> => {
+    changeUsername: async (changeUsernameRequest: ChangeUsernameRequest, onSuccess?: (description: string) => void, onError?: (description: string) => void): Promise<boolean> => {
         try{
             const response = await fetch(endpoints.users.changeUsername(), {
                 method: "POST",
@@ -167,22 +167,22 @@ export const UserService = {
 
             const data = await response.json();
             if(response.ok){
-                onSuccess("Username changed successfully.");
+                onSuccess && onSuccess("Username changed successfully.");
                 return true;
             }
             
             const error = data as ApiError;
-            onError(error.detail);
+            onError && onError(error.detail);
             return false;
         }
         catch (error) {
             const apiError: ApiError = ApiErrorFactory.createFetchError(error, "changeUsername");
-            onError(apiError.detail);
+            onError && onError(apiError.detail);
             return false;
         }
     },
     
-    delete: async (onError: (description: string) => void): Promise<boolean> => {
+    delete: async (onError?: (description: string) => void): Promise<boolean> => {
         try{
             const response = await fetch(endpoints.users.delete(), {
                 method: "DELETE",
@@ -198,12 +198,12 @@ export const UserService = {
 
             const data = await response.json();
             const error = data as ApiError;
-            onError(error.detail);
+            onError && onError(error.detail);
             return false;
         }
         catch (error){
             const apiError: ApiError = ApiErrorFactory.createFetchError(error, "delete");
-            onError(apiError.detail);
+            onError && onError(apiError.detail);
             return false;
         }
     }

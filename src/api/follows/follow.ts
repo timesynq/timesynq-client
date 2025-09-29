@@ -15,7 +15,7 @@ export type UnfollowRequest = FollowRequest;
 
 export const FollowService = {
 
-    follow: async (followRequest: FollowRequest, onError: (description: string) => void): Promise<Follow | null> => {
+    follow: async (followRequest: FollowRequest, onError?: (description: string) => void): Promise<Follow | null> => {
         try {    
             const response = await fetch(endpoints.follow.follow(), {
                 method: "POST",
@@ -38,18 +38,18 @@ export const FollowService = {
             }
             
             const error = data as ApiError;
-            onError(error.detail);
+            onError && onError(error.detail);
             return null;
         }
         
         catch (error) {
             const apiError: ApiError = ApiErrorFactory.createFetchError(error, "follow");
-            onError(apiError.detail);
+            onError && onError(apiError.detail);
             return null;
         }
     },
 
-    unfollow: async (unfollowRequest: UnfollowRequest, onError: (description: string) => void): Promise<boolean> => {
+    unfollow: async (unfollowRequest: UnfollowRequest, onError?: (description: string) => void): Promise<boolean> => {
         try {    
             const response = await fetch(endpoints.follow.unfollow(), {
                 method: "DELETE",
@@ -66,13 +66,13 @@ export const FollowService = {
             }
             const data = await response.json();
             const error = data as ApiError;
-            onError(error.detail);
+            onError && onError(error.detail);
             return false;
         }
         
         catch (error) {
             const apiError: ApiError = ApiErrorFactory.createFetchError(error, "unfollow");
-            onError(apiError.detail);
+            onError && onError(apiError.detail);
             return false;
         }
     }

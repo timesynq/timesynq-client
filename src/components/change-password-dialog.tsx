@@ -82,9 +82,9 @@ export const ChangePasswordDialog = () => {
                     )}
                     <DialogFooter>
                         <DialogClose asChild>
-                            <Button variant="outline">Close</Button>
+                            <Button variant="outline" className="cursor-pointer">Close</Button>
                         </DialogClose>
-                        <Button type="submit" variant="positive">Submit</Button>
+                        <Button type="submit" variant="positive" className="cursor-pointer">Submit</Button>
                     </DialogFooter>
                 </form>
             </DialogContent>

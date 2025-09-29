@@ -53,14 +53,14 @@ const validateResetPasswordInputs = (changeEmailRequest: ChangeEmailRequest): st
     return errors.length > 0 ? errors[0] : "";
 }
 
-export const changeEmail = async (changeEmailRequest: ChangeEmailRequest, onSuccess: (description: string) => void, onError: (description: string) => void): Promise<EmailStatus | null> => {
+export const changeEmail = async (changeEmailRequest: ChangeEmailRequest, onSuccess?: (description: string) => void, onError?: (description: string) => void): Promise<EmailStatus | null> => {
     try{
         //we can get the error by 0 index because for emails specifically, the api only provides an "Email 'x' is invalid" message
         //it is unlikely that that point is ever even reached though
 
         const validationError: string = validateResetPasswordInputs(changeEmailRequest);
         if(validationError !== ""){
-            onError(validationError);
+            onError && onError(validationError);
             return null;
         }
 
@@ -77,7 +77,7 @@ export const changeEmail = async (changeEmailRequest: ChangeEmailRequest, onSucc
         const data = await response.json();
 
         if(response.ok){
-            onSuccess("Verification email sent!");
+            onSuccess && onSuccess("Verification email sent!");
             return data as EmailStatus;
         }
         
@@ -94,12 +94,12 @@ export const changeEmail = async (changeEmailRequest: ChangeEmailRequest, onSucc
             }
         }
 
-        onError(simplifiedError.errors.length > 0 ? simplifiedError.errors[0] : simplifiedError.detail ? simplifiedError.detail : "Unknown error");
+        onError && onError(simplifiedError.errors.length > 0 ? simplifiedError.errors[0] : simplifiedError.detail ? simplifiedError.detail : "Unknown error");
         return null;
     }
     catch (error) {
         const apiError: ApiError = ApiErrorFactory.createFetchError(error, "changeEmail");
-        onError(apiError.detail);
+        onError && onError(apiError.detail);
         return null;
     }
 }
@@ -110,7 +110,7 @@ export type ResendConfirmationEmailRequest = {
 
 export type ResendConfirmationEmailError = ChangeEmailError;
 
-export const resendConfirmationEmail = async(resendConfirmationEmailRequest: ResendConfirmationEmailRequest, onError: (description: string) => void): Promise<boolean> => {
+export const resendConfirmationEmail = async(resendConfirmationEmailRequest: ResendConfirmationEmailRequest, onError?: (description: string) => void): Promise<boolean> => {
     try {
         const response = await fetch(endpoints.auth.resendConfirmationEmail(), {
             method: "POST",
@@ -125,12 +125,12 @@ export const resendConfirmationEmail = async(resendConfirmationEmailRequest: Res
             return true;
         }
 
-        onError("Resend failed.");
+        onError && onError("Resend failed.");
         return false;
     }
     catch (error) {
         const apiError: ApiError = ApiErrorFactory.createFetchError(error, "resendConfirmationEmail");
-        onError(apiError.detail);
+        onError && onError(apiError.detail);
         return false;
     }
 }

@@ -29,7 +29,7 @@ const validateInputs = (registerRequest: RegisterRequest): string[] => {
 
 }
 
-export const register = async (registerRequest: RegisterRequest, onSuccess: (description: string) => void): Promise<void | RegisterError> => {
+export const register = async (registerRequest: RegisterRequest, onSuccess?: (description: string) => void): Promise<void | RegisterError> => {
     try {
 
         const validationErrors: string[] = validateInputs(registerRequest);
@@ -49,7 +49,7 @@ export const register = async (registerRequest: RegisterRequest, onSuccess: (des
         });
         
         if (response.ok){
-            onSuccess("Verification email sent!")
+            onSuccess && onSuccess("Verification email sent!")
             return;
         }
 
