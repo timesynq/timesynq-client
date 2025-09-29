@@ -41,7 +41,7 @@ export const ChangePasswordDialog = () => {
     return (
         <Dialog open={isOpen} onOpenChange={handleOpenChange}>
             <DialogTrigger asChild>
-                <Button variant="outline" className="cursor-pointer text-xs">
+                <Button variant="outline" className="cursor-pointer text-xs ">
                     Change Password
                 </Button>
             </DialogTrigger>

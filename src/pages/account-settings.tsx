@@ -12,13 +12,24 @@ import { ChangeUsernameRequest, UserService } from "@/api/users/user";
 import { DeleteAccountDialog } from "@/components/delete-account-dialog";
 import { ChangePasswordDialog } from "@/components/change-password-dialog";
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { email, EmailStatus } from "@/api/auth/email";
 
 export const AccountSettings = () => {
 
     const { user } = useAuth(); 
     const isLg: boolean = useIsLg();
+    const [emailStatus, setEmailStatus] = useState<EmailStatus | null>(null); //todo: fix the flicker caused by the fetch for this with a skeleton
 
     if(!user) return;
+
+    useEffect(() => {
+        const fetchEmailStatus = async () => {
+            const emailStatus = await email();
+            setEmailStatus(emailStatus);
+        }
+        fetchEmailStatus();
+    }, []);
 
     const handleUsernameChange = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -43,6 +54,9 @@ export const AccountSettings = () => {
         }
     }
 
+    const handleEmailChange = async (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+    } 
 
     return (
         <main className="flex flex-col items-center justify-center m-4 mt-8">
@@ -77,7 +91,7 @@ export const AccountSettings = () => {
                         </CardHeader>
                         <CardContent className="flex flex-col items-center">
                             <form onSubmit={handleUsernameChange} className="flex flex-row items-center justify-start w-full space-x-2">
-                                <Label htmlFor="username">Username</Label>
+                                <Label htmlFor="username" className="w-20">Username</Label>
                                 <Input id="username" name="username" defaultValue={user.userName} />
                                 <Button type="submit" variant="positive" size="icon" className="min-w-[36px] cursor-pointer">
                                     <CheckIcon className="mr-0.5"/>
@@ -90,6 +104,20 @@ export const AccountSettings = () => {
                             Security
                         </CardHeader>
                         <CardContent className="flex flex-col items-center space-y-4">
+                            <div className="flex flex-row items-center justify-between w-full">
+                                <form onSubmit={handleEmailChange} className="flex flex-row items-center justify-start w-full space-x-2">
+                                    <Label htmlFor="email" className="w-20">Email</Label>
+                                    <Input type="email" id="email" name="email" defaultValue={emailStatus?.email} />
+                                    {!emailStatus?.isEmailConfirmed && 
+                                        <Button type="button" variant="negative" className="cursor-pointer text-xs">
+                                            Resend Confirmation Email
+                                        </Button> 
+                                    }
+                                    <Button type="submit" variant="positive" size="icon" className="min-w-[36px] cursor-pointer">
+                                        <CheckIcon className="mr-0.5"/>
+                                    </Button>
+                                </form>
+                            </div>
                             <Separator />
                             <div className="flex flex-row items-center justify-between w-full">
                                 <p>Password</p>
