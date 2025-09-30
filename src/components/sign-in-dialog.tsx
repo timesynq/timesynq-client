@@ -10,6 +10,7 @@ import { Link } from "react-router-dom";
 
 export const SignInDialog = ({ autoOpen = false }: { autoOpen?: boolean }) => {
 
+    const [dialogShowPassword, setDialogShowPassword] = useState<boolean>(false);
     const [errors, setErrors] = useState<LoginError | null>(null);
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const { authLogin } = useAuth();
@@ -25,6 +26,10 @@ export const SignInDialog = ({ autoOpen = false }: { autoOpen?: boolean }) => {
             setErrors(null);
         }
         setIsOpen(open);
+    }
+
+    const handleDialogShowPassword = (checked: boolean) => {
+        setDialogShowPassword(checked);
     }
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -66,12 +71,18 @@ export const SignInDialog = ({ autoOpen = false }: { autoOpen?: boolean }) => {
                         </div>
                         <div className="grid gap-3">
                             <Label htmlFor="password">Password</Label>
-                            <Input type="password" id="password" name="password" defaultValue="" />
+                            <Input type={dialogShowPassword ? "text" : "password"} id="password" name="password" defaultValue="" />
                         </div>
                     </div>
-                    <div className="flex flex-row items-center space-x-2">
-                        <Checkbox id="remember-me" name="remember-me" className="cursor-pointer" defaultChecked={false}/>
-                        <Label htmlFor="remember-me" className="cursor-pointer">Remember me</Label>
+                    <div className="flex flex-col space-y-4">
+                        <div className="flex flex-row items-center space-x-2">
+                            <Checkbox id="dialog-show-password" className="cursor-pointer" defaultChecked={false} onCheckedChange={handleDialogShowPassword}/>
+                            <Label htmlFor="dialog-show-password" className="cursor-pointer">Show password</Label>
+                        </div>
+                        <div className="flex flex-row items-center space-x-2">
+                            <Checkbox id="remember-me" name="remember-me" className="cursor-pointer" defaultChecked={false}/>
+                            <Label htmlFor="remember-me" className="cursor-pointer">Remember me</Label>
+                        </div>
                     </div>
                     {errors && (
                         <div className="text-destructive text-sm">

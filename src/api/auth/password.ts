@@ -17,7 +17,7 @@ const validateChangePasswordInputs = (changePasswordRequest: ChangePasswordReque
     return errors;
 }
 
-export const changePassword = async (changePasswordRequest: ChangePasswordRequest, onSuccess: (description: string) => void): Promise<void | ChangePasswordError> => {
+export const changePassword = async (changePasswordRequest: ChangePasswordRequest, onSuccess?: (description: string) => void): Promise<void | ChangePasswordError> => {
     try {
             const validationErrors: string[] = validateChangePasswordInputs(changePasswordRequest);
             if(validationErrors.length > 0){
@@ -37,7 +37,7 @@ export const changePassword = async (changePasswordRequest: ChangePasswordReques
             });
             
             if (response.ok){
-                onSuccess("Password successfully changed.")
+                onSuccess && onSuccess("Password successfully changed.")
                 return;
             }
     

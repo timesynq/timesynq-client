@@ -1,6 +1,6 @@
 import { endpoints } from "../endpoints";
 
-export const logout = async (onError: (description: string) => void): Promise<boolean> => {
+export const logout = async (onError?: (description: string) => void): Promise<boolean> => {
 
     try {
         const response = await fetch(endpoints.auth.logout(), {
@@ -15,12 +15,12 @@ export const logout = async (onError: (description: string) => void): Promise<bo
             return true;
         }
 
-        onError("Logout failed.");
+        onError && onError("Logout failed.");
         return false;
     }
     
     catch (error) {
-        onError("Logout failed: Network or unexpected error");
+        onError && onError("Logout failed: Network or unexpected error");
         return false;
     }
 

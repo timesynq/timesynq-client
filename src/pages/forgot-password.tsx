@@ -1,6 +1,7 @@
 import { resetPassword, ResetPasswordError, ResetPasswordRequest, sendResetCode, SendResetCodeError, SendResetCodeRequest } from "@/api/auth/password";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
@@ -11,8 +12,13 @@ import { useState } from "react";
 export const ForgotPassword = () => {
 
     const isMobile = useIsMobile();
+    const [showPassword, setShowPassword] = useState<boolean>(false);
     const [sendResetCodeErrors, setSendResetCodeErrors] = useState<SendResetCodeError | null>(null);
     const [resetPasswordErrors, setResetPasswordErrors] = useState<ResetPasswordError | null>(null);
+
+    const handleShowPassword = (checked: boolean) => {
+        setShowPassword(checked);
+    }
 
     const handleSendResetCode = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -82,7 +88,7 @@ export const ForgotPassword = () => {
                         </div>
                     )}
                     <Separator />
-                    <form onSubmit={handleResetPassword} className="flex flex-col items-center justify-start w-full space-y-2">
+                    <form onSubmit={handleResetPassword} className="flex flex-col justify-start w-full space-y-4">
                         <div className="flex flex-row items-center justify start w-full space-x-2">
                             <Label htmlFor="email" className="w-[33%]">Email</Label>
                             <Input id="email" name="email" placeholder="user@example.com"/>
@@ -93,7 +99,11 @@ export const ForgotPassword = () => {
                         </div>
                         <div className="flex flex-row items-center justify-start w-full space-x-2">
                             <Label htmlFor="new-password" className="w-[33%]">New Password</Label>
-                            <Input type="password" id="new-password" name="new-password"/>
+                            <Input type={showPassword ? "text" : "password"} id="new-password" name="new-password"/>
+                        </div>
+                        <div className="flex flex-row items-center space-x-2">
+                            <Checkbox id="show-password" name="show-password" className="cursor-pointer" defaultChecked={false} onCheckedChange={handleShowPassword}/>
+                            <Label htmlFor="show-password" className="cursor-pointer">Show password</Label>
                         </div>
                         {resetPasswordErrors && (
                             <div className="text-destructive text-sm flex flex-col justify-start w-full">
