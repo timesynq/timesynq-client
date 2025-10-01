@@ -52,12 +52,16 @@ export const AuthProvider = ({children}: AuthProviderProps) => {
               const isCookieRefreshed: boolean = await refreshCookie(rememberMe !== "true");
               if(isCookieRefreshed){
                 Toasts.success("Session refreshed.");
-                await connection.stop();
+                await connection.stop().catch((error) => {
+                  if(import.meta.env.DEV) console.error(error);
+                });
                 localStorage.removeItem(REMEMBER_ME_KEY);
               }
             });
 
-            await connection.start(); 
+            await connection.start().catch((error) => {
+              if(import.meta.env.DEV) console.error(error);
+            }); 
         }
     }
     catch(error) {
