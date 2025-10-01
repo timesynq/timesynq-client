@@ -7,6 +7,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import * as signalR from "@microsoft/signalr";
 import { refreshCookie } from "@/api/auth/refresh";
+import { hubs } from "@/api/endpoints";
 
 interface AuthProviderState {
   user: User | null;
@@ -36,14 +37,14 @@ export const AuthProvider = ({children}: AuthProviderProps) => {
         const emailStatus = await email();
         if(emailStatus && !emailStatus.isEmailConfirmed){
           const connection = new signalR.HubConnectionBuilder()
-            .withUrl("https://localhost:7032/refresh-hub")  //todo: dont hardcode this link 
+            .withUrl(hubs.refresh())
             .build();
 
-            connection.off("NotifyRefresh");
             connection.on("NotifyRefresh", async () => {
               const isCookieRefreshed: boolean = await refreshCookie();
               if(isCookieRefreshed){
                 Toasts.success("Session refreshed.");
+                await connection.stop();
               }
             });
 

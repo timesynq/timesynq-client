@@ -1,4 +1,4 @@
-const API_BASE_URL = "https://localhost:7032";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const addBaseToPath = (path: string): string => `${API_BASE_URL}${path}`;
 
@@ -31,4 +31,9 @@ export const endpoints = {
         follow: () => addBaseToPath("/follows"),
         unfollow: () => addBaseToPath("/follows"),
     },
+}
+
+export const hubs = {
+    tracker: () => addBaseToPath("/tracker-hub"),
+    refresh: () => addBaseToPath("/refresh-hub"),
 }
