@@ -107,9 +107,9 @@ export const RegisterDialog = () => {
                     )}
                     <DialogFooter>
                         <DialogClose asChild>
-                            <Button variant="outline">Close</Button>
+                            <Button variant="outline" className="cursor-pointer">Close</Button>
                         </DialogClose>
-                        <Button type="submit" variant="negative">Register</Button>
+                        <Button type="submit" variant="negative" className="cursor-pointer">Register</Button>
                     </DialogFooter>
                 </form>
             </DialogContent>

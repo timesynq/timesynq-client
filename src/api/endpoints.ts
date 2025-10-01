@@ -7,6 +7,7 @@ export const endpoints = {
         register: () => addBaseToPath("/register"),
         login: (useCookies: boolean = true, useSessionCookies: boolean = true) => 
             addBaseToPath(`/login?useCookies=${useCookies}&useSessionCookies=${useSessionCookies}`),
+        refreshCookie: () => addBaseToPath("/refresh-cookie"),
         forgotPassword: () => addBaseToPath("/forgotPassword"),
         logout: () => addBaseToPath("/logout"),
         changePassword: () => addBaseToPath("/manage/info"),

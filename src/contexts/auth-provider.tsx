@@ -1,9 +1,12 @@
+import { email } from "@/api/auth/email";
 import { login, LoginError, LoginRequest } from "@/api/auth/login";
 import { logout } from "@/api/auth/logout";
 import { User, UserService } from "@/api/users/user";
 import { Toasts } from "@/utils/toasts";
 import { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import * as signalR from "@microsoft/signalr";
+import { refreshCookie } from "@/api/auth/refresh";
 
 interface AuthProviderState {
   user: User | null;
@@ -29,6 +32,23 @@ export const AuthProvider = ({children}: AuthProviderProps) => {
     try {
         const user = await UserService.me();
         setUser(user);
+
+        const emailStatus = await email();
+        if(emailStatus && !emailStatus.isEmailConfirmed){
+          const connection = new signalR.HubConnectionBuilder()
+            .withUrl("https://localhost:7032/refresh-hub")  //todo: dont hardcode this link 
+            .build();
+
+            connection.off("NotifyRefresh");
+            connection.on("NotifyRefresh", async () => {
+              const isCookieRefreshed: boolean = await refreshCookie();
+              if(isCookieRefreshed){
+                Toasts.success("Session refreshed.");
+              }
+            });
+
+            await connection.start(); //todo: this is slow, if possible don't connect on every refresh
+        }
     }
     catch(error) {
         setUser(null);
