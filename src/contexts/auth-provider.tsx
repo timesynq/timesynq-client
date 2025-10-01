@@ -21,6 +21,8 @@ interface AuthProviderProps {
   children: React.ReactNode;
 }
 
+const REMEMBER_ME_KEY = "remember-me";
+
 const AuthProviderContext = createContext<AuthProviderState | undefined>(undefined);
 
 export const AuthProvider = ({children}: AuthProviderProps) => {
@@ -35,20 +37,27 @@ export const AuthProvider = ({children}: AuthProviderProps) => {
         setUser(user);
 
         const emailStatus = await email();
+        
+        if(emailStatus && emailStatus.isEmailConfirmed){
+          localStorage.removeItem(REMEMBER_ME_KEY);
+        }
+
         if(emailStatus && !emailStatus.isEmailConfirmed){
           const connection = new signalR.HubConnectionBuilder()
             .withUrl(hubs.refresh())
             .build();
 
             connection.on("NotifyRefresh", async () => {
-              const isCookieRefreshed: boolean = await refreshCookie();
+              const rememberMe = localStorage.getItem(REMEMBER_ME_KEY);
+              const isCookieRefreshed: boolean = await refreshCookie(rememberMe !== "true");
               if(isCookieRefreshed){
                 Toasts.success("Session refreshed.");
                 await connection.stop();
+                localStorage.removeItem(REMEMBER_ME_KEY);
               }
             });
 
-            await connection.start(); //todo: this is slow, if possible don't connect on every refresh
+            await connection.start(); 
         }
     }
     catch(error) {
@@ -65,6 +74,10 @@ export const AuthProvider = ({children}: AuthProviderProps) => {
   }, []);
 
   const authLogin = async (loginRequest: LoginRequest): Promise<void | LoginError> => {
+    if(loginRequest.rememberMe){
+      localStorage.setItem(REMEMBER_ME_KEY, "true");
+    }
+
     const error = await login(loginRequest);
       if (!error) {
         fetchUser();
