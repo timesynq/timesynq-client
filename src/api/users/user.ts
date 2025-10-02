@@ -1,4 +1,4 @@
-import { ApiError, ApiErrorFactory } from "../api-error";
+import { ApiError, UNEXPECTED_ERROR_MESSAGE } from "../api-error";
 import { endpoints } from "../endpoints";
 import { PagedList } from "../paged-list";
 
@@ -45,9 +45,8 @@ export const UserService = {
             return null;
         }
         
-        catch (error) {
-            const apiError: ApiError = ApiErrorFactory.createFetchError(error, "me");
-            onError && onError(apiError.detail);
+        catch (_error) {
+            onError && onError(UNEXPECTED_ERROR_MESSAGE);
             return null;
         }
     },
@@ -75,9 +74,8 @@ export const UserService = {
 
             return null;
         }
-        catch (error) {
-            const apiError: ApiError = ApiErrorFactory.createFetchError(error, "user");
-            onError && onError(apiError.detail);
+        catch (_error) {
+            onError && onError(UNEXPECTED_ERROR_MESSAGE);
             return null;
         }
     },
@@ -107,9 +105,8 @@ export const UserService = {
 
             return null;
         }
-        catch (error) {
-            const apiError: ApiError = ApiErrorFactory.createFetchError(error, "profile");
-            onError && onError(apiError.detail);
+        catch (_error) {
+            onError && onError(UNEXPECTED_ERROR_MESSAGE);
             return null;
         }
     },
@@ -145,10 +142,8 @@ export const UserService = {
  
             return new PagedList<User>(pagedListFields);
         } 
-        catch (error) {
-            console.log(error)
-            const apiError: ApiError = ApiErrorFactory.createFetchError(error, "search");
-            onError && onError(apiError.detail);
+        catch (_error) {
+            onError && onError(UNEXPECTED_ERROR_MESSAGE);
             return null;
         }
     },
@@ -176,8 +171,7 @@ export const UserService = {
             return false;
         }
         catch (error) {
-            const apiError: ApiError = ApiErrorFactory.createFetchError(error, "changeUsername");
-            onError && onError(apiError.detail);
+            onError && onError(UNEXPECTED_ERROR_MESSAGE);
             return false;
         }
     },
@@ -201,9 +195,8 @@ export const UserService = {
             onError && onError(error.detail);
             return false;
         }
-        catch (error){
-            const apiError: ApiError = ApiErrorFactory.createFetchError(error, "delete");
-            onError && onError(apiError.detail);
+        catch (_error){
+            onError && onError(UNEXPECTED_ERROR_MESSAGE);
             return false;
         }
     }

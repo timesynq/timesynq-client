@@ -6,18 +6,4 @@ export type ApiError = {
     instance: string,
 }
 
-export const ApiErrorFactory = {
-
-    createFetchError: (error: unknown, instance: string): ApiError => {
-
-        return {
-            type: "FetchError",
-            title: "Unexpected error occurred",
-            status: 500,
-            detail: (error instanceof Error ? error.message : "Unknown error"),
-            instance: instance,
-        };
-
-    }
-
-}
+export const UNEXPECTED_ERROR_MESSAGE = "Unexpected error. Please try again later.";

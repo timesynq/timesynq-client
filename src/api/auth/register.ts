@@ -1,3 +1,4 @@
+import { UNEXPECTED_ERROR_MESSAGE } from "../api-error";
 import { endpoints } from "../endpoints";
 import { AuthFieldValidation } from "./validation";
 
@@ -73,7 +74,7 @@ export const register = async (registerRequest: RegisterRequest, onSuccess?: (de
 
     catch (error) {
         return {
-            detail: "Network or unexpected error",
+            detail: UNEXPECTED_ERROR_MESSAGE,
             errors: [error instanceof Error ? error.message : String(error)],
         };
     }
