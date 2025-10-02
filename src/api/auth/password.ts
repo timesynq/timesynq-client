@@ -1,3 +1,4 @@
+import { UNEXPECTED_ERROR_MESSAGE } from "../api-error"
 import { endpoints } from "../endpoints"
 import { AuthFieldValidation } from "./validation"
 
@@ -60,7 +61,7 @@ export const changePassword = async (changePasswordRequest: ChangePasswordReques
     }
     catch (error) {
         return {
-            detail: "Network or unexpected error",
+            detail: UNEXPECTED_ERROR_MESSAGE,
             errors: [error instanceof Error ? error.message : String(error)],
         };
     }
@@ -119,7 +120,7 @@ export const sendResetCode = async (sendResetCodeRequest: SendResetCodeRequest):
     }
     catch (error) {
         return {
-            detail: "Network or unexpected error",
+            detail: UNEXPECTED_ERROR_MESSAGE,
             errors: [error instanceof Error ? error.message : String(error)],
         };
     }
@@ -181,7 +182,7 @@ export const resetPassword = async (resetPasswordRequest: ResetPasswordRequest):
     }
     catch (error) {
         return {
-            detail: "Network or unexpected error",
+            detail: UNEXPECTED_ERROR_MESSAGE,
             errors: [error instanceof Error ? error.message : String(error)],
         };
     }

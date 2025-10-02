@@ -1,4 +1,4 @@
-import { ApiError, ApiErrorFactory } from "../api-error";
+import { UNEXPECTED_ERROR_MESSAGE } from "../api-error";
 import { endpoints } from "../endpoints";
 import { AuthFieldValidation } from "./validation";
 
@@ -25,9 +25,8 @@ export const email = async (onError?: (description: string) => void): Promise<Em
 
         return null;
     }
-    catch (error) {
-        const apiError: ApiError = ApiErrorFactory.createFetchError(error, "email");
-        onError && onError(apiError.detail);
+    catch (_error) {
+        onError && onError(UNEXPECTED_ERROR_MESSAGE);
         return null;
     }
 }
@@ -97,9 +96,8 @@ export const changeEmail = async (changeEmailRequest: ChangeEmailRequest, onSucc
         onError && onError(simplifiedError.errors.length > 0 ? simplifiedError.errors[0] : simplifiedError.detail ? simplifiedError.detail : "Unknown error");
         return null;
     }
-    catch (error) {
-        const apiError: ApiError = ApiErrorFactory.createFetchError(error, "changeEmail");
-        onError && onError(apiError.detail);
+    catch (_error) {
+        onError && onError(UNEXPECTED_ERROR_MESSAGE);
         return null;
     }
 }
@@ -125,12 +123,11 @@ export const resendConfirmationEmail = async(resendConfirmationEmailRequest: Res
             return true;
         }
 
-        onError && onError("Resend failed.");
+        onError && onError("Resend failed. Please try again later.");
         return false;
     }
-    catch (error) {
-        const apiError: ApiError = ApiErrorFactory.createFetchError(error, "resendConfirmationEmail");
-        onError && onError(apiError.detail);
+    catch (_error) {
+        onError && onError(UNEXPECTED_ERROR_MESSAGE);
         return false;
     }
 }

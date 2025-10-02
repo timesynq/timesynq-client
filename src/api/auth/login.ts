@@ -1,3 +1,4 @@
+import { UNEXPECTED_ERROR_MESSAGE } from "../api-error";
 import { endpoints } from "../endpoints";
 import { AuthFieldValidation } from "./validation";
 
@@ -51,7 +52,7 @@ export const login = async (loginRequest: LoginRequest): Promise<void | LoginErr
 
     catch (error) {
         return {
-            detail: "Network or unexpected error",
+            detail: UNEXPECTED_ERROR_MESSAGE,
             errors: [error instanceof Error ? error.message : String(error)],
         };
     }

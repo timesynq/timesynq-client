@@ -1,3 +1,4 @@
+import { UNEXPECTED_ERROR_MESSAGE } from "../api-error";
 import { endpoints } from "../endpoints";
 
 export const logout = async (onError?: (description: string) => void): Promise<boolean> => {
@@ -19,8 +20,8 @@ export const logout = async (onError?: (description: string) => void): Promise<b
         return false;
     }
     
-    catch (error) {
-        onError && onError("Logout failed: Network or unexpected error");
+    catch (_error) {
+        onError && onError(UNEXPECTED_ERROR_MESSAGE);
         return false;
     }
 

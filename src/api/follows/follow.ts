@@ -1,5 +1,5 @@
 import { endpoints } from "../endpoints";
-import { ApiError, ApiErrorFactory } from "../api-error";
+import { ApiError, UNEXPECTED_ERROR_MESSAGE } from "../api-error";
 
 export type Follow = {
     followerId: string;
@@ -42,9 +42,8 @@ export const FollowService = {
             return null;
         }
         
-        catch (error) {
-            const apiError: ApiError = ApiErrorFactory.createFetchError(error, "follow");
-            onError && onError(apiError.detail);
+        catch (_error) {
+            onError && onError(UNEXPECTED_ERROR_MESSAGE);
             return null;
         }
     },
@@ -70,9 +69,8 @@ export const FollowService = {
             return false;
         }
         
-        catch (error) {
-            const apiError: ApiError = ApiErrorFactory.createFetchError(error, "unfollow");
-            onError && onError(apiError.detail);
+        catch (_error) {
+            onError && onError(UNEXPECTED_ERROR_MESSAGE);
             return false;
         }
     }

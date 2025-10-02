@@ -1,4 +1,4 @@
-import { ApiError, ApiErrorFactory } from "./api-error";
+import { UNEXPECTED_ERROR_MESSAGE } from "./api-error";
 
 export class PagedList<T> {
     
@@ -97,9 +97,8 @@ export class PagedList<T> {
              
             return new PagedList<T>(pagedListFields);
         }
-        catch (error) {
-            const apiError: ApiError = ApiErrorFactory.createFetchError(error, "fetchHypermedia");
-            this._onError && this._onError(apiError.detail);
+        catch (_error) {
+            this._onError && this._onError(UNEXPECTED_ERROR_MESSAGE);
             return null;
         }
     }
