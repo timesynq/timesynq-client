@@ -6,7 +6,7 @@ import { ForgotPassword } from './pages/forgot-password';
 import { Profile } from './pages/profile';
 import { Room } from './pages/room';
 import { Explore } from './pages/explore';
-import { ThemeProvider } from './components/theme-provider';
+import { ThemeProvider } from './contexts/theme-provider';
 import { Toaster } from 'sonner';
 import { Tracker } from './tracker/tracker-page';
 import { Sandbox } from './sandbox/sandbox-landing-page';
