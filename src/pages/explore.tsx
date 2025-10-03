@@ -18,7 +18,7 @@ export const Explore = () => {
     const isMobile = useIsMobile();
     const [userQuery, setUserQuery] = useState<string>("");
     const [pageSize, setPageSize] = useState<number>(10);
-    const [sortAscending, setSortAscending] = useState<boolean>(false);
+    const [sortReverse, setSortReverse] = useState<boolean>(false);
     const [userSortOrder, setUserSortOrder] = useState<string>("name");
     const [searchResultMessage, setSearchResultMessage] = useState<string>("");
     const [userSearchHypermediaResource, setUserSearchHypermediaResource] = useState<PagedList<User> | null>();
@@ -115,12 +115,12 @@ export const Explore = () => {
                                     </DropdownMenuLabel>
                                     <DropdownMenuSeparator />
                                     <DropdownMenuCheckboxItem 
-                                        checked={sortAscending} 
+                                        checked={sortReverse} 
                                         onSelect={(e) => e.preventDefault()} 
                                         onClick={(e) => e.stopPropagation()} 
-                                        onCheckedChange={setSortAscending}
+                                        onCheckedChange={setSortReverse}
                                     >
-                                        Sort ascending
+                                        Reverse sort
                                     </DropdownMenuCheckboxItem>
                                     <DropdownMenuSeparator />
                                         <DropdownMenuRadioGroup value={userSortOrder} onValueChange={setUserSortOrder}>
