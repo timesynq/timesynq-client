@@ -111,13 +111,15 @@ export const UserService = {
         }
     },
 
-    search: async (query: string, pageNumber: number = 1, pageSize: number = 20, onError?: (description: string) => void): Promise<PagedList<User> | null> => {
+    search: async (query: string, pageNumber: number = 1, pageSize: number = 20, sortOrder: string, sortBy: string, onError?: (description: string) => void): Promise<PagedList<User> | null> => {
         try {
 
             const url = new URL(endpoints.users.search(query));
             url.search = new URLSearchParams({
                 pageNumber: `${pageNumber}`,
                 pageSize: `${pageSize}`,
+                sortOrder: `${sortOrder}`,
+                sortBy: `${sortBy}`,
             }).toString();
 
             const response = await fetch(url, {

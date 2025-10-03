@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,7 +19,7 @@ export const Explore = () => {
     const [userQuery, setUserQuery] = useState<string>("");
     const [pageSize, setPageSize] = useState<number>(10);
     const [sortReverse, setSortReverse] = useState<boolean>(false);
-    const [userSortOrder, setUserSortOrder] = useState<string>("name");
+    const [userSortBy, setUserSortBy] = useState<string>("username");
     const [searchResultMessage, setSearchResultMessage] = useState<string>("");
     const [userSearchHypermediaResource, setUserSearchHypermediaResource] = useState<PagedList<User> | null>();
 
@@ -29,11 +29,13 @@ export const Explore = () => {
         const onError = (description: string) => {Toasts.error(description)};
 
         if (userQuery.trim().length < 3) {
-            onError("Please enter at least 3 letters.");
+            e && onError("Please enter at least 3 letters.");
             return;
         }
 
-        const pagedUsers = await UserService.search(userQuery, 1, pageSize, onError);
+        const sortOrder: string = sortReverse ? "reverse" : "default";
+
+        const pagedUsers = await UserService.search(userQuery, 1, pageSize, sortOrder, userSortBy, onError);
         setUserSearchHypermediaResource(pagedUsers);
         setSearchResultMessage(`User search results for "${userQuery}"`);
     };
@@ -114,7 +116,8 @@ export const Explore = () => {
                                         </div>
                                     </DropdownMenuLabel>
                                     <DropdownMenuSeparator />
-                                    <DropdownMenuCheckboxItem 
+                                    <DropdownMenuCheckboxItem
+                                        className="cursor-pointer"
                                         checked={sortReverse} 
                                         onSelect={(e) => e.preventDefault()} 
                                         onClick={(e) => e.stopPropagation()} 
@@ -123,15 +126,15 @@ export const Explore = () => {
                                         Reverse sort
                                     </DropdownMenuCheckboxItem>
                                     <DropdownMenuSeparator />
-                                        <DropdownMenuRadioGroup value={userSortOrder} onValueChange={setUserSortOrder}>
-                                            <DropdownMenuRadioItem value="name" onSelect={(e) => e.preventDefault()} onClick={(e) => e.stopPropagation()}>
-                                                Sort by name
+                                        <DropdownMenuRadioGroup value={userSortBy} onValueChange={setUserSortBy}>
+                                            <DropdownMenuRadioItem value="username" onSelect={(e) => e.preventDefault()} onClick={(e) => e.stopPropagation()} className="cursor-pointer">
+                                                Sort by username
                                             </DropdownMenuRadioItem>
-                                            <DropdownMenuRadioItem value="followers" onSelect={(e) => e.preventDefault()} onClick={(e) => e.stopPropagation()}>
+                                            <DropdownMenuRadioItem value="followers" onSelect={(e) => e.preventDefault()} onClick={(e) => e.stopPropagation()} className="cursor-pointer">
                                                 Sort by followers
                                             </DropdownMenuRadioItem>
-                                            <DropdownMenuRadioItem value="tracks" onSelect={(e) => e.preventDefault()} onClick={(e) => e.stopPropagation()}>
-                                                Sort by tracks
+                                            <DropdownMenuRadioItem value="accountAge" onSelect={(e) => e.preventDefault()} onClick={(e) => e.stopPropagation()} className="cursor-pointer">
+                                                Sort by account age
                                             </DropdownMenuRadioItem>
                                         </DropdownMenuRadioGroup>
                                 </DropdownMenuContent>
