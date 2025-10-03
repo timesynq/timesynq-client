@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -78,15 +78,15 @@ export const Explore = () => {
     return (
         <main className="flex flex-col items-center justify-center m-4">
             <Tabs defaultValue="tracks">
-                <TabsList className="m-2">
+                <TabsList className="my-2">
                     <TabsTrigger value="tracks">Tracks</TabsTrigger>
                     <TabsTrigger value="users">Users</TabsTrigger>
                 </TabsList>
                 <TabsContent value="tracks">
-                    <p className={`${isMobile ? 'w-full' : 'min-w-[700px]'} flex flex-row space-x-2 m-2 pb-4`}>Not implemented yet.</p>
+                    <p className={`${isMobile ? 'w-full' : 'min-w-[700px]'} flex flex-row space-x-2 pb-4`}>Not implemented yet.</p>
                 </TabsContent>
                 <TabsContent value="users">
-                    <form onSubmit={handleSubmit} className={`${isMobile ? 'w-full' : 'min-w-[700px]'} flex flex-row space-x-2 m-2 pb-4`}>
+                    <form onSubmit={handleSubmit} className={`${isMobile ? 'w-full' : 'min-w-[700px]'} flex flex-row items-center space-x-2 pb-4`}>
                         <Input
                             className="w-full"
                             placeholder="Search..."
@@ -140,8 +140,8 @@ export const Explore = () => {
                                 </DropdownMenuContent>
                             </DropdownMenu>
                     </form>
-                    <div className={`${isMobile ? 'w-full' : 'min-w-[700px]'} flex flex-row items-end justify-between space-x-8`}>
-                        <p className="w-[50%] text-sm">{searchResultMessage}</p>
+                    <div className={`${isMobile ? 'w-full' : 'min-w-[700px]'} flex flex-row items-end justify-between space-x-8 h-10`}>
+                        <p className="w-[50%] text-sm ">{searchResultMessage}</p>
                         {!!totalPages && totalPages > 0 && 
                             <Pagination className="w-[50%] justify-end">
                                 <PaginationContent className="space-x-2">
