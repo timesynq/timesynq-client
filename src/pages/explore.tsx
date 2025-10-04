@@ -24,11 +24,14 @@ export const Explore = () => {
     const [searchResultMessage, setSearchResultMessage] = useState<string>("");
     const [userSearchHypermediaResource, setUserSearchHypermediaResource] = useState<PagedList<User> | null>();
 
+    const pageNumber = userSearchHypermediaResource?.pageNumber();
+    const totalPages = userSearchHypermediaResource? userSearchHypermediaResource.totalPages() : 0;
+
     useEffect(() => {
-        handleSubmit(undefined, searchedUserQuery);
+        handleSubmit(undefined, searchedUserQuery, pageNumber);
     }, [pageSize, sortReverse, userSortBy]);
 
-    const handleSubmit = async (e?: React.FormEvent, savedQuery?: string) => {
+    const handleSubmit = async (e?: React.FormEvent, savedQuery?: string, pageNumber: number = 1) => {
         e?.preventDefault();
 
         const onError = (description: string) => {Toasts.error(description)};
@@ -41,7 +44,7 @@ export const Explore = () => {
         const query: string = savedQuery ?? userQuery;
         const sortOrder: string = sortReverse ? "reverse" : "default";
 
-        const pagedUsers = await UserService.search(query, 1, pageSize, sortOrder, userSortBy, onError);
+        const pagedUsers = await UserService.search(query, pageNumber, pageSize, sortOrder, userSortBy, onError);
         setUserSearchHypermediaResource(pagedUsers);
         setSearchResultMessage(`User search results for "${query}"`);
         setSearchedUserQuery(query);
@@ -61,23 +64,47 @@ export const Explore = () => {
         setPageSize(isNaN(newPageSize) ? oldPageSize : clamp(newPageSize, 1, 100));
     }
 
-    const pageNumber = userSearchHypermediaResource?.pageNumber();
-    const totalPages = userSearchHypermediaResource? userSearchHypermediaResource.totalPages() : 0;
-
     const handleGetPreviousPage = async () => {
-        if(!userSearchHypermediaResource || userSearchHypermediaResource.pageNumber() == 1)
+        if(!userSearchHypermediaResource)
             return;
-        const previousPageResource = await userSearchHypermediaResource.getPreviousPage();
-        if(previousPageResource != null){
-            setUserSearchHypermediaResource(previousPageResource);
-        }
+        changePage(
+            userSearchHypermediaResource.getPreviousPage(),
+            userSearchHypermediaResource.pageNumber() == 1
+        );
     }
 
     const handleGetNextPage = async () => {
-        if(!userSearchHypermediaResource || userSearchHypermediaResource.pageNumber() == userSearchHypermediaResource.totalPages())
+        if(!userSearchHypermediaResource)
             return;
-        const nextPageResource = await userSearchHypermediaResource.getNextPage();
-        if(nextPageResource != null){
+        changePage(
+            userSearchHypermediaResource.getNextPage(),
+            userSearchHypermediaResource.pageNumber() == userSearchHypermediaResource.totalPages()
+        );
+    }
+
+    const handleGetFirstPage = async () => {
+        if(!userSearchHypermediaResource)
+            return;
+        changePage(
+            userSearchHypermediaResource.getFirstPage(),
+            userSearchHypermediaResource.pageNumber() == 1
+        );
+    }
+
+    const handleGetLastPage = async () => {
+        if(!userSearchHypermediaResource)
+            return;
+        changePage(
+            userSearchHypermediaResource.getLastPage(),
+            userSearchHypermediaResource.pageNumber() == userSearchHypermediaResource.totalPages()
+        );
+    }
+
+    const changePage = async (hypermediaResourceFunc: Promise<PagedList<User> | null>, isPageChangeDisabled: boolean) => {
+        if(!userSearchHypermediaResource || isPageChangeDisabled)
+            return;
+        const nextPageResource = await hypermediaResourceFunc;
+        if(!nextPageResource != null){
             setUserSearchHypermediaResource(nextPageResource);
         }
     }
@@ -204,6 +231,13 @@ export const Explore = () => {
                             userSearchHypermediaResource && userSearchHypermediaResource.items().length == 0 && <p className="text-muted-foreground">No users found.</p>
                         )}
                     </ul>
+                    { userSearchHypermediaResource && userSearchHypermediaResource.items().length > 0 &&
+                        <div className="flex flex-row items-center justify-center space-x-2 my-4">
+                            <Button variant="outline" onClick={handleGetFirstPage} className={`${pageNumber == 1 ? 'hover:bg-background hover:text-muted-foreground text-muted-foreground' : 'cursor-pointer'}`}>First</Button>
+                            <Button variant="outline" onClick={handleGetLastPage} className={`${pageNumber == totalPages ? 'hover:bg-background hover:text-muted-foreground text-muted-foreground' : 'cursor-pointer'}`}>Last</Button>
+                        </div>
+                    }
+                    
                 </TabsContent>
             </Tabs>
         </main>
