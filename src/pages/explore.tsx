@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,27 +17,34 @@ export const Explore = () => {
 
     const isMobile = useIsMobile();
     const [userQuery, setUserQuery] = useState<string>("");
+    const [searchedUserQuery, setSearchedUserQuery] = useState<string>("");
     const [pageSize, setPageSize] = useState<number>(10);
     const [sortReverse, setSortReverse] = useState<boolean>(false);
     const [userSortBy, setUserSortBy] = useState<string>("username");
     const [searchResultMessage, setSearchResultMessage] = useState<string>("");
     const [userSearchHypermediaResource, setUserSearchHypermediaResource] = useState<PagedList<User> | null>();
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    useEffect(() => {
+        handleSubmit(undefined, searchedUserQuery);
+    }, [pageSize, sortReverse, userSortBy]);
+
+    const handleSubmit = async (e?: React.FormEvent, savedQuery?: string) => {
+        e?.preventDefault();
 
         const onError = (description: string) => {Toasts.error(description)};
 
-        if (userQuery.trim().length < 3) {
+        if (!savedQuery && userQuery.trim().length < 3) {
             e && onError("Please enter at least 3 letters.");
             return;
         }
 
+        const query: string = savedQuery ?? userQuery;
         const sortOrder: string = sortReverse ? "reverse" : "default";
 
-        const pagedUsers = await UserService.search(userQuery, 1, pageSize, sortOrder, userSortBy, onError);
+        const pagedUsers = await UserService.search(query, 1, pageSize, sortOrder, userSortBy, onError);
         setUserSearchHypermediaResource(pagedUsers);
-        setSearchResultMessage(`User search results for "${userQuery}"`);
+        setSearchResultMessage(`User search results for "${query}"`);
+        setSearchedUserQuery(query);
     };
 
     const handlePageSizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
