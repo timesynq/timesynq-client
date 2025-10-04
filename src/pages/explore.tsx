@@ -12,6 +12,7 @@ import { Pagination, PaginationContent, PaginationItem, PaginationNext, Paginati
 import { PagedList } from "@/api/paged-list";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTrigger } from "@/components/ui/dialog";
 
 export const Explore = () => {
 
@@ -23,12 +24,14 @@ export const Explore = () => {
     const [userSortBy, setUserSortBy] = useState<string>("username");
     const [searchResultMessage, setSearchResultMessage] = useState<string>("");
     const [userSearchHypermediaResource, setUserSearchHypermediaResource] = useState<PagedList<User> | null>();
+    const [isOpen, setIsOpen] = useState<boolean>(false);
 
     const pageNumber = userSearchHypermediaResource?.pageNumber();
     const totalPages = userSearchHypermediaResource? userSearchHypermediaResource.totalPages() : 0;
 
     useEffect(() => {
-        handleSubmit(undefined, searchedUserQuery, pageNumber);
+        if(searchedUserQuery !== "")
+            handleSubmit(undefined, searchedUserQuery, pageNumber);
     }, [pageSize, sortReverse, userSortBy]);
 
     const handleSubmit = async (e?: React.FormEvent, savedQuery?: string, pageNumber: number = 1) => {
@@ -50,6 +53,10 @@ export const Explore = () => {
         setSearchedUserQuery(query);
     };
 
+    const clamp = (num: number, min: number, max: number): number => {  
+        return num < min ? min : num > max ? max : num; 
+    }
+
     const handlePageSizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         e.preventDefault();
 
@@ -57,11 +64,26 @@ export const Explore = () => {
         const oldPageSize = pageSize;
         const newPageSize = parseInt(input);
 
-        const clamp = (num: number, min: number, max: number): number => {  
-            return num < min ? min : num > max ? max : num; 
+        setPageSize(isNaN(newPageSize) ? oldPageSize : clamp(newPageSize, 1, 100));
+    }
+
+    const handleOpenChange = (open: boolean) => {
+        setIsOpen(open);
+    }
+
+    const handlePageQuery = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+
+        const formData = new FormData(e.currentTarget);
+        const input: string = formData.get("page-number") as string;
+        const newPageNumber = parseInt(input);
+        
+        if(isNaN(newPageNumber)){
+            return;
         }
 
-        setPageSize(isNaN(newPageSize) ? oldPageSize : clamp(newPageSize, 1, 100));
+        handleSubmit(undefined, undefined, clamp(newPageNumber, 1, totalPages));
+        setIsOpen(false);
     }
 
     const handleGetPreviousPage = async () => {
@@ -232,8 +254,36 @@ export const Explore = () => {
                         )}
                     </ul>
                     { userSearchHypermediaResource && userSearchHypermediaResource.items().length > 0 &&
-                        <div className="flex flex-row items-center justify-center space-x-2 my-4">
+                        <div className="flex flex-row items-center justify-between space-x-2 my-4">
                             <Button variant="outline" onClick={handleGetFirstPage} className={`${pageNumber == 1 ? 'hover:bg-background hover:text-muted-foreground text-muted-foreground' : 'cursor-pointer'}`}>First</Button>
+                            <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+                                <DialogTrigger asChild>
+                                    <Button variant="outline" className="cursor-pointer">
+                                        ...
+                                    </Button>
+                                </DialogTrigger>
+                                    <DialogContent className="w-64">
+                                        <DialogHeader>
+                                            Go to Page
+                                        </DialogHeader>
+                                        <form onSubmit={handlePageQuery} className="flex flex-col space-y-4">
+                                            <Input
+                                                name="page-number"
+                                                type="number" 
+                                                onChange={() => {}}
+                                                onSelect={(e) => e.stopPropagation()}
+                                                onClick={(e) => e.preventDefault()} 
+                                                defaultValue={pageNumber}
+                                            />
+                                            <DialogFooter>
+                                                <DialogClose asChild>
+                                                    <Button type="button" variant="outline" className="cursor-pointer">Close</Button>
+                                                </DialogClose>
+                                                <Button type="submit" variant="positive" className="cursor-pointer">Go</Button>
+                                            </DialogFooter>
+                                        </form>
+                                    </DialogContent>
+                            </Dialog>
                             <Button variant="outline" onClick={handleGetLastPage} className={`${pageNumber == totalPages ? 'hover:bg-background hover:text-muted-foreground text-muted-foreground' : 'cursor-pointer'}`}>Last</Button>
                         </div>
                     }
