@@ -1,7 +1,6 @@
-import { email } from "@/api/auth/email";
 import { login, LoginError, LoginRequest } from "@/api/auth/login";
 import { logout } from "@/api/auth/logout";
-import { User, UserService } from "@/api/users/user";
+import { Me, UserService } from "@/api/users/user";
 import { Toasts } from "@/utils/toasts";
 import { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -10,7 +9,7 @@ import { refreshCookie } from "@/api/auth/refresh";
 import { hubs } from "@/api/endpoints";
 
 interface AuthProviderState {
-  user: User | null;
+  user: Me | null;
   isLoading: boolean;
   fetchUser: () => Promise<void>;
   authLogin: (loginRequest: LoginRequest) => Promise<void | LoginError>;
@@ -27,7 +26,7 @@ const AuthProviderContext = createContext<AuthProviderState | undefined>(undefin
 
 export const AuthProvider = ({children}: AuthProviderProps) => {
 
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<Me | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const navigate = useNavigate();
 
@@ -35,14 +34,16 @@ export const AuthProvider = ({children}: AuthProviderProps) => {
     try {
         const user = await UserService.me();
         setUser(user);
-
-        const emailStatus = await email();
         
-        if(emailStatus && emailStatus.isEmailConfirmed){
+        if(user === null){
+          return;
+        }
+
+        if(user.emailConfirmed){
           localStorage.removeItem(REMEMBER_ME_KEY);
         }
 
-        if(emailStatus && !emailStatus.isEmailConfirmed){
+        if(!user.emailConfirmed){
           const connection = new signalR.HubConnectionBuilder()
             .withUrl(hubs.refresh())
             .build();

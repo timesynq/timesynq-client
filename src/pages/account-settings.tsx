@@ -13,23 +13,23 @@ import { DeleteAccountDialog } from "@/components/delete-account-dialog";
 import { ChangePasswordDialog } from "@/components/change-password-dialog";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { changeEmail, ChangeEmailRequest, email, EmailStatus, resendConfirmationEmail, ResendConfirmationEmailRequest } from "@/api/auth/email";
+import { changeEmail, ChangeEmailRequest, EmailStatus, resendConfirmationEmail, ResendConfirmationEmailRequest } from "@/api/auth/email";
 
 export const AccountSettings = () => {
 
     const { user } = useAuth(); 
     const isLg: boolean = useIsLg();
-    const [emailStatus, setEmailStatus] = useState<EmailStatus | null>(null); //todo: fix the flicker caused by the fetch for this with a skeleton
+    const [emailStatus, setEmailStatus] = useState<EmailStatus | null>(null);
 
     if(!user) return;
 
     useEffect(() => {
-        const fetchEmailStatus = async () => {
-            const emailStatus = await email();
-            setEmailStatus(emailStatus);
+        const emailStatus: EmailStatus = {
+            email: user.email,
+            isEmailConfirmed: user.emailConfirmed,
         }
-        fetchEmailStatus();
-    }, []);
+        setEmailStatus(emailStatus);
+    }, [user]);
 
     const handleUsernameChange = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();

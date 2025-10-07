@@ -11,6 +11,11 @@ export type User = {
     followeeCount: number;
 }
 
+export type Me = User & {
+    email: string,
+    emailConfirmed: boolean,
+}
+
 export type Profile = {
     user: User;
     isFollowing: boolean;
@@ -22,7 +27,7 @@ export type ChangeUsernameRequest = {
 
 export const UserService = {
 
-    me: async (onError?: (description: string) => void): Promise<User | null> => {
+    me: async (onError?: (description: string) => void): Promise<Me | null> => {
         try {    
             const response = await fetch(endpoints.users.me(), {
                 method: "GET",
