@@ -14,12 +14,16 @@ import { ChangePasswordDialog } from "@/components/change-password-dialog";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { changeEmail, ChangeEmailRequest, EmailStatus, resendConfirmationEmail, ResendConfirmationEmailRequest } from "@/api/auth/email";
+import LoadingIndicator from "@/assets/svg/loading-indicator.svg?react";
 
 export const AccountSettings = () => {
 
     const { user } = useAuth(); 
     const isLg: boolean = useIsLg();
     const [emailStatus, setEmailStatus] = useState<EmailStatus | null>(null);
+    const [isChangeUsernameLoading, setIsChangeUsernameLoading] = useState<boolean>(false);
+    const [isChangeEmailLoading, setIsChangeEmailLoading] = useState<boolean>(false);
+    const [isResendConfirmationEmailLoading, setIsResendConfirmationEmailLoading] = useState<boolean>(false);
 
     if(!user) return;
 
@@ -33,9 +37,9 @@ export const AccountSettings = () => {
 
     const handleUsernameChange = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        
-        const formData = new FormData(event.currentTarget);
+        setIsChangeUsernameLoading(true);
 
+        const formData = new FormData(event.currentTarget);
         const changeUsernameRequest: ChangeUsernameRequest = {
             newUserName: formData.get("username") as string
         }
@@ -52,10 +56,13 @@ export const AccountSettings = () => {
         if(changeUsernameResult){
             //todo:
         }
+
+        setIsChangeUsernameLoading(false);
     }
 
     const handleEmailChange = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
+        setIsChangeEmailLoading(true);
 
         const formData = new FormData(event.currentTarget);
 
@@ -72,6 +79,8 @@ export const AccountSettings = () => {
         if(newEmailStatus){
             setEmailStatus(newEmailStatus);
         }
+
+        setIsChangeEmailLoading(false);
     } 
 
     const handleResendConfirmationEmail = async () => {
@@ -79,6 +88,7 @@ export const AccountSettings = () => {
             return;
         }
 
+        setIsResendConfirmationEmailLoading(true);
         const request: ResendConfirmationEmailRequest = {
             email: emailStatus.email,
         }
@@ -87,6 +97,7 @@ export const AccountSettings = () => {
         if(isResendSuccessful){
             Toasts.success("Verification email sent!");
         }
+        setIsResendConfirmationEmailLoading(false);
     }
 
     return (
@@ -125,7 +136,7 @@ export const AccountSettings = () => {
                                 <Label htmlFor="username" className="w-20">Username</Label>
                                 <Input id="username" name="username" defaultValue={user.userName} />
                                 <Button type="submit" variant="positive" size="icon" className="min-w-[36px] cursor-pointer">
-                                    <CheckIcon className="mr-0.5"/>
+                                    {isChangeUsernameLoading ? <LoadingIndicator /> : <CheckIcon className="mr-0.5"/>}
                                 </Button>
                             </form>
                         </CardContent>
@@ -138,15 +149,15 @@ export const AccountSettings = () => {
                             <div className="flex flex-row items-center justify-between w-full">
                                 <form onSubmit={handleEmailChange} className="flex flex-row items-center justify-start w-full space-x-2">
                                     <Label htmlFor="email" className="w-20">Email</Label>
-                                    <Input type="email" id="email" name="email" disabled={!emailStatus?.isEmailConfirmed} defaultValue={emailStatus?.email} />
+                                    <Input type="email" id="email" name="email" disabled={!emailStatus?.isEmailConfirmed} defaultValue={emailStatus?.email}/>
                                     {!emailStatus?.isEmailConfirmed && 
-                                        <Button type="button" onClick={handleResendConfirmationEmail} variant="negative" className="cursor-pointer text-xs">
-                                            Resend Confirmation Email
+                                        <Button type="button" onClick={handleResendConfirmationEmail} variant="negative" className="cursor-pointer text-xs min-w-40">
+                                            {isResendConfirmationEmailLoading ? <LoadingIndicator /> : "Resend Confirmation Email"}
                                         </Button> 
                                     }
                                     {emailStatus?.isEmailConfirmed &&
                                         <Button type="submit" variant="positive" size="icon" className="min-w-[36px] cursor-pointer">
-                                            <CheckIcon className="mr-0.5"/>
+                                            {isChangeEmailLoading ? <LoadingIndicator /> : <CheckIcon className="mr-0.5"/>}
                                         </Button>
                                     }
                                 </form>
