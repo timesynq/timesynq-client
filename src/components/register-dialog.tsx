@@ -58,12 +58,11 @@ export const RegisterDialog = () => {
         }
 
         const loginError = await authLogin(loginRequest);
-        
-        setIsRegisterLoading(false);
 
         if (loginError) {
             loginError.detail = `Login failed after successful registration. ${loginError.detail}`;
             setErrors(loginError);
+            setIsRegisterLoading(false);
             return;
         }
 

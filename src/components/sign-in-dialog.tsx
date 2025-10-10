@@ -48,10 +48,9 @@ export const SignInDialog = ({ autoOpen = false }: { autoOpen?: boolean }) => {
 
         const loginError = await authLogin(request);
 
-        setIsLoginLoading(false);
-
         if (loginError) {
             setErrors(loginError);
+            setIsLoginLoading(false);
             return;
         }
 
