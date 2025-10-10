@@ -7,12 +7,14 @@ import { LoginError, LoginRequest } from "@/api/auth/login";
 import { useAuth } from "@/contexts/auth-provider";
 import { Checkbox } from "./ui/checkbox";
 import { Link } from "react-router-dom";
+import LoadingIndicator from "@/assets/svg/loading-indicator.svg?react";
 
 export const SignInDialog = ({ autoOpen = false }: { autoOpen?: boolean }) => {
 
     const [dialogShowPassword, setDialogShowPassword] = useState<boolean>(false);
     const [errors, setErrors] = useState<LoginError | null>(null);
     const [isOpen, setIsOpen] = useState<boolean>(false);
+    const [isLoginLoading, setIsLoginLoading] = useState<boolean>(false);
     const { authLogin } = useAuth();
 
     useEffect(() => {
@@ -35,6 +37,8 @@ export const SignInDialog = ({ autoOpen = false }: { autoOpen?: boolean }) => {
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
+        setIsLoginLoading(true);
+
         const formData = new FormData(event.currentTarget);
         const request: LoginRequest = {
             username: formData.get("username") as string,
@@ -43,6 +47,8 @@ export const SignInDialog = ({ autoOpen = false }: { autoOpen?: boolean }) => {
         };
 
         const loginError = await authLogin(request);
+
+        setIsLoginLoading(false);
 
         if (loginError) {
             setErrors(loginError);
@@ -101,7 +107,9 @@ export const SignInDialog = ({ autoOpen = false }: { autoOpen?: boolean }) => {
                                 <Button type="button" variant="outline" className="cursor-pointer">Close</Button>
                             </div>
                         </DialogClose>
-                        <Button type="submit" variant="positive" className="cursor-pointer">Sign in</Button>
+                        <Button type="submit" variant="positive" className="cursor-pointer w-18">
+                            {isLoginLoading ? <LoadingIndicator /> : "Sign in"}
+                        </Button>
                     </DialogFooter>
                 </form>
             </DialogContent>
