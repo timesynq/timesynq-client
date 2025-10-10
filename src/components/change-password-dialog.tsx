@@ -7,16 +7,20 @@ import { RegisterError } from "@/api/auth/register";
 import { changePassword, ChangePasswordRequest } from "@/api/auth/password";
 import { Toasts } from "@/utils/toasts";
 import { Checkbox } from "./ui/checkbox";
+import LoadingIndicator from "@/assets/svg/loading-indicator.svg?react";
 
 export const ChangePasswordDialog = () => {
 
     const [dialogShowPassword, setDialogShowPassword] = useState<boolean>(false);
     const [errors, setErrors] = useState<RegisterError | null>(null);
     const [isOpen, setIsOpen] = useState<boolean>(false);
+    const [isChangePasswordLoading, setIsChangePasswordLoading] = useState<boolean>(false);
 
     const handleOpenChange = (open: boolean) => {
         if(open){
             setErrors(null);
+            setIsChangePasswordLoading(false);
+            setDialogShowPassword(false);
         }
         setIsOpen(open);
     }
@@ -28,6 +32,8 @@ export const ChangePasswordDialog = () => {
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
+        setIsChangePasswordLoading(true);
+
         const formData = new FormData(event.currentTarget);
         const changePasswordRequest: ChangePasswordRequest = {
             oldPassword: formData.get("old-password") as string,
@@ -38,6 +44,7 @@ export const ChangePasswordDialog = () => {
 
         if (changePasswordError) {
             setErrors(changePasswordError);
+            setIsChangePasswordLoading(false);
             return;
         }
 
@@ -84,7 +91,9 @@ export const ChangePasswordDialog = () => {
                         <DialogClose asChild>
                             <Button variant="outline" className="cursor-pointer">Close</Button>
                         </DialogClose>
-                        <Button type="submit" variant="positive" className="cursor-pointer">Submit</Button>
+                        <Button type="submit" variant="positive" className="cursor-pointer w-18">
+                            {isChangePasswordLoading ? <LoadingIndicator /> : "Submit"}
+                        </Button>
                     </DialogFooter>
                 </form>
             </DialogContent>
