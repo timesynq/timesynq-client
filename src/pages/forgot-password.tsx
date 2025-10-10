@@ -8,6 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Toasts } from "@/utils/toasts";
 import { useState } from "react";
+import LoadingIndicator from "@/assets/svg/loading-indicator.svg?react";
 
 export const ForgotPassword = () => {
 
@@ -15,6 +16,8 @@ export const ForgotPassword = () => {
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const [sendResetCodeErrors, setSendResetCodeErrors] = useState<SendResetCodeError | null>(null);
     const [resetPasswordErrors, setResetPasswordErrors] = useState<ResetPasswordError | null>(null);
+    const [isSendResetCodeLoading, setIsSendResetCodeLoading] = useState<boolean>(false);
+    const [isResetPasswordLoading, setIsResetPasswordLoading] = useState<boolean>(false);
 
     const handleShowPassword = (checked: boolean) => {
         setShowPassword(checked);
@@ -23,12 +26,16 @@ export const ForgotPassword = () => {
     const handleSendResetCode = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
+        setIsSendResetCodeLoading(true);
+
         const formData = new FormData(event.currentTarget);
         const request: SendResetCodeRequest = {
             email: formData.get("email") as string,
         };
 
         const sendResetCodeError = await sendResetCode(request);
+
+        setIsSendResetCodeLoading(false);
 
         if (sendResetCodeError) {
             setSendResetCodeErrors(sendResetCodeError);
@@ -43,6 +50,8 @@ export const ForgotPassword = () => {
     const handleResetPassword = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
+        setIsResetPasswordLoading(true);
+
         const formData = new FormData(event.currentTarget);
         const request: ResetPasswordRequest = {
             email: formData.get("email") as string,
@@ -51,6 +60,8 @@ export const ForgotPassword = () => {
         }
 
         const resetPasswordError = await resetPassword(request);
+
+        setIsResetPasswordLoading(false);
 
         if(resetPasswordError) {
             setResetPasswordErrors(resetPasswordError);
@@ -74,8 +85,8 @@ export const ForgotPassword = () => {
                         <Label htmlFor="email" className="w-[33%]">Email</Label>
                         <div className="flex flex-row w-[102%] space-x-2">
                             <Input id="email" name="email" placeholder="user@example.com"/>
-                            <Button type="submit" variant="positive" className="cursor-pointer">
-                                Send
+                            <Button type="submit" variant="positive" className="cursor-pointer w-16">
+                                {isSendResetCodeLoading ? <LoadingIndicator /> : "Send"}
                             </Button>
                         </div>
                     </form>
@@ -114,8 +125,8 @@ export const ForgotPassword = () => {
                             </div>
                         )}
                         <div className="flex flex-row items-center justify-end w-full">
-                            <Button type="submit" variant="positive" className="cursor-pointer">
-                                Submit
+                            <Button type="submit" variant="positive" className="cursor-pointer w-18">
+                                {isResetPasswordLoading ? <LoadingIndicator /> : "Submit"}
                             </Button>
                         </div>
                     </form>
