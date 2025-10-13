@@ -5,10 +5,12 @@ import { useState } from "react";
 import { Toasts } from "@/utils/toasts";
 import { UserService } from "@/api/users/user";
 import { useAuth } from "@/contexts/auth-provider";
+import LoadingIndicator from "@/assets/svg/loading-indicator.svg?react";
 
 export const DeleteAccountDialog = () => {
 
     const [isOpen, setIsOpen] = useState<boolean>(false);
+    const [isDeleteAccountLoading, setIsDeleteAccountLoading] = useState<boolean>(false);
     const { authLogout } = useAuth();
     
     const handleLogout = async (): Promise<void> => {
@@ -20,15 +22,23 @@ export const DeleteAccountDialog = () => {
     }
 
     const handleOpenChange = (open: boolean) => {
+        if(open){
+            setIsDeleteAccountLoading(false);
+        }
         setIsOpen(open);
     }
 
     const handleDelete = async () => {
+        setIsDeleteAccountLoading(true);
+
         const onError = (description: string) => {Toasts.error(description)};
 
         const isDeleteSuccessful = await UserService.delete(onError);
         if(isDeleteSuccessful){
             await handleLogout();
+        }
+        else{
+            setIsDeleteAccountLoading(false);
         }
     }
 
@@ -53,7 +63,9 @@ export const DeleteAccountDialog = () => {
                         <DialogClose asChild>
                             <Button variant="outline" className="cursor-pointer">Cancel</Button>
                         </DialogClose>
-                        <Button onClick={handleDelete} variant="negative" className="cursor-pointer">Confirm</Button>
+                        <Button onClick={handleDelete} variant="negative" className="cursor-pointer w-20">
+                            {isDeleteAccountLoading ? <LoadingIndicator /> : "Confirm"}
+                        </Button>
                     </DialogFooter>
                 </div>
             </DialogContent>

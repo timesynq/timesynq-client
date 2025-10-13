@@ -8,12 +8,14 @@ import { LoginRequest } from "@/api/auth/login";
 import { Toasts } from "@/utils/toasts";
 import { useAuth } from "@/contexts/auth-provider";
 import { Checkbox } from "./ui/checkbox";
+import LoadingIndicator from "@/assets/svg/loading-indicator.svg?react";
 
 export const RegisterDialog = () => {
 
     const [dialogShowPassword, setDialogShowPassword] = useState<boolean>(false);
     const [errors, setErrors] = useState<RegisterError | null>(null);
     const [isOpen, setIsOpen] = useState<boolean>(false);
+    const [isRegisterLoading, setIsRegisterLoading] = useState<boolean>(false);
     const { authLogin } = useAuth();
 
     const handleOpenChange = (open: boolean) => {
@@ -31,6 +33,8 @@ export const RegisterDialog = () => {
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
+        setIsRegisterLoading(true);
+
         const formData = new FormData(event.currentTarget);
         const registerRequest: RegisterRequest = {
             username: formData.get("username") as string,
@@ -43,6 +47,7 @@ export const RegisterDialog = () => {
 
         if (registerError) {
             setErrors(registerError);
+            setIsRegisterLoading(false);
             return;
         }
 
@@ -53,10 +58,11 @@ export const RegisterDialog = () => {
         }
 
         const loginError = await authLogin(loginRequest);
-        
+
         if (loginError) {
             loginError.detail = `Login failed after successful registration. ${loginError.detail}`;
             setErrors(loginError);
+            setIsRegisterLoading(false);
             return;
         }
 
@@ -109,7 +115,9 @@ export const RegisterDialog = () => {
                         <DialogClose asChild>
                             <Button variant="outline" className="cursor-pointer">Close</Button>
                         </DialogClose>
-                        <Button type="submit" variant="negative" className="cursor-pointer">Register</Button>
+                        <Button type="submit" variant="negative" className="cursor-pointer w-20">
+                            {isRegisterLoading ? <LoadingIndicator /> : "Register"}
+                        </Button>
                     </DialogFooter>
                 </form>
             </DialogContent>

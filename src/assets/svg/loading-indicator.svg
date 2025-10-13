@@ -1,0 +1,38 @@
+<svg width="200" height="80" viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+  <style>
+    .pixel {
+      width: 40px;
+      height: 40px;
+    }
+  </style>
+  <rect x="0" y="40" width="40" height="40" class="pixel">
+    <animate attributeName="y"
+             values="40;0;40;40"
+             keyTimes="0;0.4;0.8;1"
+             dur="1.4s"
+             repeatCount="indefinite"
+             calcMode="spline"
+             keySplines="0.42 0 0.58 1;0.42 0 0.58 1;0 0 1 1"
+             begin="0s"/>
+  </rect>
+  <rect x="80" y="40" width="40" height="40" class="pixel">
+    <animate attributeName="y"
+             values="40;0;40;40"
+             keyTimes="0;0.4;0.8;1"
+             dur="1.4s"
+             repeatCount="indefinite"
+             calcMode="spline"
+             keySplines="0.42 0 0.58 1;0.42 0 0.58 1;0 0 1 1"
+             begin="0.15s"/>
+  </rect>
+  <rect x="160" y="40" width="40" height="40" class="pixel">
+    <animate attributeName="y"
+             values="40;0;40;40"
+             keyTimes="0;0.4;0.8;1"
+             dur="1.4s"
+             repeatCount="indefinite"
+             calcMode="spline"
+             keySplines="0.42 0 0.58 1;0.42 0 0.58 1;0 0 1 1"
+             begin="0.3s"/>
+  </rect>
+</svg>
