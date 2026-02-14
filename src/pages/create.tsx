@@ -4,8 +4,27 @@ import { Input } from "@/components/ui/input";
 import MusicIcon from "@/assets/svg/music-icon.svg?react";
 import PlusIcon from "@/assets/svg/plus-icon.svg?react";
 import HeartIcon from "@/assets/svg/heart-icon.svg?react";
+import { useTrackerHub } from "@/contexts/tracker-hub-provider";
+import { Toasts } from "@/utils/toasts";
+import { useNavigate } from "react-router-dom";
 
 export const Create = () => {
+
+    const { createRoom, joinRoom } = useTrackerHub();
+    const navigate = useNavigate();
+
+    const tryInitRoom = async(): Promise<void> => {
+        const roomCode: string | null = await createRoom();
+        if(roomCode === null){
+
+            // temporary
+            Toasts.error("couldn't create room");
+
+            return;
+        }
+        await joinRoom(roomCode);
+        navigate(`/room/${roomCode}`);
+    }
 
     return (
         <main className="flex-1 flex flex-col items-center justify-center m-4 mt-4">
@@ -36,7 +55,7 @@ export const Create = () => {
                                 <p className="text-sm text-muted-foreground">Create something from scratch.</p>
                             </CardContent>
                             <CardFooter className="w-full mt-4">
-                                <Button className="w-full" variant="outline">Create New Song</Button>
+                                <Button onClick={tryInitRoom} className="w-full" variant="outline">Create New Song</Button>
                             </CardFooter>
                         </Card>
                         <Card className="flex flex-col items-center justify-between p-4 text-center">
