@@ -1,16 +1,19 @@
 import { TrackerHubClient } from "@/api/tracker/tracker-hub-client";
 import { createContext, useCallback, useContext, useEffect, useRef } from "react";
 import { useAuth } from "./auth-provider";
+import { TrackerHubResult } from "@/api/tracker/tracker-hub-result";
 
 interface TrackerHubProviderState {
-    createRoom: () => Promise<string | null>
-    joinRoom: (roomCode: string) => Promise<void>
+    createRoom: () => Promise<TrackerHubResult<string>>
+    joinRoom: (roomCode: string) => Promise<TrackerHubResult<object>>
     leaveRoom: () => Promise<void>
 }
 
 interface TrackerHubProviderProps {
     children: React.ReactNode;
 }
+
+const NO_CONNECTION_ERROR_MESSAGE: string = "Unable to connect to the server. Try refreshing the page.";
 
 const TrackerHubProviderContext = createContext<TrackerHubProviderState | undefined>(undefined);
 
@@ -37,16 +40,28 @@ export const TrackerHubProvider = ({children}: TrackerHubProviderProps) => {
         setupTrackerHubClient();
     }, [user]);
 
-    const createRoom = useCallback(async (): Promise<string | null> => {
-        if(trackerHubClientRef.current === null)
-            return null;
+    const createRoom = useCallback(async (): Promise<TrackerHubResult<string>> => {
+        if(trackerHubClientRef.current === null){
+            const errorResult: TrackerHubResult<string> = {
+                isSuccessful: false,
+                errorMessage: NO_CONNECTION_ERROR_MESSAGE,
+                value: null
+            }
+            return errorResult;
+        }
         return await trackerHubClientRef.current.createRoom();
     }, []);
 
-    const joinRoom = useCallback(async (roomCode: string): Promise<void> => {
-        if(trackerHubClientRef.current === null)
-            return;
-        await trackerHubClientRef.current.joinRoom(roomCode);
+    const joinRoom = useCallback(async (roomCode: string): Promise<TrackerHubResult<object>> => {
+        if(trackerHubClientRef.current === null){
+            const errorResult: TrackerHubResult<object> = {
+                isSuccessful: false,
+                errorMessage: NO_CONNECTION_ERROR_MESSAGE,
+                value: null
+            }
+            return errorResult;
+        }
+        return await trackerHubClientRef.current.joinRoom(roomCode);
     }, []);
 
     const leaveRoom = useCallback(async (): Promise<void> => {

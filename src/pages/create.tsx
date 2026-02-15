@@ -7,6 +7,8 @@ import HeartIcon from "@/assets/svg/heart-icon.svg?react";
 import { useTrackerHub } from "@/contexts/tracker-hub-provider";
 import { Toasts } from "@/utils/toasts";
 import { useNavigate } from "react-router-dom";
+import { TrackerHubResult } from "@/api/tracker/tracker-hub-result";
+import { UNEXPECTED_ERROR_MESSAGE } from "@/api/api-error";
 
 export const Create = () => {
 
@@ -14,15 +16,19 @@ export const Create = () => {
     const navigate = useNavigate();
 
     const tryInitRoom = async(): Promise<void> => {
-        const roomCode: string | null = await createRoom();
-        if(roomCode === null){
-
-            // temporary
-            Toasts.error("couldn't create room");
-
+        const createRoomResult: TrackerHubResult<string> = await createRoom();
+        if(!createRoomResult.isSuccessful || createRoomResult.value === null){
+            Toasts.error(createRoomResult.errorMessage ?? UNEXPECTED_ERROR_MESSAGE);
             return;
         }
-        await joinRoom(roomCode);
+        
+        const roomCode: string = createRoomResult.value;
+        const joinRoomResult: TrackerHubResult<object> = await joinRoom(roomCode);
+        if(!joinRoomResult.isSuccessful){
+            Toasts.error(joinRoomResult.errorMessage ?? UNEXPECTED_ERROR_MESSAGE);
+            return;
+        }
+
         navigate(`/room/${roomCode}`);
     }
 

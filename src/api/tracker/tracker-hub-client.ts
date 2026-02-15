@@ -1,5 +1,6 @@
 import * as signalR from "@microsoft/signalr";
 import { hubs } from "../endpoints";
+import { TrackerHubResult } from "./tracker-hub-result";
 
 const TrackerHubServerFunctions = {
     DisbandRoom: "DisbandRoom",
@@ -34,17 +35,12 @@ export class TrackerHubClient{
         });
     }
 
-    createRoom(): Promise<string | null> {
-        return this._connection.invoke<string | null>(TrackerHubServerFunctions.CreateRoom, null);
+    createRoom(): Promise<TrackerHubResult<string>> {
+        return this._connection.invoke<TrackerHubResult<string>>(TrackerHubServerFunctions.CreateRoom, null);
     }
 
-    async joinRoom(roomCode: string): Promise<void> {
-
-        //in the future, JoinRoom will return the tracker info needed to initialize the page when successful
-        await this._connection.invoke(TrackerHubServerFunctions.JoinRoom, roomCode)
-            .catch((error) => {
-                if(import.meta.env.DEV) console.error(error);
-            });
+    joinRoom(roomCode: string): Promise<TrackerHubResult<object>> {
+        return this._connection.invoke<TrackerHubResult<object>>(TrackerHubServerFunctions.JoinRoom, roomCode);
     }
 
     async leaveRoom(): Promise<void> {
