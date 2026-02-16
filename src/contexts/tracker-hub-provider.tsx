@@ -6,14 +6,15 @@ import { TrackerHubResult } from "@/api/tracker/tracker-hub-result";
 interface TrackerHubProviderState {
     createRoom: () => Promise<TrackerHubResult<string>>
     joinRoom: (roomCode: string) => Promise<TrackerHubResult<object>>
-    leaveRoom: () => Promise<void>
+    leaveRoom: () => Promise<TrackerHubResult<void>>
+    disbandRoom: () => Promise<TrackerHubResult<void>>
 }
 
 interface TrackerHubProviderProps {
     children: React.ReactNode;
 }
 
-const NO_CONNECTION_ERROR_MESSAGE: string = "Unable to connect to the server. Try refreshing the page.";
+const NO_CONNECTION_ERROR_MESSAGE: string = "Unable to connect to the server.";
 
 const TrackerHubProviderContext = createContext<TrackerHubProviderState | undefined>(undefined);
 
@@ -64,14 +65,32 @@ export const TrackerHubProvider = ({children}: TrackerHubProviderProps) => {
         return await trackerHubClientRef.current.joinRoom(roomCode);
     }, []);
 
-    const leaveRoom = useCallback(async (): Promise<void> => {
-        if(trackerHubClientRef.current === null)
-            return;
-        await trackerHubClientRef.current.leaveRoom();
+    const leaveRoom = useCallback(async (): Promise<TrackerHubResult<void>> => {
+        if(trackerHubClientRef.current === null){
+            const errorResult: TrackerHubResult<void> = {
+                isSuccessful: false,
+                errorMessage: NO_CONNECTION_ERROR_MESSAGE,
+                value: null
+            }
+            return errorResult;
+        }
+        return await trackerHubClientRef.current.leaveRoom();
+    }, []);
+
+    const disbandRoom = useCallback(async (): Promise<TrackerHubResult<void>> => {
+        if(trackerHubClientRef.current === null){
+            const errorResult: TrackerHubResult<void> = {
+                isSuccessful: false,
+                errorMessage: NO_CONNECTION_ERROR_MESSAGE,
+                value: null
+            }
+            return errorResult;
+        }
+        return await trackerHubClientRef.current.disbandRoom();
     }, []);
 
     return(
-        <TrackerHubProviderContext.Provider value={{createRoom, joinRoom, leaveRoom}}>
+        <TrackerHubProviderContext.Provider value={{createRoom, joinRoom, leaveRoom, disbandRoom}}>
             {children}
         </TrackerHubProviderContext.Provider>
     ) 
