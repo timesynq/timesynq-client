@@ -31,6 +31,13 @@ export const endpoints = {
         follow: () => addBaseToPath("/follows"),
         unfollow: () => addBaseToPath("/follows"),
     },
+    wips: {
+        getById: (id: string) => addBaseToPath(`/wips/${id}`),
+        getAll: () => addBaseToPath(`/wips/all`),
+        create: () => addBaseToPath("/wips"),
+        delete: () => addBaseToPath("/wips"),
+        changeWipName: (id: string) => (`/wips/${id}/name`)
+    }
 }
 
 export const hubs = {

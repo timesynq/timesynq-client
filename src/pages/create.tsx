@@ -4,32 +4,19 @@ import { Input } from "@/components/ui/input";
 import MusicIcon from "@/assets/svg/music-icon.svg?react";
 import PlusIcon from "@/assets/svg/plus-icon.svg?react";
 import HeartIcon from "@/assets/svg/heart-icon.svg?react";
-import { useTrackerHub } from "@/contexts/tracker-hub-provider";
 import { Toasts } from "@/utils/toasts";
 import { useNavigate } from "react-router-dom";
-import { TrackerHubResult } from "@/api/tracker/tracker-hub-result";
-import { UNEXPECTED_ERROR_MESSAGE } from "@/api/api-error";
+import { Wip, WipService } from "@/api/wips/wip";
 
 export const Create = () => {
 
-    const { createRoom, joinRoom } = useTrackerHub();
     const navigate = useNavigate();
 
-    const tryInitRoom = async(): Promise<void> => {
-        const createRoomResult: TrackerHubResult<string> = await createRoom();
-        if(!createRoomResult.isSuccessful || createRoomResult.value === null){
-            Toasts.error(createRoomResult.errorMessage ?? UNEXPECTED_ERROR_MESSAGE);
-            return;
+    const createNewWip = async(): Promise<void> => {
+        const newWip: Wip | null = await WipService.create((description: string) => {Toasts.error(description)});
+        if (newWip !== null){
+            navigate(`/room/${newWip.id}`);
         }
-        
-        const roomCode: string = createRoomResult.value;
-        const joinRoomResult: TrackerHubResult<object> = await joinRoom(roomCode);
-        if(!joinRoomResult.isSuccessful){
-            Toasts.error(joinRoomResult.errorMessage ?? UNEXPECTED_ERROR_MESSAGE);
-            return;
-        }
-
-        navigate(`/room/${roomCode}`);
     }
 
     return (
@@ -61,16 +48,16 @@ export const Create = () => {
                                 <p className="text-sm text-muted-foreground">Create something from scratch.</p>
                             </CardContent>
                             <CardFooter className="w-full mt-4">
-                                <Button onClick={tryInitRoom} className="w-full" variant="outline">Create New Song</Button>
+                                <Button onClick={createNewWip} className="w-full" variant="outline">Create New Song</Button>
                             </CardFooter>
                         </Card>
                         <Card className="flex flex-col items-center justify-between p-4 text-center">
                             <CardHeader className="flex flex-col items-center justify-center space-y-8">
                                 <HeartIcon className="w-12 h-12 text-timesynq-red" />
-                                <CardTitle className="text-lg font-semibold">Join Room</CardTitle>
+                                <CardTitle className="text-lg font-semibold">Open Room with Shared Song</CardTitle>
                             </CardHeader>
                             <CardContent className="w-full">
-                                <p className="text-sm text-muted-foreground">Enter a room code to join an existing session.</p>
+                                <p className="text-sm text-muted-foreground">Load a work in progress that was shared with you.</p>
                             </CardContent>
                             <CardFooter className="w-full mt-4 flex flex-col items-center justify-center space-y-4">
                                 <div className="flex w-full max-w-sm items-center gap-2">

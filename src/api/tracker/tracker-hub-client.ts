@@ -1,10 +1,10 @@
 import * as signalR from "@microsoft/signalr";
 import { hubs } from "../endpoints";
 import { TrackerHubResult } from "./tracker-hub-result";
+import { UNEXPECTED_ERROR_MESSAGE } from "../api-error";
+import { Wip } from "../wips/wip";
 
 const TrackerHubServerFunctions = {
-    DisbandRoom: "DisbandRoom",
-    CreateRoom: "CreateRoom",
     JoinRoom: "JoinRoom",
     LeaveRoom: "LeaveRoom",
 }
@@ -12,20 +12,18 @@ const TrackerHubServerFunctions = {
 export class TrackerHubClient{
 
     private _connection: signalR.HubConnection;
-    private _currentRoom: string | null;
 
     constructor(){
         this._connection = new signalR.HubConnectionBuilder()
             .withUrl(hubs.tracker())
             .withAutomaticReconnect()
             .build();
-        this._currentRoom = null;
     }
 
     private serverError<T>(): TrackerHubResult<T> {
         const result: TrackerHubResult<T> = {
             isSuccessful: false,
-            errorMessage: "Unexpected server error. Please try again later",
+            errorMessage: UNEXPECTED_ERROR_MESSAGE,
             value: null,
         }
         return result;
@@ -47,49 +45,24 @@ export class TrackerHubClient{
         });
     }
 
-    async createRoom(): Promise<TrackerHubResult<string>> {
-        return await this._connection.invoke<TrackerHubResult<string>>(TrackerHubServerFunctions.CreateRoom, null)
-            .catch(() => {
-                return this.serverError<string>();
-            });
-    }
-
-    async joinRoom(roomCode: string): Promise<TrackerHubResult<object>> {
-        return this.updateRoomState<object>(
+    async joinRoom(roomCode: string): Promise<TrackerHubResult<Wip>> {
+        return this.updateRoomState<Wip>(
             TrackerHubServerFunctions.JoinRoom,
-            () => {
-                this._currentRoom = roomCode;
-            },
             roomCode
         );
     }
 
     async leaveRoom(): Promise<TrackerHubResult<void>> {
         return this.updateRoomState<void>(
-            TrackerHubServerFunctions.LeaveRoom,
-            () => {
-                this._currentRoom = null;
-            }
+            TrackerHubServerFunctions.LeaveRoom
         );
     }
 
-    async disbandRoom(): Promise<TrackerHubResult<void>> {
-        return this.updateRoomState<void>(
-            TrackerHubServerFunctions.DisbandRoom,
-            () => {
-                this._currentRoom = null;
-            }
-        );
-    }
-
-    private async updateRoomState<T> (trackerHubServerFunction: string, callbackIfSuccessful: () => void, ...args: string[]): Promise<TrackerHubResult<T>> {
+    private async updateRoomState<T> (trackerHubServerFunction: string, ...args: string[]): Promise<TrackerHubResult<T>> {
         const result = await this._connection.invoke<TrackerHubResult<T>>(trackerHubServerFunction, ...args)
             .catch(() => {
                 return this.serverError<T>();
             });
-        if (result.isSuccessful){
-            callbackIfSuccessful();
-        }
         return result;
     }
 }
