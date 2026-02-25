@@ -2,9 +2,11 @@ import { UNEXPECTED_ERROR_MESSAGE } from "@/api/api-error";
 import { TrackerHubClient } from "@/api/tracker/tracker-hub-client";
 import { TrackerHubResult } from "@/api/tracker/tracker-hub-result";
 import { Wip } from "@/api/wips/wip";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/contexts/auth-provider";
 import { useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
 export const Room = () => {
 
@@ -24,7 +26,7 @@ export const Room = () => {
             await client.start();
             trackerHubClientRef.current = client;
             const joinRoomResult: TrackerHubResult<Wip> = await trackerHubClientRef.current.joinRoom(wipId);
-            if (!joinRoomResult.isSuccessful || joinRoomResult.value === null){
+            if (true || !joinRoomResult.isSuccessful || joinRoomResult.value === null){
                 setPageError(joinRoomResult.errorMessage ?? UNEXPECTED_ERROR_MESSAGE);
                 return;
             }
@@ -36,11 +38,16 @@ export const Room = () => {
     return (
         <>
             {pageError && 
-                <>
-                    <main className="flex flex-col items-center justify-center">
-                        <p>{pageError}</p>
-                    </main>
-                </>
+                <main className="flex flex-col items-center m-4">
+                    <Card style={{backgroundColor: "oklch(20.019% 0.04696 287.092)", border: "1px solid oklch(1 0 0 / 10%)"}}>
+                        <CardContent className="flex flex-col items-center justify-center space-y-2 p-8 w-[400px]">
+                            <p>{pageError}</p>
+                            <Link to="/create">
+                                <Button variant="link" className="cursor-pointer">Return to options</Button>
+                            </Link>     
+                        </CardContent>
+                    </Card>
+                </main>
             }
             {!pageError && 
             <>
