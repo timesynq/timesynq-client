@@ -27,6 +27,7 @@ body {
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
   --color-background: var(--background);
+  --color-background-darker: var(--background-darker);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
@@ -84,6 +85,7 @@ body {
 :root {
   --radius: 0.625rem;
   --background: oklch(1 0 0);
+  --background-darker: oklch(91.887% 0.0001 271.152);
   --foreground: oklch(0.141 0.005 285.823);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.141 0.005 285.823);
@@ -120,6 +122,7 @@ body {
 
 .dark {
   --background: oklch(14.623% 0.04042 288.257);
+  --background-darker: oklch(12.663% 0.03508 280.163);
   --foreground: oklch(0.985 0 0);
   --card: oklch(20.019% 0.04696 287.092);
   --card-foreground: oklch(0.985 0 0);
