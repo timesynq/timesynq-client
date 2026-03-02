@@ -1,8 +1,7 @@
 import * as signalR from "@microsoft/signalr";
 import { hubs } from "../endpoints";
-import { TrackerHubResult } from "./tracker-hub-result";
 import { UNEXPECTED_ERROR_MESSAGE } from "../api-error";
-import { Wip } from "../wips/wip";
+import { RoomInitializer, RoomMember, TrackerHubResult } from "./tracker-hub-models";
 
 const TrackerHubServerFunctions = {
     JoinRoom: "JoinRoom",
@@ -20,7 +19,7 @@ export class TrackerHubClient{
 
     private _connection: signalR.HubConnection;
     private _chatMessageListeners: Set<(userId: string, message: string) => void>; 
-    
+    private _userJoinedRoomListeners: Set<(roomMember: RoomMember) => void>;
 
     constructor(){
         this._connection = new signalR.HubConnectionBuilder()
@@ -29,6 +28,7 @@ export class TrackerHubClient{
             .build();
 
         this._chatMessageListeners = new Set<(userId: string, message: string) => void>();
+        this._userJoinedRoomListeners = new Set<(roomMember: RoomMember) => void>();
         this.registerListeners();
     }
 
@@ -38,12 +38,24 @@ export class TrackerHubClient{
             (userId: string, message: string) => {
                 this._chatMessageListeners.forEach(callback => callback(userId, message));
             }
-        )   
+        )
+        this._connection.on(
+            TrackerHubClientCallbacks.UserJoinedRoom,
+            (roomMember: RoomMember) => {
+                console.log(this._userJoinedRoomListeners);
+                this._userJoinedRoomListeners.forEach(callback => callback(roomMember));
+            }
+        )
     }
 
     onChatMessageReceived(callback: (userId: string, message: string) => void): () => boolean {
         this._chatMessageListeners.add(callback);
         return () => this._chatMessageListeners.delete(callback);
+    }
+
+    onUserJoinedRoom(callback: (roomMember: RoomMember) => void): () => boolean {
+        this._userJoinedRoomListeners.add(callback);
+        return () => this._userJoinedRoomListeners.delete(callback);
     }
 
     private serverError<T>(): TrackerHubResult<T> {
@@ -71,8 +83,8 @@ export class TrackerHubClient{
         });
     }
 
-    async joinRoom(roomCode: string): Promise<TrackerHubResult<Wip>> {
-        return this.updateRoomState<Wip>(
+    async joinRoom(roomCode: string): Promise<TrackerHubResult<RoomInitializer>> {
+        return this.updateRoomState<RoomInitializer>(
             TrackerHubServerFunctions.JoinRoom,
             roomCode
         );
