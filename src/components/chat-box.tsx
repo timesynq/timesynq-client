@@ -1,6 +1,6 @@
 import { UNEXPECTED_ERROR_MESSAGE } from "@/api/api-error";
 import { Toasts } from "@/utils/toasts";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Separator } from "./ui/separator";
 import { Input } from "./ui/input";
 import { TrackerHubClient } from "@/api/tracker/tracker-hub-client";
@@ -23,6 +23,11 @@ export const ChatBox = ({ client, members }: ChatBoxProps) => {
 
     const [input, setInput] = useState<string>('');
     const [messages, setMessages] = useState<Message[]>([]);
+    const bottomRef = useRef<HTMLDivElement | null>(null);
+
+    useEffect(() => {
+        bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [messages])
 
     useEffect(() => {
         const callback = (userId: string, message: string) => {
@@ -34,7 +39,6 @@ export const ChatBox = ({ client, members }: ChatBoxProps) => {
             }
 
             setMessages(prev => [...prev, newMessage]);
-            // todo: add autoscroll to bottom when receiving new message
         }
 
         const unsubscribeChat = client.onChatMessageReceived(callback);
@@ -73,8 +77,8 @@ export const ChatBox = ({ client, members }: ChatBoxProps) => {
             </div>
             <Separator />
             <ScrollArea autoFocus className="flex-1 min-h-0 overflow-y-auto p-4">
-                {messages.map((message: Message) => (
-                    <div>
+                {messages.map((message: Message, index: number) => (
+                    <div key={index}>
                         <span className={`${message.color}`}>
                             {message.username}
                         </span>
@@ -83,6 +87,7 @@ export const ChatBox = ({ client, members }: ChatBoxProps) => {
                         </span>
                     </div>
                 ))}
+                <div ref={bottomRef} />
             </ScrollArea>
             <Separator />
             <div className="h-24 p-4 flex flex-row items-center justify-start space-x-2 bg-background-darker">
