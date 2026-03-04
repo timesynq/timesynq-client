@@ -1,5 +1,12 @@
 import { UNEXPECTED_ERROR_MESSAGE } from "./api-error";
 
+export enum Page {
+    First,
+    Last,
+    Next,
+    Previous,
+}
+
 export class PagedList<T> {
     
     private _items: T[];
@@ -27,7 +34,7 @@ export class PagedList<T> {
     }) {
         this._items = pagedListFields.items;
         this._pageNumber = pagedListFields.pageNumber;
-        this._pageSize = pagedListFields.pageNumber;
+        this._pageSize = pagedListFields.pageSize;
         this._totalItems = pagedListFields.totalItems;
         this._totalPages = pagedListFields.totalPages;
         this._firstPageUrl = pagedListFields.firstPageUrl;
@@ -57,20 +64,28 @@ export class PagedList<T> {
         return this._totalPages;
     }
 
-    public async getFirstPage(): Promise<PagedList<T> | null> {
-        return this._firstPageUrl ? this.fetchHypermedia(this._firstPageUrl) : null;
+    public canGoTo(page: Page): boolean {
+        switch (page) {
+            case Page.First: return !!this._firstPageUrl && this._pageNumber > 1;
+            case Page.Last: return !!this._lastPageUrl && this._pageNumber < this._totalPages;
+            case Page.Previous: return !!this._previousPageUrl && this._pageNumber > 1;
+            case Page.Next:
+            default: return !!this._nextPageUrl && this._pageNumber < this._totalPages;
+        }
     }
 
-    public async getLastPage(): Promise<PagedList<T> | null> {
-        return this._lastPageUrl ? this.fetchHypermedia(this._lastPageUrl) : null;
-    }
-
-    public async getPreviousPage(): Promise<PagedList<T> | null> {
-        return this._previousPageUrl ? this.fetchHypermedia(this._previousPageUrl) : null;
-    }
-
-    public async getNextPage(): Promise<PagedList<T> | null> {
-        return this._nextPageUrl ? this.fetchHypermedia(this._nextPageUrl) : null;
+    public async goTo(page: Page): Promise<PagedList<T> | null> {
+        let url: string | undefined = undefined;
+        switch (page) {
+            case Page.First: url = this._firstPageUrl; break;
+            case Page.Last: url = this._lastPageUrl; break;
+            case Page.Previous: url = this._previousPageUrl; break;
+            case Page.Next:
+            default: url = this._nextPageUrl;
+        }
+        if (!url) 
+            return null;
+        return this.fetchHypermedia(url);
     }
 
     private async fetchHypermedia(url: string): Promise<PagedList<T> | null> {

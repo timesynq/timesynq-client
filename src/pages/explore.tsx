@@ -9,7 +9,7 @@ import SearchIcon from "@/assets/svg/search-icon.svg?react";
 import SettingsIcon from "@/assets/svg/settings-icon.svg?react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import { PagedList } from "@/api/paged-list";
+import { Page, PagedList } from "@/api/paged-list";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTrigger } from "@/components/ui/dialog";
@@ -86,49 +86,14 @@ export const Explore = () => {
         setIsOpen(false);
     }
 
-    const handleGetPreviousPage = async () => {
-        if(!userSearchHypermediaResource)
+    const handlePageChange = async (page: Page) => {
+        if (!userSearchHypermediaResource)
             return;
-        changePage(
-            userSearchHypermediaResource.getPreviousPage(),
-            userSearchHypermediaResource.pageNumber() == 1
-        );
-    }
-
-    const handleGetNextPage = async () => {
-        if(!userSearchHypermediaResource)
+        if(!userSearchHypermediaResource.canGoTo(page))
             return;
-        changePage(
-            userSearchHypermediaResource.getNextPage(),
-            userSearchHypermediaResource.pageNumber() == userSearchHypermediaResource.totalPages()
-        );
-    }
-
-    const handleGetFirstPage = async () => {
-        if(!userSearchHypermediaResource)
-            return;
-        changePage(
-            userSearchHypermediaResource.getFirstPage(),
-            userSearchHypermediaResource.pageNumber() == 1
-        );
-    }
-
-    const handleGetLastPage = async () => {
-        if(!userSearchHypermediaResource)
-            return;
-        changePage(
-            userSearchHypermediaResource.getLastPage(),
-            userSearchHypermediaResource.pageNumber() == userSearchHypermediaResource.totalPages()
-        );
-    }
-
-    const changePage = async (hypermediaResourceFunc: Promise<PagedList<User> | null>, isPageChangeDisabled: boolean) => {
-        if(!userSearchHypermediaResource || isPageChangeDisabled)
-            return;
-        const nextPageResource = await hypermediaResourceFunc;
-        if(!nextPageResource != null){
-            setUserSearchHypermediaResource(nextPageResource);
-        }
+        const nextPage = await userSearchHypermediaResource.goTo(page);
+        if (nextPage)
+            setUserSearchHypermediaResource(nextPage);
     }
 
     return (
@@ -202,13 +167,13 @@ export const Explore = () => {
                             <Pagination className="w-[50%] justify-end">
                                 <PaginationContent className="space-x-2">
                                     <PaginationItem>
-                                        <PaginationPrevious onClick={handleGetPreviousPage} className={`${pageNumber == 1 ? 'hover:bg-background hover:text-muted-foreground text-muted-foreground' : 'cursor-pointer'}`} />
+                                        <PaginationPrevious onClick={() => handlePageChange(Page.Previous)} className={`${pageNumber == 1 ? 'hover:bg-background hover:text-muted-foreground text-muted-foreground' : 'cursor-pointer'}`} />
                                     </PaginationItem>
                                     <PaginationItem>
                                         <p>Page {pageNumber} of {totalPages}</p>
                                     </PaginationItem>
                                     <PaginationItem>
-                                        <PaginationNext onClick={handleGetNextPage} className={`${pageNumber == totalPages ? 'hover:bg-background hover:text-muted-foreground text-muted-foreground' : 'cursor-pointer'}`}/>
+                                        <PaginationNext onClick={() => handlePageChange(Page.Next)} className={`${pageNumber == totalPages ? 'hover:bg-background hover:text-muted-foreground text-muted-foreground' : 'cursor-pointer'}`}/>
                                     </PaginationItem>
                                 </PaginationContent>
                             </Pagination>
@@ -255,7 +220,7 @@ export const Explore = () => {
                     </ul>
                     { userSearchHypermediaResource && userSearchHypermediaResource.items().length > 0 &&
                         <div className="flex flex-row items-center justify-between space-x-2 my-4">
-                            <Button variant="outline" onClick={handleGetFirstPage} className={`${pageNumber == 1 ? 'hover:bg-background hover:text-muted-foreground text-muted-foreground' : 'cursor-pointer'}`}>First</Button>
+                            <Button variant="outline" onClick={() => handlePageChange(Page.First)} className={`${pageNumber == 1 ? 'hover:bg-background hover:text-muted-foreground text-muted-foreground' : 'cursor-pointer'}`}>First</Button>
                             <Dialog open={isOpen} onOpenChange={handleOpenChange}>
                                 <DialogTrigger asChild>
                                     <Button variant="outline" className="cursor-pointer">
@@ -284,7 +249,7 @@ export const Explore = () => {
                                         </form>
                                     </DialogContent>
                             </Dialog>
-                            <Button variant="outline" onClick={handleGetLastPage} className={`${pageNumber == totalPages ? 'hover:bg-background hover:text-muted-foreground text-muted-foreground' : 'cursor-pointer'}`}>Last</Button>
+                            <Button variant="outline" onClick={() => handlePageChange(Page.Last)} className={`${pageNumber == totalPages ? 'hover:bg-background hover:text-muted-foreground text-muted-foreground' : 'cursor-pointer'}`}>Last</Button>
                         </div>
                     }
                     
