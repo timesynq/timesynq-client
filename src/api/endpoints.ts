@@ -32,11 +32,16 @@ export const endpoints = {
         unfollow: () => addBaseToPath("/follows"),
     },
     wips: {
-        getById: (id: string) => addBaseToPath(`/wips/${id}`),
-        getAll: () => addBaseToPath(`/wips/all`),
+        getById: (wipId: string) => addBaseToPath(`/wips/${wipId}`),
+        getMyWips: () => addBaseToPath("/wips"),
         create: () => addBaseToPath("/wips"),
         delete: () => addBaseToPath("/wips"),
-        changeWipName: (id: string) => (`/wips/${id}/name`)
+        changeWipName: (wipId: string) => (`/wips/${wipId}/name`),
+        getSharedWips: () => ("/wips/shared"),
+        getSharedUsers: (wipId: string) => (`/wips/${wipId}/shares`),
+        share: (wipId: string) => (`/wips/${wipId}/shares`),  
+        unshareOne: (wipId: string, userId: string) => (`/wips/${wipId}/shares/${userId}`),
+        unshareAll: (wipId: string) => (`/wips/${wipId}/shares`)
     }
 }
 
