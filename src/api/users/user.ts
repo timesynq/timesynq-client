@@ -1,6 +1,7 @@
 import { ApiError, UNEXPECTED_ERROR_MESSAGE } from "../api-error";
 import { endpoints } from "../endpoints";
-import { PagedList } from "../paged-list";
+import { fetchHypermedia } from "../hypermedia";
+import { PagedList, PagedListFields } from "../paged-list";
 
 export type User = {
     id: string;
@@ -133,7 +134,7 @@ export const UserService = {
             });
 
             const data = await response.json();
-            const pagedListFields = {
+            const pagedListFields: PagedListFields<User> = {
                 items: data.items ?? [],
                 pageNumber: data.pageNumber,
                 pageSize: data.pageSize,
@@ -143,10 +144,9 @@ export const UserService = {
                 lastPageUrl: data.lastPageUrl ?? null,
                 previousPageUrl: data.previousPageUrl ?? null,
                 nextPageUrl: data.nextPageUrl ?? null,
-                onError: onError,
             }
  
-            return new PagedList<User>(pagedListFields);
+            return new PagedList<User>(pagedListFields, fetchHypermedia, onError);
         } 
         catch (_error) {
             onError && onError(UNEXPECTED_ERROR_MESSAGE);

@@ -1,4 +1,5 @@
 import { UNEXPECTED_ERROR_MESSAGE } from "./api-error";
+import { HypermediaFetcher } from "./hypermedia";
 
 export enum Page {
     First,
@@ -7,112 +8,69 @@ export enum Page {
     Previous,
 }
 
+export interface PagedListFields<T> {
+    items: T[];
+    pageNumber: number;
+    pageSize: number;
+    totalItems: number;
+    totalPages: number;
+    firstPageUrl?: string;
+    lastPageUrl?: string;
+    previousPageUrl?: string;
+    nextPageUrl?: string;
+}
+
 export class PagedList<T> {
     
-    private _items: T[];
-    private _pageNumber: number;
-    private _pageSize: number;
-    private _totalItems: number;
-    private _totalPages: number;
-    private _firstPageUrl?: string;
-    private _lastPageUrl?: string;
-    private _previousPageUrl?: string;
-    private _nextPageUrl?: string;
+    private _fields: PagedListFields<T>;
+    private _fetcher: HypermediaFetcher<T>;
     private _onError?: (description: string) => void;
     
-    constructor(pagedListFields: {
-        items: T[],
-        pageNumber: number,
-        pageSize: number,
-        totalItems: number,
-        totalPages: number,
-        firstPageUrl?: string,
-        lastPageUrl?: string,
-        previousPageUrl?: string,
-        nextPageUrl?: string,
-        onError?: (description: string) => void;
-    }) {
-        this._items = pagedListFields.items;
-        this._pageNumber = pagedListFields.pageNumber;
-        this._pageSize = pagedListFields.pageSize;
-        this._totalItems = pagedListFields.totalItems;
-        this._totalPages = pagedListFields.totalPages;
-        this._firstPageUrl = pagedListFields.firstPageUrl;
-        this._lastPageUrl = pagedListFields.lastPageUrl;
-        this._previousPageUrl = pagedListFields.previousPageUrl;
-        this._nextPageUrl = pagedListFields.nextPageUrl;
-        this._onError = pagedListFields.onError;
+    constructor(
+        fields: PagedListFields<T>,
+        fetcher: HypermediaFetcher<T>, 
+        onError?: (description: string) => void
+    ) {
+        this._fields = fields;
+        this._fetcher = fetcher;
+        this._onError = onError;
     }
 
-    public items(): T[] {
-        return this._items;
-    }
-
-    public pageNumber(): number {
-        return this._pageNumber;
-    }
-
-    public pageSize(): number {
-        return this._pageSize;
-    }
-
-    public totalItems(): number {
-        return this._totalItems;
-    }
-
-    public totalPages(): number {
-        return this._totalPages;
-    }
+    public items(): T[] { return this._fields.items; }
+    public pageNumber(): number { return this._fields.pageNumber; }
+    public pageSize(): number { return this._fields.pageSize; }
+    public totalItems(): number { return this._fields.totalItems; }
+    public totalPages(): number { return this._fields.totalPages; }
 
     public canGoTo(page: Page): boolean {
         switch (page) {
-            case Page.First: return !!this._firstPageUrl && this._pageNumber > 1;
-            case Page.Last: return !!this._lastPageUrl && this._pageNumber < this._totalPages;
-            case Page.Previous: return !!this._previousPageUrl && this._pageNumber > 1;
+            case Page.First: return !!this._fields.firstPageUrl && this.pageNumber() > 1;
+            case Page.Last: return !!this._fields.lastPageUrl && this.pageNumber() < this.totalPages();
+            case Page.Previous: return !!this._fields.previousPageUrl && this.pageNumber() > 1;
             case Page.Next:
-            default: return !!this._nextPageUrl && this._pageNumber < this._totalPages;
+            default: return !!this._fields.nextPageUrl && this.pageNumber() < this.totalPages();
         }
     }
 
     public async goTo(page: Page): Promise<PagedList<T> | null> {
         let url: string | undefined = undefined;
         switch (page) {
-            case Page.First: url = this._firstPageUrl; break;
-            case Page.Last: url = this._lastPageUrl; break;
-            case Page.Previous: url = this._previousPageUrl; break;
+            case Page.First: url = this._fields.firstPageUrl; break;
+            case Page.Last: url = this._fields.lastPageUrl; break;
+            case Page.Previous: url = this._fields.previousPageUrl; break;
             case Page.Next:
-            default: url = this._nextPageUrl;
+            default: url = this._fields.nextPageUrl;
         }
         if (!url) 
             return null;
-        return this.fetchHypermedia(url);
-    }
 
-    private async fetchHypermedia(url: string): Promise<PagedList<T> | null> {
         try {
-            const response = await fetch(url, {
-                method: "GET",
-                credentials: "include",
-                headers: { "Accept": "application/json" },
-            });
-            
-            const data = await response.json();
-            const pagedListFields = {
-                items: data.items ?? [],
-                pageNumber: data.pageNumber,
-                pageSize: data.pageSize,
-                totalItems: data.totalItems,
-                totalPages: data.totalPages,
-                firstPageUrl: data.firstPageUrl ?? null,
-                lastPageUrl: data.lastPageUrl ?? null,
-                previousPageUrl: data.previousPageUrl ?? null,
-                nextPageUrl: data.nextPageUrl ?? null,
-                onError: this._onError,
-            }
-             
-            return new PagedList<T>(pagedListFields);
+            const fields: PagedListFields<T> | null = await this._fetcher(url);
+            if (!fields)
+                return null;
+            return new PagedList<T>(fields, this._fetcher, this._onError);
         }
-        catch (_error) {
+        catch {
             this._onError && this._onError(UNEXPECTED_ERROR_MESSAGE);
             return null;
         }
