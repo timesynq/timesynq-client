@@ -33,39 +33,42 @@ export const usePagination = <T>(
 
     const queryByPage = (newPageNumber: number) => {
         newPageNumber = clamp(newPageNumber, 1, totalPages);
-        setPageNumber(newPageNumber);
-
         if (searchedQuery)
             search(searchedQuery, newPageNumber);
+        else 
+            setPageNumber(newPageNumber);
     }
 
     const updatePageSize = (newPageSize: number): void => {
         newPageSize = clamp(newPageSize, 1, 100);
-        setPageSize(newPageSize);
-        setPageNumber(1);
-
         if (searchedQuery)
             search(searchedQuery, 1, newPageSize);
+        else {
+            setPageSize(newPageSize);
+            setPageNumber(1);
+        }
     }
 
     const updateSortOrder = (newSortReverse: boolean): void => {
         if (newSortReverse === sortReverse)
             return;
-        setSortReverse(newSortReverse);
-        setPageNumber(1);
-
         if (searchedQuery)
             search(searchedQuery, 1, undefined, newSortReverse);
+        else {
+            setSortReverse(newSortReverse);
+            setPageNumber(1);
+        }
     }
 
     const updateSortBy = (newSortBy: string): void => {
         if (newSortBy === sortBy)
             return;
-        setSortBy(newSortBy);
-        setPageNumber(1);
-
         if (searchedQuery)
             search(searchedQuery, 1, undefined, undefined, newSortBy);
+        else {
+            setSortBy(newSortBy);
+            setPageNumber(1);
+        }
     }
 
     const search = async (
@@ -91,7 +94,10 @@ export const usePagination = <T>(
         setHypermediaResource(pagedList);
         setPageNumber(pagedList.pageNumber());
         setSearchedQuery(query);
-        return true;
+        if(pageSizeParam !== undefined) setPageSize(pageSizeParam);
+        if(sortReverseParam !== undefined) setSortReverse(sortReverseParam);
+        if(sortByParam !== undefined) setSortBy(sortByParam);
+        return true; 
     }
 
     const tryGoTo = async (page: Page) => {
