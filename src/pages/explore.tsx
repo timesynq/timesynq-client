@@ -1,79 +1,69 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ProfilePicture } from "@/components/profile-picture";
-import { User, UserService } from "@/api/users/user";
+import { UserSortField } from "@/api/users/user";
 import { Toasts } from "@/utils/toasts";
 import SearchIcon from "@/assets/svg/search-icon.svg?react";
 import SettingsIcon from "@/assets/svg/settings-icon.svg?react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import { Page, PagedList } from "@/api/paged-list";
+import { Page } from "@/api/paged-list";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTrigger } from "@/components/ui/dialog";
+import { useUserSearch } from "@/hooks/use-user-search";
 
 export const Explore = () => {
 
     const isMobile = useIsMobile();
     const [userQuery, setUserQuery] = useState<string>("");
-    const [searchedUserQuery, setSearchedUserQuery] = useState<string>("");
-    const [pageSize, setPageSize] = useState<number>(10);
-    const [sortReverse, setSortReverse] = useState<boolean>(false);
-    const [userSortBy, setUserSortBy] = useState<string>("username");
     const [searchResultMessage, setSearchResultMessage] = useState<string>("");
-    const [userSearchHypermediaResource, setUserSearchHypermediaResource] = useState<PagedList<User> | null>();
     const [isOpen, setIsOpen] = useState<boolean>(false);
 
-    const pageNumber = userSearchHypermediaResource?.pageNumber();
-    const totalPages = userSearchHypermediaResource? userSearchHypermediaResource.totalPages() : 0;
+    const {
+        // read only values
+        items,
+        pageNumber,
+        pageSize,
+        totalPages,
+        sortReverse,
+        sortBy,
+        isLoading,
 
-    useEffect(() => {
-        if(searchedUserQuery !== "")
-            handleSubmit(undefined, searchedUserQuery, pageNumber);
-    }, [pageSize, sortReverse, userSortBy]);
+        // api functions
+        queryByPage,
+        updatePageSize,
+        updateSortOrder,
+        updateSortBy,
+        trySearch,
+        tryGoTo
+    } = useUserSearch((description: string) => Toasts.error(description));
 
-    const handleSubmit = async (e?: React.FormEvent, savedQuery?: string, pageNumber: number = 1) => {
-        e?.preventDefault();
-
-        const onError = (description: string) => {Toasts.error(description)};
-
-        if (!savedQuery && userQuery.trim().length < 3) {
-            e && onError("Please enter at least 3 letters.");
-            return;
-        }
-
-        const query: string = savedQuery ?? userQuery;
-        const sortOrder: string = sortReverse ? "reverse" : "default";
-
-        const pagedUsers = await UserService.search(query, pageNumber, pageSize, sortOrder, userSortBy, onError);
-        setUserSearchHypermediaResource(pagedUsers);
-        setSearchResultMessage(`User search results for "${query}"`);
-        setSearchedUserQuery(query);
-    };
-
-    const clamp = (num: number, min: number, max: number): number => {  
-        return num < min ? min : num > max ? max : num; 
-    }
-
-    const handlePageSizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        const input: string = e.target.value;
-        const oldPageSize = pageSize;
-        const newPageSize = parseInt(input);
-
-        setPageSize(isNaN(newPageSize) ? oldPageSize : clamp(newPageSize, 1, 100));
-    }
+        const succeeded: boolean = await trySearch(userQuery);
+        if(succeeded)
+            setSearchResultMessage(`User search results for "${userQuery}"`);
+    };
 
     const handleOpenChange = (open: boolean) => {
         setIsOpen(open);
     }
 
-    const handlePageQuery = (e: React.FormEvent<HTMLFormElement>) => {
+    const handlePageSizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         e.preventDefault();
 
+        const input = Number(e.target.value);
+        if (!isNaN(input))
+            updatePageSize(input);
+    }
+
+
+    const handlePageQuery = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
         const formData = new FormData(e.currentTarget);
         const input: string = formData.get("page-number") as string;
         const newPageNumber = parseInt(input);
@@ -82,18 +72,8 @@ export const Explore = () => {
             return;
         }
 
-        handleSubmit(undefined, undefined, clamp(newPageNumber, 1, totalPages));
+        queryByPage(newPageNumber);
         setIsOpen(false);
-    }
-
-    const handlePageChange = async (page: Page) => {
-        if (!userSearchHypermediaResource)
-            return;
-        if(!userSearchHypermediaResource.canGoTo(page))
-            return;
-        const nextPage = await userSearchHypermediaResource.goTo(page);
-        if (nextPage)
-            setUserSearchHypermediaResource(nextPage);
     }
 
     return (
@@ -142,19 +122,19 @@ export const Explore = () => {
                                         checked={sortReverse} 
                                         onSelect={(e) => e.preventDefault()} 
                                         onClick={(e) => e.stopPropagation()} 
-                                        onCheckedChange={setSortReverse}
+                                        onCheckedChange={() => updateSortOrder(!sortReverse)}
                                     >
                                         Reverse sort
                                     </DropdownMenuCheckboxItem>
                                     <DropdownMenuSeparator />
-                                        <DropdownMenuRadioGroup value={userSortBy} onValueChange={setUserSortBy}>
-                                            <DropdownMenuRadioItem value="username" onSelect={(e) => e.preventDefault()} onClick={(e) => e.stopPropagation()} className="cursor-pointer">
+                                        <DropdownMenuRadioGroup value={sortBy} onValueChange={updateSortBy}>
+                                            <DropdownMenuRadioItem value={UserSortField.username} onSelect={(e) => e.preventDefault()} onClick={(e) => e.stopPropagation()} className="cursor-pointer">
                                                 Sort by username
                                             </DropdownMenuRadioItem>
-                                            <DropdownMenuRadioItem value="followers" onSelect={(e) => e.preventDefault()} onClick={(e) => e.stopPropagation()} className="cursor-pointer">
+                                            <DropdownMenuRadioItem value={UserSortField.followers} onSelect={(e) => e.preventDefault()} onClick={(e) => e.stopPropagation()} className="cursor-pointer">
                                                 Sort by followers
                                             </DropdownMenuRadioItem>
-                                            <DropdownMenuRadioItem value="accountAge" onSelect={(e) => e.preventDefault()} onClick={(e) => e.stopPropagation()} className="cursor-pointer">
+                                            <DropdownMenuRadioItem value={UserSortField.accountAge} onSelect={(e) => e.preventDefault()} onClick={(e) => e.stopPropagation()} className="cursor-pointer">
                                                 Sort by account age
                                             </DropdownMenuRadioItem>
                                         </DropdownMenuRadioGroup>
@@ -167,21 +147,21 @@ export const Explore = () => {
                             <Pagination className="w-[50%] justify-end">
                                 <PaginationContent className="space-x-2">
                                     <PaginationItem>
-                                        <PaginationPrevious onClick={() => handlePageChange(Page.Previous)} className={`${pageNumber == 1 ? 'hover:bg-background hover:text-muted-foreground text-muted-foreground' : 'cursor-pointer'}`} />
+                                        <PaginationPrevious onClick={() => tryGoTo(Page.Previous)} className={`${pageNumber == 1 ? 'hover:bg-background hover:text-muted-foreground text-muted-foreground' : 'cursor-pointer'}`} />
                                     </PaginationItem>
                                     <PaginationItem>
                                         <p>Page {pageNumber} of {totalPages}</p>
                                     </PaginationItem>
                                     <PaginationItem>
-                                        <PaginationNext onClick={() => handlePageChange(Page.Next)} className={`${pageNumber == totalPages ? 'hover:bg-background hover:text-muted-foreground text-muted-foreground' : 'cursor-pointer'}`}/>
+                                        <PaginationNext onClick={() => tryGoTo(Page.Next)} className={`${pageNumber == totalPages ? 'hover:bg-background hover:text-muted-foreground text-muted-foreground' : 'cursor-pointer'}`}/>
                                     </PaginationItem>
                                 </PaginationContent>
                             </Pagination>
                         }
                     </div>
                     <ul className={`${isMobile ? 'w-full' : 'min-w-[600px]'} mt-4 space-y-2 flex flex-col items-center justify-center`}>
-                        {userSearchHypermediaResource && userSearchHypermediaResource.items().length > 0 ? (
-                            userSearchHypermediaResource.items().map((entry) => (
+                        { items.length > 0 ? (
+                            items.map((entry) => (
                                 <li key={entry.id} className={`${isMobile ? 'w-full' : 'min-w-[700px] flex-1'}`}>
                                     <Link
                                         to={`/profile/${entry.id}`}
@@ -215,12 +195,12 @@ export const Explore = () => {
                                 </li>
                             ))
                         ) : (
-                            userSearchHypermediaResource && userSearchHypermediaResource.items().length == 0 && <p className="text-muted-foreground">No users found.</p>
+                            items.length == 0 && <p className="text-muted-foreground">No users found.</p>
                         )}
                     </ul>
-                    { userSearchHypermediaResource && userSearchHypermediaResource.items().length > 0 &&
+                    { items.length > 0 &&
                         <div className="flex flex-row items-center justify-between space-x-2 my-4">
-                            <Button variant="outline" onClick={() => handlePageChange(Page.First)} className={`${pageNumber == 1 ? 'hover:bg-background hover:text-muted-foreground text-muted-foreground' : 'cursor-pointer'}`}>First</Button>
+                            <Button variant="outline" onClick={() => tryGoTo(Page.First)} className={`${pageNumber == 1 ? 'hover:bg-background hover:text-muted-foreground text-muted-foreground' : 'cursor-pointer'}`}>First</Button>
                             <Dialog open={isOpen} onOpenChange={handleOpenChange}>
                                 <DialogTrigger asChild>
                                     <Button variant="outline" className="cursor-pointer">
@@ -249,7 +229,13 @@ export const Explore = () => {
                                         </form>
                                     </DialogContent>
                             </Dialog>
-                            <Button variant="outline" onClick={() => handlePageChange(Page.Last)} className={`${pageNumber == totalPages ? 'hover:bg-background hover:text-muted-foreground text-muted-foreground' : 'cursor-pointer'}`}>Last</Button>
+                            <Button 
+                                variant="outline" 
+                                onClick={() => tryGoTo(Page.Last)}
+                                className={`${pageNumber == totalPages ? 'hover:bg-background hover:text-muted-foreground text-muted-foreground' : 'cursor-pointer'}`}
+                            >
+                                Last
+                            </Button>
                         </div>
                     }
                     

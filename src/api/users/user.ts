@@ -1,7 +1,12 @@
 import { ApiError, UNEXPECTED_ERROR_MESSAGE } from "../api-error";
 import { endpoints } from "../endpoints";
-import { fetchHypermedia } from "../hypermedia";
 import { PagedList, PagedListFields } from "../paged-list";
+
+export const UserSortField = {
+    username: "username",
+    accountAge: "accountage",
+    followers: "followers",
+}
 
 export type User = {
     id: string;
@@ -117,7 +122,14 @@ export const UserService = {
         }
     },
 
-    search: async (query: string, pageNumber: number = 1, pageSize: number = 20, sortOrder: string, sortBy: string, onError?: (description: string) => void): Promise<PagedList<User> | null> => {
+    search: async (
+        query: string,
+        pageNumber: number = 1,
+        pageSize: number = 20,
+        sortOrder: string,
+        sortBy: string, 
+        onError?: (description: string) => void
+    ): Promise<PagedList<User> | null> => {
         try {
             const url = new URL(endpoints.users.search(query));
             url.search = new URLSearchParams({
@@ -146,7 +158,7 @@ export const UserService = {
                 nextPageUrl: data.nextPageUrl ?? null,
             }
  
-            return new PagedList<User>(pagedListFields, fetchHypermedia, onError);
+            return new PagedList<User>(pagedListFields);
         } 
         catch (_error) {
             onError && onError(UNEXPECTED_ERROR_MESSAGE);
