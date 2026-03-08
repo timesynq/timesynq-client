@@ -23,10 +23,6 @@ export type Wip = {
     lastOpenedOnUTC: Date;
 }
 
-export type DeleteWipRequest = {
-    wipId: string;
-}
-
 export type ChangeWipNameRequest = {
     newName: string;
 }
@@ -156,15 +152,14 @@ export const WipService = {
         }
     },
 
-    delete: async (deleteWipRequest: DeleteWipRequest, onError?: (description: string) => void): Promise<boolean> => {
+    delete: async (wipId: string, onError?: (description: string) => void): Promise<boolean> => {
         try{
-            const response = await fetch(endpoints.wips.delete(), {
+            const response = await fetch(endpoints.wips.delete(wipId), {
                 method: "DELETE",
                 credentials: "include",
                 headers: {
                     'Accept': 'application/json',
                 },
-                body: JSON.stringify(deleteWipRequest),
             });
 
             if(response.ok){
