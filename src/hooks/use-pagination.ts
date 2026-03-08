@@ -16,6 +16,7 @@ export const usePagination = <T>(
     initialState: InitialPaginationState,
     searcher: Searcher<T>,
     hypermediaFetcher: HypermediaFetcher<T>,
+    refetchWithEmptySearch: boolean,
     onError?: (description: string) => void,
 ) => {
 
@@ -33,7 +34,7 @@ export const usePagination = <T>(
 
     const queryByPage = (newPageNumber: number) => {
         newPageNumber = clamp(newPageNumber, 1, totalPages);
-        if (searchedQuery)
+        if (searchedQuery || refetchWithEmptySearch)
             search(searchedQuery, newPageNumber);
         else 
             setPageNumber(newPageNumber);
@@ -41,7 +42,7 @@ export const usePagination = <T>(
 
     const updatePageSize = (newPageSize: number): void => {
         newPageSize = clamp(newPageSize, 1, 100);
-        if (searchedQuery)
+        if (searchedQuery || refetchWithEmptySearch)
             search(searchedQuery, 1, newPageSize);
         else {
             setPageSize(newPageSize);
@@ -52,7 +53,7 @@ export const usePagination = <T>(
     const updateSortOrder = (newSortReverse: boolean): void => {
         if (newSortReverse === sortReverse)
             return;
-        if (searchedQuery)
+        if (searchedQuery || refetchWithEmptySearch)
             search(searchedQuery, 1, undefined, newSortReverse);
         else {
             setSortReverse(newSortReverse);
@@ -63,7 +64,7 @@ export const usePagination = <T>(
     const updateSortBy = (newSortBy: string): void => {
         if (newSortBy === sortBy)
             return;
-        if (searchedQuery)
+        if (searchedQuery || refetchWithEmptySearch)
             search(searchedQuery, 1, undefined, undefined, newSortBy);
         else {
             setSortBy(newSortBy);
@@ -72,7 +73,7 @@ export const usePagination = <T>(
     }
 
     const search = async (
-        query: string,
+        query: string | null,
         pageNumberParam?: number,
         pageSizeParam?: number,
         sortReverseParam?: boolean,

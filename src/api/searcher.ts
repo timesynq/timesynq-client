@@ -1,7 +1,7 @@
 import { PagedList } from "./paged-list";
 
 export type Searcher<T> = (
-    query: string,
+    query: string | null,
     pageNumber: number,
     pageSize: number,
     sortOrder: string,

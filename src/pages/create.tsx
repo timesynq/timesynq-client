@@ -6,15 +6,11 @@ import HeartIcon from "@/assets/svg/heart-icon.svg?react";
 import { Toasts } from "@/utils/toasts";
 import { useNavigate } from "react-router-dom";
 import { Wip, WipService } from "@/api/wips/wip";
-import { useEffect, useState } from "react";
+import { WipSearchDialog } from "@/components/wip-search-dialog";
 
 export const Create = () => {
 
     const navigate = useNavigate();
-    const [ownedWips, setOwnedWips] = useState<Wip[]>([]);
-    const [sharedWips, setSharedWips] = useState<Wip[]>([]);
-    const [ownedWipsLoading, setOwnedWipsLoading] = useState<boolean>(true);
-    const [sharedWipsLoading, setSharedWipsLoading] = useState<boolean>(true);
 
     const createNewWip = async(): Promise<void> => {
         const newWip: Wip | null = await WipService.create((description: string) => {Toasts.error(description)});
@@ -22,19 +18,6 @@ export const Create = () => {
             navigate(`/room/${newWip.id}`);
         }
     }
-
-    useEffect(() => {
-        const fetchOwnedWips = async () => {
-            
-            
-        }
-
-        const fetchSharedWips = async () => {
-
-        }
-        fetchOwnedWips();
-        fetchSharedWips();
-    }, []);
 
     return (
         <main className="flex-1 flex flex-col items-center justify-center m-4 mt-4">
@@ -53,7 +36,7 @@ export const Create = () => {
                                 <p className="text-sm text-muted-foreground">Load a work in progress.</p>
                             </CardContent>
                             <CardFooter className="w-full mt-4">
-                                <Button className="w-full" variant="outline">Select Song</Button>
+                                <WipSearchDialog isShared={false}/>
                             </CardFooter>
                         </Card>
                         <Card className="flex flex-col items-center justify-between p-4 text-center">
@@ -77,7 +60,7 @@ export const Create = () => {
                                 <p className="text-sm text-muted-foreground">Load a work in progress that was shared with you.</p>
                             </CardContent>
                             <CardFooter className="w-full mt-4">
-                                <Button className="w-full" variant="outline">Select Song</Button>
+                                <WipSearchDialog isShared={true}/>
                             </CardFooter>
                         </Card>
                     </div>

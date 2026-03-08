@@ -3,6 +3,17 @@ import { endpoints } from "../endpoints";
 import { PagedList } from "../paged-list";
 import { User } from "../users/user";
 
+export const WipSortField = {
+    name: "name",
+    lastOpened: "lastopened",
+    wipage: "wipage",
+}
+
+export const WipShareSortField = {
+    name: "name",
+    shareAge: "shareAge"
+}
+
 export type Wip = {
     id: string;
     name: string;
@@ -26,6 +37,7 @@ export type ShareWipRequest = {
 export const WipService = {
 
     getMyWips: async (
+        searchString: string | null = null,
         pageNumber: number = 1,
         pageSize: number = 20,
         sortOrder: string,
@@ -35,10 +47,11 @@ export const WipService = {
         try {
             const url = new URL(endpoints.wips.getMyWips());
             url.search = new URLSearchParams({
+                ...(searchString !== null && {searchString}),
                 pageNumber: `${pageNumber}`,
                 pageSize: `${pageSize}`,
-                sortOrder: `${sortOrder}`,
-                sortBy: `${sortBy}`,
+                sortOrder: sortOrder,
+                sortBy: sortBy,
             }).toString();
 
             const response = await fetch(url, {
@@ -158,6 +171,7 @@ export const WipService = {
     },
 
     getWipsSharedWithMe: async (
+        searchString: string | null = null,
         pageNumber: number = 1,
         pageSize: number = 20,
         sortOrder: string,
@@ -167,10 +181,11 @@ export const WipService = {
         try {
             const url = new URL(endpoints.wips.getSharedWips());
             url.search = new URLSearchParams({
+                ...(searchString !== null && {searchString}),
                 pageNumber: `${pageNumber}`,
                 pageSize: `${pageSize}`,
-                sortOrder: `${sortOrder}`,
-                sortBy: `${sortBy}`,
+                sortOrder: sortOrder,
+                sortBy: sortBy,
             }).toString();
 
             const response = await fetch(url, {

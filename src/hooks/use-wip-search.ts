@@ -1,14 +1,14 @@
-import { fetchHypermedia } from "@/api/hypermedia";
+import { Wip, WipService, WipShareSortField, WipSortField } from "@/api/wips/wip";
 import { InitialPaginationState, usePagination } from "./use-pagination";
-import { User, UserService, UserSortField } from "@/api/users/user";
+import { fetchHypermedia } from "@/api/hypermedia";
 
-export const useUserSearch = (onError?: (description: string) => void) => {
-    
+export const useWipSearch = (isShared: boolean, onError?: (description: string) => void) => {
+
     const defaultPaginationState: InitialPaginationState = {
         pageNumber: 1,
         pageSize: 10,
         sortReverse: false,
-        sortBy: UserSortField.username
+        sortBy: isShared ? WipShareSortField.name : WipSortField.name
     }
 
     const {
@@ -28,21 +28,16 @@ export const useUserSearch = (onError?: (description: string) => void) => {
         updateSortBy,
         search,
         tryGoTo
-    } = usePagination<User>(
+    } = usePagination<Wip>(
         defaultPaginationState,
-        UserService.search,
+        isShared ? WipService.getWipsSharedWithMe : WipService.getMyWips,
         fetchHypermedia,
-        false,
+        true,
         onError,
     );
 
     const trySearch = async (query: string): Promise<boolean> => {
-        if (query.trim().length < 3) {
-            onError && onError("Please enter at least 3 letters.");
-            return false;
-        }
-        const succeeded: boolean = await search(query);
-        return succeeded;
+        return await search(query);
     }
 
     return {
@@ -63,4 +58,5 @@ export const useUserSearch = (onError?: (description: string) => void) => {
         trySearch,
         tryGoTo
     }
+
 }

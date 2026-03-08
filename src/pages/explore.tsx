@@ -12,7 +12,7 @@ import { Pagination, PaginationContent, PaginationItem, PaginationNext, Paginati
 import { Page } from "@/api/paged-list";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useUserSearch } from "@/hooks/use-user-search";
 
 export const Explore = () => {
@@ -61,7 +61,6 @@ export const Explore = () => {
             updatePageSize(input);
     }
 
-
     const handlePageQuery = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
@@ -95,7 +94,7 @@ export const Explore = () => {
                             onChange={(e) => setUserQuery(e.target.value)}
                         />
                         <Button type="submit" variant="positive" size="icon" className="cursor-pointer w-12">
-                            <SearchIcon  />
+                            <SearchIcon />
                         </Button>
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
@@ -143,7 +142,7 @@ export const Explore = () => {
                     </form>
                     <div className={`${isMobile ? 'w-full' : 'min-w-[700px]'} flex flex-row items-end justify-between space-x-8 h-10`}>
                         <p className="w-[50%] text-sm ">{searchResultMessage}</p>
-                        {!!totalPages && totalPages > 0 && 
+                        { totalPages > 0 && 
                             <Pagination className="w-[50%] justify-end">
                                 <PaginationContent className="space-x-2">
                                     <PaginationItem>
@@ -209,7 +208,9 @@ export const Explore = () => {
                                 </DialogTrigger>
                                     <DialogContent className="w-64">
                                         <DialogHeader>
-                                            Go to Page
+                                            <DialogTitle>
+                                                Go to Page
+                                            </DialogTitle>
                                         </DialogHeader>
                                         <form onSubmit={handlePageQuery} className="flex flex-col space-y-4">
                                             <Input

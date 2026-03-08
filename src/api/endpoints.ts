@@ -20,7 +20,7 @@ export const endpoints = {
         me: () => addBaseToPath("/users/me"),
         getById: (id: string) => addBaseToPath(`/users/${id}`),
         profile: (id: string) => addBaseToPath(`/users/${id}/profile`),
-        search: (searchString: string) => addBaseToPath(`/users/search/${searchString}`),
+        search: () => addBaseToPath("/users"),
         changeUsername: () => addBaseToPath("/users/username"),
         delete: () => addBaseToPath("/users"), 
     },

@@ -42,7 +42,6 @@ export class TrackerHubClient{
         this._connection.on(
             TrackerHubClientCallbacks.UserJoinedRoom,
             (roomMember: RoomMember) => {
-                console.log(this._userJoinedRoomListeners);
                 this._userJoinedRoomListeners.forEach(callback => callback(roomMember));
             }
         )
