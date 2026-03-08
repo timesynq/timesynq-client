@@ -1,3 +1,4 @@
+import { trimUTC } from "@/utils/date";
 import { ApiError, UNEXPECTED_ERROR_MESSAGE } from "../api-error";
 import { endpoints } from "../endpoints";
 import { PagedList } from "../paged-list";
@@ -61,8 +62,21 @@ export const WipService = {
             });
 
             const data = await response.json();
+
+            const items: Wip[] = (data.items ?? []).map((item: any) => {
+                return {
+                    ...item,
+                    createdOnUTC: item.createdOnUTC
+                        ? trimUTC(item.createdOnUTC)
+                        : null,
+                    lastOpenedOnUTC: item.lastOpenedOnUTC
+                        ? trimUTC(item.lastOpenedOnUTC)
+                        : null,
+                };
+            });
+            
             const pagedListFields = {
-                items: data.items ?? [],
+                items: items,
                 pageNumber: data.pageNumber,
                 pageSize: data.pageSize,
                 totalItems: data.totalItems,
@@ -96,12 +110,10 @@ export const WipService = {
             const data = await response.json();
 
             if(response.ok){
-                const trimmedCreatedOnUTCTimestamp = data.createdOnUTC.slice(0, 23);
-                const trimmedLastOpenedOnUTCTimestamp = data.lastOpenedOnUTC.slice(0, 23);
                 return {
                     ...data,
-                    createdOnUTC: new Date(trimmedCreatedOnUTCTimestamp),
-                    lastOpenedOnUTC: new Date(trimmedLastOpenedOnUTCTimestamp)
+                    createdOnUTC: trimUTC(data.createdOnUTC),
+                    lastOpenedOnUTC: trimUTC(data.lastOpenedOnUTC)
                 }
             }
             
@@ -195,8 +207,21 @@ export const WipService = {
             });
 
             const data = await response.json();
+
+            const items: Wip[] = (data.items ?? []).map((item: any) => {
+                return {
+                    ...item,
+                    createdOnUTC: item.createdOnUTC
+                        ? trimUTC(item.createdOnUTC)
+                        : null,
+                    lastOpenedOnUTC: item.lastOpenedOnUTC
+                        ? trimUTC(item.lastOpenedOnUTC)
+                        : null,
+                };
+            });
+
             const pagedListFields = {
-                items: data.items ?? [],
+                items: items,
                 pageNumber: data.pageNumber,
                 pageSize: data.pageSize,
                 totalItems: data.totalItems,

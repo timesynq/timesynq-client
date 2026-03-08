@@ -1,3 +1,4 @@
+import { trimUTC } from "@/utils/date";
 import { ApiError, UNEXPECTED_ERROR_MESSAGE } from "../api-error";
 import { endpoints } from "../endpoints";
 import { PagedList, PagedListFields } from "../paged-list";
@@ -46,10 +47,9 @@ export const UserService = {
             const data = await response.json();
 
             if(response.ok){
-                const trimmedTimestamp = data.createdOnUTC.slice(0, 23);
                 return {
                     ...data,
-                    createdOnUTC: new Date(trimmedTimestamp),
+                    createdOnUTC: trimUTC(data.createdOnUTC),
                 }
             }
 
@@ -76,10 +76,9 @@ export const UserService = {
             const data = await response.json();
 
             if(response.ok){
-                const trimmedTimestamp = data.createdOnUTC.slice(0, 23);
                 return {
                     ...data,
-                    createdOnUTC: new Date(trimmedTimestamp),
+                    createdOnUTC: trimUTC(data.createdOnUTC),
                 }
             }
 
@@ -106,8 +105,7 @@ export const UserService = {
 
             if(response.ok){
                 const user = data.user;
-                const trimmedTimestamp = user.createdOnUTC.slice(0, 23);
-                user.createdOnUTC = trimmedTimestamp;
+                user.createdOnUTC = trimUTC(user.createdOnUTC);
                 return {
                     ...data,
                     user: user,

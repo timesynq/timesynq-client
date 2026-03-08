@@ -6,12 +6,13 @@ import { useEffect, useState } from "react";
 import SearchIcon from "@/assets/svg/search-icon.svg?react";
 import SettingsIcon from "@/assets/svg/settings-icon.svg?react";
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/dropdown-menu";
-import { ScrollArea } from "./ui/scroll-area";
 import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "./ui/pagination";
 import { useWipSearch } from "@/hooks/use-wip-search";
 import { Page } from "@/api/paged-list";
 import { Toasts } from "@/utils/toasts";
 import { WipShareSortField, WipSortField } from "@/api/wips/wip";
+import TrashIcon from "@/assets/svg/trash-icon.svg?react";
+
 
 export interface WipSearchDialogProps {
     isShared: boolean
@@ -191,11 +192,20 @@ export const WipSearchDialog = ({isShared}: WipSearchDialogProps) => {
                         { items.length > 0 ? (
                             items.map((entry) => (
                                 <li key={entry.id} className={`${isMobile ? 'w-full' : 'min-w-[700px] flex-1'}`}>
-                                    <div className="block bg-popover p-4 shadow-md hover:shadow-lg hover:bg-accent transition-all duration-200 border-border border-1">
+                                    <div className="block bg-popover p-4 shadow-md hover:shadow-lg hover:bg-accent transition-all duration-200 border-border border-1 cursor-pointer">
                                         <div className="flex items-center gap-4">
-                                            <div className="flex flex-col">
-                                                <span className="text-lg font-semibold text-foreground">
-                                                    {entry.name}
+                                            <div className="flex flex-col w-full">
+                                                <span className="flex flex-row justify-between text-lg font-semibold text-foreground">
+                                                    <span>{entry.name}</span>
+                                                    <div>
+                                                        <Button variant="negative" size="icon" className="cursor-pointer">
+                                                            <TrashIcon />
+                                                        </Button>
+                                                    </div>
+                                                </span>
+                                                <span className="flex flex-row space-x-3 text-muted-foreground text-sm">
+                                                    <span>Created {entry.createdOnUTC.toLocaleDateString()}</span>
+                                                    <span>Last opened {entry.lastOpenedOnUTC.toLocaleString()}</span>
                                                 </span>
                                             </div>
                                         </div>

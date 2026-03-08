@@ -1,5 +1,6 @@
 import { endpoints } from "../endpoints";
 import { ApiError, UNEXPECTED_ERROR_MESSAGE } from "../api-error";
+import { trimUTC } from "@/utils/date";
 
 export type Follow = {
     followerId: string;
@@ -30,10 +31,9 @@ export const FollowService = {
             const data = await response.json();
 
             if(response.ok){
-                const trimmedTimestamp = data.createdOnUTC.slice(0, 23);
                 return {
                     ...data,
-                    createdOnUTC: new Date(trimmedTimestamp),
+                    createdOnUTC: trimUTC(data.createdOnUTC),
                 }
             }
             
