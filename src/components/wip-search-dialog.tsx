@@ -21,7 +21,7 @@ export const WipSearchDialog = ({isShared}: WipSearchDialogProps) => {
 
     const isMobile = useIsMobile();
     const [nameQuery, setNameQuery] = useState<string>("");
-    const [searchResultMessage, setSearchResultMessage] = useState<string>("");
+    const [searchResultMessage, setSearchResultMessage] = useState<string>("All wips");
     const [isPageQueryOpen, setIsPageQueryOpen] = useState<boolean>(false);
 
     const {
