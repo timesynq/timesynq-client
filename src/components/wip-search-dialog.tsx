@@ -170,23 +170,23 @@ export const WipSearchDialog = ({isShared}: WipSearchDialogProps) => {
                 </form>
                 <div className={`${isMobile ? 'w-full' : 'min-w-[700px]'} flex flex-row items-end justify-between space-x-8 h-10`}>
                     <p className="w-[50%] text-sm ">{searchResultMessage}</p>
-                        { totalPages > 0 && 
-                            <Pagination className="w-[50%] justify-end">
-                                <PaginationContent className="space-x-2">
-                                    <PaginationItem>
-                                        <PaginationPrevious onClick={() => tryGoTo(Page.Previous)} className={`${pageNumber == 1 ? 'hover:bg-background hover:text-muted-foreground text-muted-foreground' : 'cursor-pointer'}`} />
-                                    </PaginationItem>
-                                    <PaginationItem>
-                                        <p>Page {pageNumber} of {totalPages}</p>
-                                    </PaginationItem>
-                                    <PaginationItem>
-                                        <PaginationNext onClick={() => tryGoTo(Page.Next)} className={`${pageNumber == totalPages ? 'hover:bg-background hover:text-muted-foreground text-muted-foreground' : 'cursor-pointer'}`}/>
-                                    </PaginationItem>
-                                </PaginationContent>
-                            </Pagination>
-                        }
-                    </div>
-                <ScrollArea className="h-[480px] overflow-y-auto -mx-4 px-4">
+                    { totalPages > 0 && 
+                        <Pagination className="w-[50%] justify-end">
+                            <PaginationContent className="space-x-2">
+                                <PaginationItem>
+                                    <PaginationPrevious onClick={() => tryGoTo(Page.Previous)} className={`${pageNumber == 1 ? 'hover:bg-background hover:text-muted-foreground text-muted-foreground' : 'cursor-pointer'}`} />
+                                </PaginationItem>
+                                <PaginationItem>
+                                    <p>Page {pageNumber} of {totalPages}</p>
+                                </PaginationItem>
+                                <PaginationItem>
+                                    <PaginationNext onClick={() => tryGoTo(Page.Next)} className={`${pageNumber == totalPages ? 'hover:bg-background hover:text-muted-foreground text-muted-foreground' : 'cursor-pointer'}`}/>
+                                </PaginationItem>
+                            </PaginationContent>
+                        </Pagination>
+                    }
+                </div>
+                <div className="h-[480px] overflow-y-auto -mx-4 px-4 no-scrollbar">
                     <ul className={`${isMobile ? 'w-full' : 'min-w-[600px]'} mt-4 space-y-2 flex flex-col items-center justify-center`}>
                         { items.length > 0 ? (
                             items.map((entry) => (
@@ -206,7 +206,7 @@ export const WipSearchDialog = ({isShared}: WipSearchDialogProps) => {
                             items.length == 0 && <p className="text-muted-foreground">No wips found.</p>
                         )}
                     </ul>
-                </ScrollArea>
+                </div>
                 { items.length > 0 &&
                     <div className="flex flex-row items-center justify-between space-x-2 my-4">
                         <Button variant="outline" onClick={() => tryGoTo(Page.First)} className={`${pageNumber == 1 ? 'hover:bg-background hover:text-muted-foreground text-muted-foreground' : 'cursor-pointer'}`}>First</Button>
