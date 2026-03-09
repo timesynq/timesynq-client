@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import CheckIcon from "@/assets/svg/check-icon.svg?react";
 import XIcon from "@/assets/svg/x-icon.svg?react";
-import { FollowService, FollowRequest, UnfollowRequest } from "@/api/follows/follow";
+import { FollowService, FollowRequest } from "@/api/follows/follow";
 import { Toasts } from "@/utils/toasts";
 import { User, UserService } from "@/api/users/user";
 import { useAuth } from "@/contexts/auth-provider";
@@ -64,10 +64,7 @@ export const Profile = () => {
     const handleUnfollow = async (): Promise<void> => {
         if(!displayedUser)
             return;
-        const request: UnfollowRequest = {
-            followeeId: displayedUser.id,
-        }
-        const unfollowResult = await FollowService.unfollow(request, (description: string) => {Toasts.error(description)});
+        const unfollowResult = await FollowService.unfollow(displayedUser.id, (description: string) => {Toasts.error(description)});
         if(unfollowResult){
             setDisplayedUser({
                 ...displayedUser,

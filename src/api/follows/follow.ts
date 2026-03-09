@@ -12,8 +12,6 @@ export type FollowRequest = {
     followeeId: string
 }
 
-export type UnfollowRequest = FollowRequest;
-
 export const FollowService = {
 
     follow: async (followRequest: FollowRequest, onError?: (description: string) => void): Promise<Follow | null> => {
@@ -48,22 +46,26 @@ export const FollowService = {
         }
     },
 
-    unfollow: async (unfollowRequest: UnfollowRequest, onError?: (description: string) => void): Promise<boolean> => {
+    unfollow: async (followeeId: string, onError?: (description: string) => void): Promise<boolean> => {
+        console.log(followeeId)
+
         try {    
-            const response = await fetch(endpoints.follow.unfollow(), {
+            const response = await fetch(endpoints.follow.unfollow(followeeId), {
                 method: "DELETE",
                 credentials: 'include',
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(unfollowRequest),
             });
+
+            console.log(endpoints.follow.unfollow(followeeId))
             
             if(response.ok){
                 return true;
             }
             const data = await response.json();
+            console.log(data)
             const error = data as ApiError;
             onError && onError(error.detail);
             return false;

@@ -29,7 +29,7 @@ export const endpoints = {
         followers: (userId: string) => addBaseToPath(`/follows/${userId}/followers`),
         followees: (userId: string) => addBaseToPath(`/follows/${userId}/followees`),
         follow: () => addBaseToPath("/follows"),
-        unfollow: () => addBaseToPath("/follows"),
+        unfollow: (followeeId: string) => addBaseToPath(`/follows/${followeeId}`),
     },
     wips: {
         getById: (wipId: string) => addBaseToPath(`/wips/${wipId}`),
