@@ -13,6 +13,7 @@ import { Toasts } from "@/utils/toasts";
 import { Wip, WipService, WipShareSortField, WipSortField } from "@/api/wips/wip";
 import TrashIcon from "@/assets/svg/trash-icon.svg?react";
 import LoadingIndicator from "@/assets/svg/loading-indicator.svg?react";
+import { useNavigate } from "react-router-dom";
 
 export interface WipSearchDialogProps {
     isShared: boolean
@@ -31,6 +32,8 @@ export const WipSearchDialog = ({isShared}: WipSearchDialogProps) => {
     const [isPageQueryOpen, setIsPageQueryOpen] = useState<boolean>(false);
     const [deleteDialogState, setDeleteDialogState] = useState<DeleteDialogState>({open: false});
     const [isDeleteLoading, setIsDeleteLoading] = useState<boolean>(false);
+
+    const navigate = useNavigate();
 
     const {
         // read only values
@@ -221,7 +224,10 @@ export const WipSearchDialog = ({isShared}: WipSearchDialogProps) => {
                             { items.length > 0 ? (
                                 items.map((entry) => (
                                     <li key={entry.id} className={`${isMobile ? 'w-full' : 'min-w-[700px] flex-1'}`}>
-                                        <div className="block bg-popover p-4 shadow-md hover:shadow-lg hover:bg-accent transition-all duration-200 border-border border-1 cursor-pointer">
+                                        <div 
+                                            onDoubleClick={() => navigate(`/room/${entry.id}`)}
+                                            className="block bg-popover p-4 shadow-md hover:shadow-lg hover:bg-accent transition-all duration-200 border-border border-1 cursor-pointer"
+                                        >
                                             <div className="flex items-center gap-4">
                                                 <div className="flex flex-col w-full">
                                                     <span className="flex flex-row justify-between text-lg font-semibold text-foreground">
@@ -231,10 +237,14 @@ export const WipSearchDialog = ({isShared}: WipSearchDialogProps) => {
                                                                 variant="negative"
                                                                 size="icon"
                                                                 className="cursor-pointer"
-                                                                onClick={() => setDeleteDialogState({
-                                                                    open: true,
-                                                                    wip: entry
-                                                                })}
+                                                                onClick={(e) => {
+                                                                    e.preventDefault();
+                                                                    e.stopPropagation();
+                                                                    setDeleteDialogState({
+                                                                        open: true,
+                                                                        wip: entry
+                                                                    })
+                                                                }}
                                                             >
                                                                 <TrashIcon />
                                                             </Button>
