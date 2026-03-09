@@ -168,7 +168,7 @@ export const UserService = {
     changeUsername: async (changeUsernameRequest: ChangeUsernameRequest, onSuccess?: (description: string) => void, onError?: (description: string) => void): Promise<boolean> => {
         try{
             const response = await fetch(endpoints.users.changeUsername(), {
-                method: "POST",
+                method: "PATCH",
                 credentials: "include",
                 headers: {
                     'Accept': 'application/json',
