@@ -1,8 +1,9 @@
+export const MIN_USERNAME_LENGTH = 3
+export const MAX_USERNAME_LENGTH = 24
+
 export const AuthFieldValidation = {
 
     validateUsername: (username: string): string[] => {
-        const MIN_USERNAME_LENGTH = 3
-        const MAX_USERNAME_LENGTH = 24
         const errors: string[] = [];
 
         if(username.length < MIN_USERNAME_LENGTH || username.length > MAX_USERNAME_LENGTH){

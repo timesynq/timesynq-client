@@ -1,4 +1,4 @@
-import { Wip, WipService, WipShareSortField, WipSortField } from "@/api/wips/wip";
+import { MAX_WIP_NAME_LENGTH, Wip, WipService, WipShareSortField, WipSortField } from "@/api/wips/wip";
 import { InitialPaginationState, usePagination } from "./use-pagination";
 import { fetchHypermedia } from "@/api/hypermedia";
 
@@ -37,6 +37,11 @@ export const useWipSearch = (isShared: boolean, onError?: (description: string) 
     );
 
     const trySearch = async (query: string): Promise<boolean> => {
+        const trimmed = query.trim();
+        if (trimmed.length > MAX_WIP_NAME_LENGTH) {
+            onError && onError(`Wip names cannot exceed ${MAX_WIP_NAME_LENGTH} letters.`);
+            return false;
+        }
         return await search(query);
     }
 

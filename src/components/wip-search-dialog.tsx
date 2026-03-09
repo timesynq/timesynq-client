@@ -202,7 +202,9 @@ export const WipSearchDialog = ({isShared}: WipSearchDialogProps) => {
                         </DropdownMenu>
                     </form>
                     <div className={`${isMobile ? 'w-full' : 'min-w-[700px]'} flex flex-row items-end justify-between space-x-8 h-10`}>
-                        <p className="w-[50%] text-sm ">{searchResultMessage}</p>
+                        <p className="w-[50%] text-sm truncate whitespace-nowrap text-ellipsis">
+                            {searchResultMessage}
+                        </p>
                         { totalPages > 0 && 
                             <Pagination className="w-[50%] justify-end">
                                 <PaginationContent className="space-x-2">

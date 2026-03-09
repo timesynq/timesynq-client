@@ -4,6 +4,8 @@ import { endpoints } from "../endpoints";
 import { PagedList } from "../paged-list";
 import { User } from "../users/user";
 
+export const MAX_WIP_NAME_LENGTH = 100;
+
 export const WipSortField = {
     name: "name",
     lastOpened: "lastopened",
