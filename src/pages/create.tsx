@@ -7,15 +7,19 @@ import { Toasts } from "@/utils/toasts";
 import { useNavigate } from "react-router-dom";
 import { Wip, WipService } from "@/api/wips/wip";
 import { WipSearchDialog } from "@/components/wip-search-dialog";
+import { Result } from "@/api/result";
 
 export const Create = () => {
 
     const navigate = useNavigate();
 
     const createNewWip = async(): Promise<void> => {
-        const newWip: Wip | null = await WipService.create((description: string) => {Toasts.error(description)});
-        if (newWip !== null){
-            navigate(`/room/${newWip.id}`);
+        const createWipResult: Result<Wip> = await WipService.create();
+        if (createWipResult.isSuccessful){
+            navigate(`/room/${createWipResult.value.id}`);
+        }
+        else{
+            Toasts.error(createWipResult.message);
         }
     }
 

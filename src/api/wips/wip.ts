@@ -92,7 +92,7 @@ export const WipService = {
         }
     },
 
-    create: async (onError?: (description: string) => void): Promise<Wip | null> => {
+    create: async (): Promise<Result<Wip>> => {
         try {    
             const response = await fetch(endpoints.wips.create(), {
                 method: "POST",
@@ -106,25 +106,23 @@ export const WipService = {
             const data = await response.json();
 
             if(response.ok){
-                return {
+                return ResultFactory.success({
                     ...data,
                     createdOnUTC: trimUTC(data.createdOnUTC),
                     lastOpenedOnUTC: trimUTC(data.lastOpenedOnUTC)
-                }
+                }); 
             }
             
             const error = data as ApiError;
-            onError && onError(error.detail);
-            return null;
+            return ResultFactory.error(error.detail);
         }
         
         catch (_error) {
-            onError && onError(UNEXPECTED_ERROR_MESSAGE);
-            return null;
+            return ResultFactory.error(UNEXPECTED_ERROR_MESSAGE);
         }
     },
 
-    changeWipName: async (changeWipNameRequest: ChangeWipNameRequest, onSuccess?: (description: string) => void, onError?: (description: string) => void): Promise<boolean> => {
+    changeWipName: async (changeWipNameRequest: ChangeWipNameRequest): Promise<Result<void>> => {
         try{
             const response = await fetch(endpoints.wips.changeWipName(changeWipNameRequest.newName), {
                 method: "POST",
@@ -138,21 +136,18 @@ export const WipService = {
 
             const data = await response.json();
             if(response.ok){
-                onSuccess && onSuccess("Wip name changed successfully.");
-                return true;
+                return ResultFactory.success<void>(undefined);
             }
             
             const error = data as ApiError;
-            onError && onError(error.detail);
-            return false;
+            return ResultFactory.error(error.detail);
         }
         catch (_error) {
-            onError && onError(UNEXPECTED_ERROR_MESSAGE);
-            return false;
+            return ResultFactory.error(UNEXPECTED_ERROR_MESSAGE);
         }
     },
 
-    delete: async (wipId: string, onError?: (description: string) => void): Promise<boolean> => {
+    delete: async (wipId: string): Promise<Result<void>> => {
         try{
             const response = await fetch(endpoints.wips.delete(wipId), {
                 method: "DELETE",
@@ -163,17 +158,15 @@ export const WipService = {
             });
 
             if(response.ok){
-                return true;
+                return ResultFactory.success<void>(undefined);
             }
 
             const data = await response.json();
             const error = data as ApiError;
-            onError && onError(error.detail);
-            return false;
+            return ResultFactory.error(error.detail);
         }
         catch (_error){
-            onError && onError(UNEXPECTED_ERROR_MESSAGE);
-            return false;
+            return ResultFactory.error(UNEXPECTED_ERROR_MESSAGE);
         }
     },
 
@@ -235,19 +228,20 @@ export const WipService = {
 
     getSharedUsers: async (
         wipId: string,
+        searchString: string | null = null,
         pageNumber: number = 1,
         pageSize: number = 20,
         sortOrder: string,
         sortBy: string,
-        onError?: (description: string) => void
-    ): Promise<PagedList<Wip> | null> => {
+    ): Promise<Result<PagedList<Wip>>> => {
         try {
             const url = new URL(endpoints.wips.getSharedUsers(wipId));
             url.search = new URLSearchParams({
+                ...(searchString !== null && {searchString}),
                 pageNumber: `${pageNumber}`,
                 pageSize: `${pageSize}`,
-                sortOrder: `${sortOrder}`,
-                sortBy: `${sortBy}`,
+                sortOrder: sortOrder,
+                sortBy: sortBy,
             }).toString();
 
             const response = await fetch(url, {
@@ -267,23 +261,16 @@ export const WipService = {
                 lastPageUrl: data.lastPageUrl ?? null,
                 previousPageUrl: data.previousPageUrl ?? null,
                 nextPageUrl: data.nextPageUrl ?? null,
-                onError: onError,
             }
     
-            return new PagedList<Wip>(pagedListFields);
+            return ResultFactory.success(new PagedList<Wip>(pagedListFields));
         } 
         catch (_error) {
-            onError && onError(UNEXPECTED_ERROR_MESSAGE);
-            return null;
+            return ResultFactory.error(UNEXPECTED_ERROR_MESSAGE);
         }
     },
 
-    share: async (
-        wipId: string,
-        shareWipRequest: ShareWipRequest,
-        onSuccess?: (description: string) => void,
-        onError?: (description: string) => void
-    ): Promise<User | null> => {
+    share: async (wipId: string, shareWipRequest: ShareWipRequest): Promise<Result<User>> => {
         try{
             const response = await fetch(endpoints.wips.share(wipId), {
                 method: "POST",
@@ -297,26 +284,18 @@ export const WipService = {
 
             const data = await response.json();
             if(response.ok){
-                onSuccess && onSuccess("Wip shared successfully.");
-                return data as User;
+                return ResultFactory.success(data as User);
             }
             
             const error = data as ApiError;
-            onError && onError(error.detail);
-            return null;
+            return ResultFactory.error(error.detail);
         }
         catch (_error) {
-            onError && onError(UNEXPECTED_ERROR_MESSAGE);
-            return null;
+            return ResultFactory.error(UNEXPECTED_ERROR_MESSAGE);
         }
     },
 
-    unshareOne: async (
-        wipId: string,
-        userId: string,
-        onSuccess?: (description: string) => void,
-        onError?: (description: string) => void
-    ): Promise<boolean> => {
+    unshareOne: async (wipId: string, userId: string): Promise<Result<void>> => {
         try{
             const response = await fetch(endpoints.wips.unshareOne(wipId, userId), {
                 method: "DELETE",
@@ -327,26 +306,19 @@ export const WipService = {
             });
 
             if(response.ok){
-                onSuccess && onSuccess("Unshared successfully.");
-                return true;
+                return ResultFactory.success<void>(undefined);
             }
 
             const data = await response.json();
             const error = data as ApiError;
-            onError && onError(error.detail);
-            return false;
+            return ResultFactory.error(error.detail);
         }
         catch (_error){
-            onError && onError(UNEXPECTED_ERROR_MESSAGE);
-            return false;
+            return ResultFactory.error(UNEXPECTED_ERROR_MESSAGE);
         }
     },  
 
-    unshareAll: async (
-        wipId: string,
-        onSuccess?: (description: string) => void,
-        onError?: (description: string) => void
-    ): Promise<boolean> => {
+    unshareAll: async (wipId: string): Promise<Result<void>> => {
         try{
             const response = await fetch(endpoints.wips.unshareAll(wipId), {
                 method: "DELETE",
@@ -357,18 +329,15 @@ export const WipService = {
             });
 
             if(response.ok){
-                onSuccess && onSuccess("Unshared successfully.");
-                return true;
+                return ResultFactory.success<void>(undefined);
             }
 
             const data = await response.json();
             const error = data as ApiError;
-            onError && onError(error.detail);
-            return false;
+            return ResultFactory.error(error.detail);
         }
         catch (_error){
-            onError && onError(UNEXPECTED_ERROR_MESSAGE);
-            return false;
+            return ResultFactory.error(UNEXPECTED_ERROR_MESSAGE);
         }
     },  
 }

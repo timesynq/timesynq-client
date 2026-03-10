@@ -130,13 +130,14 @@ export const WipSearchDialog = ({isShared}: WipSearchDialogProps) => {
         
         setIsDeleteLoading(true);
 
-        const onError = (description: string) => {Toasts.error(description)};
-
-        const isDeleteSuccessful = await WipService.delete(wipId, onError);
-        if(isDeleteSuccessful){
+        const deleteResult: Result<void> = await WipService.delete(wipId);
+        if(deleteResult.isSuccessful){
             Toasts.success("Wip deleted.");
             await trySearch(nameQuery);
             closeDeleteDialog();
+        }
+        else{
+            Toasts.error(deleteResult.message);
         }
         setIsDeleteLoading(false);
     }
