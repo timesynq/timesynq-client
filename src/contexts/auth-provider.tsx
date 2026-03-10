@@ -95,13 +95,16 @@ export const AuthProvider = ({children}: AuthProviderProps) => {
   }
 
   const authLogout = async (): Promise<boolean> => {
-    const isLogoutSuccessful: boolean = await logout((description: string) => Toasts.error(description));
-    if(isLogoutSuccessful){
+    const logoutResult: Result<void> = await logout();
+    if(logoutResult.isSuccessful){
       setUser(null);
       setIsLoading(false);
       navigate('/');
     }
-    return isLogoutSuccessful;
+    else{
+      Toasts.error(logoutResult.message);
+    }
+    return logoutResult.isSuccessful;
   }
 
   return(
