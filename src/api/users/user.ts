@@ -127,8 +127,7 @@ export const UserService = {
         pageSize: number = 20,
         sortOrder: string,
         sortBy: string, 
-        onError?: (description: string) => void
-    ): Promise<PagedList<User> | null> => {
+    ): Promise<Result<PagedList<User>>> => {
         try {
             const url = new URL(endpoints.users.search());
             url.search = new URLSearchParams({
@@ -158,11 +157,10 @@ export const UserService = {
                 nextPageUrl: data.nextPageUrl ?? null,
             }
  
-            return new PagedList<User>(pagedListFields);
+            return ResultFactory.success(new PagedList<User>(pagedListFields));
         } 
         catch (_error) {
-            onError && onError(UNEXPECTED_ERROR_MESSAGE);
-            return null;
+            return ResultFactory.error(UNEXPECTED_ERROR_MESSAGE)
         }
     },
 

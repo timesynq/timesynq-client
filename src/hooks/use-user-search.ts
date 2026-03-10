@@ -2,8 +2,9 @@ import { fetchHypermedia } from "@/api/hypermedia";
 import { InitialPaginationState, usePagination } from "./use-pagination";
 import { User, UserService, UserSortField } from "@/api/users/user";
 import { MAX_USERNAME_LENGTH, MIN_USERNAME_LENGTH } from "@/api/auth/validation";
+import { Result, ResultFactory } from "@/api/result";
 
-export const useUserSearch = (onError?: (description: string) => void) => {
+export const useUserSearch = () => {
     
     const defaultPaginationState: InitialPaginationState = {
         pageNumber: 1,
@@ -34,17 +35,14 @@ export const useUserSearch = (onError?: (description: string) => void) => {
         UserService.search,
         fetchHypermedia,
         false,
-        onError,
     );
 
-    const trySearch = async (query: string): Promise<boolean> => {
+    const trySearch = async (query: string): Promise<Result<void>> => {
         const trimmed = query.trim();
         if (trimmed.length < MIN_USERNAME_LENGTH || trimmed.length > MAX_USERNAME_LENGTH) {
-            onError && onError(`Please enter between ${MIN_USERNAME_LENGTH} and ${MAX_USERNAME_LENGTH} letters.`);
-            return false;
+            return ResultFactory.error(`Please enter between ${MIN_USERNAME_LENGTH} and ${MAX_USERNAME_LENGTH} letters.`)
         }
-        const succeeded: boolean = await search(query);
-        return succeeded;
+        return await search(query);
     }
 
     return {

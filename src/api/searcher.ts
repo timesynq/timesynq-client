@@ -1,4 +1,5 @@
 import { PagedList } from "./paged-list";
+import { Result } from "./result";
 
 export type Searcher<T> = (
     query: string | null,
@@ -6,5 +7,4 @@ export type Searcher<T> = (
     pageSize: number,
     sortOrder: string,
     sortBy: string,
-    onError?: (description: string) => void,
-) => Promise<PagedList<T> | null>;
+) => Promise<Result<PagedList<T>>>;

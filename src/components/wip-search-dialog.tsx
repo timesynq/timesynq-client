@@ -14,6 +14,7 @@ import { Wip, WipService, WipShareSortField, WipSortField } from "@/api/wips/wip
 import TrashIcon from "@/assets/svg/trash-icon.svg?react";
 import LoadingIndicator from "@/assets/svg/loading-indicator.svg?react";
 import { useNavigate } from "react-router-dom";
+import { Result } from "@/api/result";
 
 export interface WipSearchDialogProps {
     isShared: boolean
@@ -52,7 +53,7 @@ export const WipSearchDialog = ({isShared}: WipSearchDialogProps) => {
         updateSortBy,
         trySearch,
         tryGoTo
-    } = useWipSearch(isShared, (description: string) => Toasts.error(description));
+    } = useWipSearch(isShared);
 
     useEffect(() => {
         const fetchInitialWips = async(): Promise<void> => {
@@ -64,13 +65,15 @@ export const WipSearchDialog = ({isShared}: WipSearchDialogProps) => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        const succeeded: boolean = await trySearch(nameQuery);
-        if(succeeded){
+        const searchResult: Result<void> = await trySearch(nameQuery);
+        if(searchResult.isSuccessful){
             if(nameQuery.length > 0)
                 setSearchResultMessage(`Wip search results for "${nameQuery}"`);
             else
                 setSearchResultMessage("All wips");
         }
+        else
+            Toasts.error(searchResult.message);
     }
 
     const handlePageQueryOpenChange = (open: boolean) => {
@@ -81,25 +84,43 @@ export const WipSearchDialog = ({isShared}: WipSearchDialogProps) => {
         setDeleteDialogState(prev => ({...prev, open: false}));
     }
 
-    const handlePageSizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handlePageSizeChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         e.preventDefault();
 
         const input = Number(e.target.value);
-        if (!isNaN(input))
-            updatePageSize(input);
+        if (isNaN(input))
+            return;
+
+        const updatePageSizeResult: Result<void> = await updatePageSize(input);
+        if (!updatePageSizeResult.isSuccessful)
+            Toasts.error(updatePageSizeResult.message);
     }
 
-    const handlePageQuery = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleUpdateSortOrder = async (newSortReverse: boolean) => {
+        const updateSortOrderResult: Result<void> = await updateSortOrder(newSortReverse);
+        if (!updateSortOrderResult.isSuccessful)
+            Toasts.error(updateSortOrderResult.message); 
+    }
+
+    const handleUpdateSortBy = async (newSortBy: string) => {
+        const updateSortByResult: Result<void> = await updateSortBy(newSortBy);
+        if (!updateSortByResult.isSuccessful)
+            Toasts.error(updateSortByResult.message);
+    }
+
+    const handlePageQuery = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
         const input: string = formData.get("page-number") as string;
         const newPageNumber = parseInt(input);
         
-        if(isNaN(newPageNumber)){
+        if (isNaN(newPageNumber))
             return;
-        }
 
-        queryByPage(newPageNumber);
+        const queryByPageResult: Result<void> = await queryByPage(newPageNumber);
+        if (!queryByPageResult.isSuccessful)
+            Toasts.error(queryByPageResult.message);
+
         setIsPageQueryOpen(false);
     }
 
@@ -118,6 +139,12 @@ export const WipSearchDialog = ({isShared}: WipSearchDialogProps) => {
             closeDeleteDialog();
         }
         setIsDeleteLoading(false);
+    }
+
+    const handleTryGoTo = async (page: Page) => {
+        const tryGoToResult: Result<void> = await tryGoTo(page);
+        if(!tryGoToResult.isSuccessful)
+            Toasts.error(tryGoToResult.message);
     }
 
     return (
@@ -167,12 +194,12 @@ export const WipSearchDialog = ({isShared}: WipSearchDialogProps) => {
                                     checked={sortReverse} 
                                     onSelect={(e) => e.preventDefault()} 
                                     onClick={(e) => e.stopPropagation()} 
-                                    onCheckedChange={() => updateSortOrder(!sortReverse)}
+                                    onCheckedChange={() => handleUpdateSortOrder(!sortReverse)}
                                 >
                                     Reverse sort
                                 </DropdownMenuCheckboxItem>
                                 <DropdownMenuSeparator />
-                                    <DropdownMenuRadioGroup value={sortBy} onValueChange={updateSortBy}>
+                                    <DropdownMenuRadioGroup value={sortBy} onValueChange={(value) => handleUpdateSortBy(value)}>
                                         { isShared && 
                                             <>
                                                 <DropdownMenuRadioItem value={WipShareSortField.name} onSelect={(e) => e.preventDefault()} onClick={(e) => e.stopPropagation()} className="cursor-pointer">
@@ -209,13 +236,13 @@ export const WipSearchDialog = ({isShared}: WipSearchDialogProps) => {
                             <Pagination className="w-[50%] justify-end">
                                 <PaginationContent className="space-x-2">
                                     <PaginationItem>
-                                        <PaginationPrevious onClick={() => tryGoTo(Page.Previous)} className={`${pageNumber == 1 ? 'hover:bg-background hover:text-muted-foreground text-muted-foreground' : 'cursor-pointer'}`} />
+                                        <PaginationPrevious onClick={() => handleTryGoTo(Page.Previous)} className={`${pageNumber == 1 ? 'hover:bg-background hover:text-muted-foreground text-muted-foreground' : 'cursor-pointer'}`} />
                                     </PaginationItem>
                                     <PaginationItem>
                                         <p>Page {pageNumber} of {totalPages}</p>
                                     </PaginationItem>
                                     <PaginationItem>
-                                        <PaginationNext onClick={() => tryGoTo(Page.Next)} className={`${pageNumber == totalPages ? 'hover:bg-background hover:text-muted-foreground text-muted-foreground' : 'cursor-pointer'}`}/>
+                                        <PaginationNext onClick={() => handleTryGoTo(Page.Next)} className={`${pageNumber == totalPages ? 'hover:bg-background hover:text-muted-foreground text-muted-foreground' : 'cursor-pointer'}`}/>
                                     </PaginationItem>
                                 </PaginationContent>
                             </Pagination>
@@ -268,7 +295,7 @@ export const WipSearchDialog = ({isShared}: WipSearchDialogProps) => {
                     </div>
                     { items.length > 0 &&
                         <div className="flex flex-row items-center justify-between space-x-2 my-4">
-                            <Button variant="outline" onClick={() => tryGoTo(Page.First)} className={`${pageNumber == 1 ? 'hover:bg-background hover:text-muted-foreground text-muted-foreground' : 'cursor-pointer'}`}>First</Button>
+                            <Button variant="outline" onClick={() => handleTryGoTo(Page.First)} className={`${pageNumber == 1 ? 'hover:bg-background hover:text-muted-foreground text-muted-foreground' : 'cursor-pointer'}`}>First</Button>
                             <Dialog open={isPageQueryOpen} onOpenChange={handlePageQueryOpenChange}>
                                 <DialogTrigger asChild>
                                     <Button variant="outline" className="cursor-pointer">
@@ -301,7 +328,7 @@ export const WipSearchDialog = ({isShared}: WipSearchDialogProps) => {
                             </Dialog>
                             <Button 
                                 variant="outline" 
-                                onClick={() => tryGoTo(Page.Last)}
+                                onClick={() => handleTryGoTo(Page.Last)}
                                 className={`${pageNumber == totalPages ? 'hover:bg-background hover:text-muted-foreground text-muted-foreground' : 'cursor-pointer'}`}
                             >
                                 Last

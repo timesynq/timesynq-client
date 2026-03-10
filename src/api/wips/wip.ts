@@ -3,6 +3,7 @@ import { ApiError, UNEXPECTED_ERROR_MESSAGE } from "../api-error";
 import { endpoints } from "../endpoints";
 import { PagedList } from "../paged-list";
 import { User } from "../users/user";
+import { Result, ResultFactory } from "../result";
 
 export const MAX_WIP_NAME_LENGTH = 100;
 
@@ -41,8 +42,7 @@ export const WipService = {
         pageSize: number = 20,
         sortOrder: string,
         sortBy: string,
-        onError?: (description: string) => void
-    ): Promise<PagedList<Wip> | null> => {
+    ): Promise<Result<PagedList<Wip>>> => {
         try {
             const url = new URL(endpoints.wips.getMyWips());
             url.search = new URLSearchParams({
@@ -83,14 +83,12 @@ export const WipService = {
                 lastPageUrl: data.lastPageUrl ?? null,
                 previousPageUrl: data.previousPageUrl ?? null,
                 nextPageUrl: data.nextPageUrl ?? null,
-                onError: onError,
             }
     
-            return new PagedList<Wip>(pagedListFields);
+            return ResultFactory.success(new PagedList<Wip>(pagedListFields));
         } 
         catch (_error) {
-            onError && onError(UNEXPECTED_ERROR_MESSAGE);
-            return null;
+            return ResultFactory.error(UNEXPECTED_ERROR_MESSAGE);
         }
     },
 
@@ -185,8 +183,7 @@ export const WipService = {
         pageSize: number = 20,
         sortOrder: string,
         sortBy: string,
-        onError?: (description: string) => void
-    ): Promise<PagedList<Wip> | null> => {
+    ): Promise<Result<PagedList<Wip>>> => {
         try {
             const url = new URL(endpoints.wips.getSharedWips());
             url.search = new URLSearchParams({
@@ -227,14 +224,12 @@ export const WipService = {
                 lastPageUrl: data.lastPageUrl ?? null,
                 previousPageUrl: data.previousPageUrl ?? null,
                 nextPageUrl: data.nextPageUrl ?? null,
-                onError: onError,
             }
     
-            return new PagedList<Wip>(pagedListFields);
+            return ResultFactory.success(new PagedList<Wip>(pagedListFields));
         } 
         catch (_error) {
-            onError && onError(UNEXPECTED_ERROR_MESSAGE);
-            return null;
+            return ResultFactory.error(UNEXPECTED_ERROR_MESSAGE);
         }
     },
 

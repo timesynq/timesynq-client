@@ -1,8 +1,9 @@
 import { MAX_WIP_NAME_LENGTH, Wip, WipService, WipShareSortField, WipSortField } from "@/api/wips/wip";
 import { InitialPaginationState, usePagination } from "./use-pagination";
 import { fetchHypermedia } from "@/api/hypermedia";
+import { Result, ResultFactory } from "@/api/result";
 
-export const useWipSearch = (isShared: boolean, onError?: (description: string) => void) => {
+export const useWipSearch = (isShared: boolean) => {
 
     const defaultPaginationState: InitialPaginationState = {
         pageNumber: 1,
@@ -33,14 +34,12 @@ export const useWipSearch = (isShared: boolean, onError?: (description: string) 
         isShared ? WipService.getWipsSharedWithMe : WipService.getMyWips,
         fetchHypermedia,
         true,
-        onError,
     );
 
-    const trySearch = async (query: string): Promise<boolean> => {
+    const trySearch = async (query: string): Promise<Result<void>> => {
         const trimmed = query.trim();
         if (trimmed.length > MAX_WIP_NAME_LENGTH) {
-            onError && onError(`Wip names cannot exceed ${MAX_WIP_NAME_LENGTH} letters.`);
-            return false;
+            return ResultFactory.error(`Wip names cannot exceed ${MAX_WIP_NAME_LENGTH} letters.`);
         }
         return await search(query);
     }

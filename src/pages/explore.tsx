@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useUserSearch } from "@/hooks/use-user-search";
+import { Result } from "@/api/result";
 
 export const Explore = () => {
 
@@ -39,40 +40,66 @@ export const Explore = () => {
         updateSortBy,
         trySearch,
         tryGoTo
-    } = useUserSearch((description: string) => Toasts.error(description));
+    } = useUserSearch();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        const succeeded: boolean = await trySearch(userQuery);
-        if(succeeded)
+        const searchResult: Result<void> = await trySearch(userQuery);
+        if (searchResult.isSuccessful)
             setSearchResultMessage(`User search results for "${userQuery}"`);
+        else
+            Toasts.error(searchResult.message);
     };
 
     const handleOpenChange = (open: boolean) => {
         setIsOpen(open);
     }
 
-    const handlePageSizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleUpdateSortOrder = async (newSortReverse: boolean) => {
+        const updateSortOrderResult: Result<void> = await updateSortOrder(newSortReverse);
+        if (!updateSortOrderResult.isSuccessful)
+            Toasts.error(updateSortOrderResult.message); 
+    }
+
+    const handleUpdateSortBy = async (newSortBy: string) => {
+        const updateSortByResult: Result<void> = await updateSortBy(newSortBy);
+        if (!updateSortByResult.isSuccessful)
+            Toasts.error(updateSortByResult.message);
+    }
+
+    const handlePageSizeChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         e.preventDefault();
 
         const input = Number(e.target.value);
-        if (!isNaN(input))
-            updatePageSize(input);
+        if (isNaN(input))
+            return;
+
+        const updatePageSizeResult: Result<void> = await updatePageSize(input);
+        if (!updatePageSizeResult.isSuccessful)
+            Toasts.error(updatePageSizeResult.message);
     }
 
-    const handlePageQuery = (e: React.FormEvent<HTMLFormElement>) => {
+    const handlePageQuery = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
         const input: string = formData.get("page-number") as string;
         const newPageNumber = parseInt(input);
         
-        if(isNaN(newPageNumber)){
+        if (isNaN(newPageNumber))
             return;
-        }
 
-        queryByPage(newPageNumber);
+        const queryByPageResult: Result<void> = await queryByPage(newPageNumber);
+        if (!queryByPageResult.isSuccessful)
+            Toasts.error(queryByPageResult.message);
+
         setIsOpen(false);
+    }
+
+    const handleTryGoTo = async (page: Page) => {
+        const tryGoToResult: Result<void> = await tryGoTo(page);
+        if(!tryGoToResult.isSuccessful)
+            Toasts.error(tryGoToResult.message);
     }
 
     return (
@@ -121,12 +148,12 @@ export const Explore = () => {
                                         checked={sortReverse} 
                                         onSelect={(e) => e.preventDefault()} 
                                         onClick={(e) => e.stopPropagation()} 
-                                        onCheckedChange={() => updateSortOrder(!sortReverse)}
+                                        onCheckedChange={() => handleUpdateSortOrder(!sortReverse)}
                                     >
                                         Reverse sort
                                     </DropdownMenuCheckboxItem>
                                     <DropdownMenuSeparator />
-                                        <DropdownMenuRadioGroup value={sortBy} onValueChange={updateSortBy}>
+                                        <DropdownMenuRadioGroup value={sortBy} onValueChange={(value) => handleUpdateSortBy(value)}>
                                             <DropdownMenuRadioItem value={UserSortField.username} onSelect={(e) => e.preventDefault()} onClick={(e) => e.stopPropagation()} className="cursor-pointer">
                                                 Sort by username
                                             </DropdownMenuRadioItem>
@@ -146,13 +173,13 @@ export const Explore = () => {
                             <Pagination className="w-[50%] justify-end">
                                 <PaginationContent className="space-x-2">
                                     <PaginationItem>
-                                        <PaginationPrevious onClick={() => tryGoTo(Page.Previous)} className={`${pageNumber == 1 ? 'hover:bg-background hover:text-muted-foreground text-muted-foreground' : 'cursor-pointer'}`} />
+                                        <PaginationPrevious onClick={() => handleTryGoTo(Page.Previous)} className={`${pageNumber == 1 ? 'hover:bg-background hover:text-muted-foreground text-muted-foreground' : 'cursor-pointer'}`} />
                                     </PaginationItem>
                                     <PaginationItem>
                                         <p>Page {pageNumber} of {totalPages}</p>
                                     </PaginationItem>
                                     <PaginationItem>
-                                        <PaginationNext onClick={() => tryGoTo(Page.Next)} className={`${pageNumber == totalPages ? 'hover:bg-background hover:text-muted-foreground text-muted-foreground' : 'cursor-pointer'}`}/>
+                                        <PaginationNext onClick={() => handleTryGoTo(Page.Next)} className={`${pageNumber == totalPages ? 'hover:bg-background hover:text-muted-foreground text-muted-foreground' : 'cursor-pointer'}`}/>
                                     </PaginationItem>
                                 </PaginationContent>
                             </Pagination>
@@ -199,7 +226,7 @@ export const Explore = () => {
                     </ul>
                     { items.length > 0 &&
                         <div className="flex flex-row items-center justify-between space-x-2 my-4">
-                            <Button variant="outline" onClick={() => tryGoTo(Page.First)} className={`${pageNumber == 1 ? 'hover:bg-background hover:text-muted-foreground text-muted-foreground' : 'cursor-pointer'}`}>First</Button>
+                            <Button variant="outline" onClick={() => handleTryGoTo(Page.First)} className={`${pageNumber == 1 ? 'hover:bg-background hover:text-muted-foreground text-muted-foreground' : 'cursor-pointer'}`}>First</Button>
                             <Dialog open={isOpen} onOpenChange={handleOpenChange}>
                                 <DialogTrigger asChild>
                                     <Button variant="outline" className="cursor-pointer">
@@ -232,7 +259,7 @@ export const Explore = () => {
                             </Dialog>
                             <Button 
                                 variant="outline" 
-                                onClick={() => tryGoTo(Page.Last)}
+                                onClick={() => handleTryGoTo(Page.Last)}
                                 className={`${pageNumber == totalPages ? 'hover:bg-background hover:text-muted-foreground text-muted-foreground' : 'cursor-pointer'}`}
                             >
                                 Last
