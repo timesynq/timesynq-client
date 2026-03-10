@@ -1,6 +1,7 @@
 import { endpoints } from "../endpoints";
 import { ApiError, UNEXPECTED_ERROR_MESSAGE } from "../api-error";
 import { trimUTC } from "@/utils/date";
+import { Result } from "../result";
 
 export type Follow = {
     followerId: string;
@@ -14,7 +15,7 @@ export type FollowRequest = {
 
 export const FollowService = {
 
-    follow: async (followRequest: FollowRequest, onError?: (description: string) => void): Promise<Follow | null> => {
+    follow: async (followRequest: FollowRequest): Promise<Result<Follow>> => {
         try {    
             const response = await fetch(endpoints.follow.follow(), {
                 method: "POST",
@@ -30,26 +31,31 @@ export const FollowService = {
 
             if(response.ok){
                 return {
-                    ...data,
-                    createdOnUTC: trimUTC(data.createdOnUTC),
+                    isSuccessful: true,
+                    value: {
+                        ...data,
+                        createdOnUTC: trimUTC(data.createdOnUTC),
+                    }
                 }
             }
             
             const error = data as ApiError;
-            onError && onError(error.detail);
-            return null;
+            return {
+                isSuccessful: false,
+                message: error.detail,
+            };
         }
         
         catch (_error) {
-            onError && onError(UNEXPECTED_ERROR_MESSAGE);
-            return null;
+            return {
+                isSuccessful: false,
+                message: UNEXPECTED_ERROR_MESSAGE,
+            };
         }
     },
 
-    unfollow: async (followeeId: string, onError?: (description: string) => void): Promise<boolean> => {
-        console.log(followeeId)
-
-        try {    
+    unfollow: async (followeeId: string): Promise<Result<void>> => {
+        try {
             const response = await fetch(endpoints.follow.unfollow(followeeId), {
                 method: "DELETE",
                 credentials: 'include',
@@ -59,21 +65,25 @@ export const FollowService = {
                 },
             });
 
-            console.log(endpoints.follow.unfollow(followeeId))
-            
             if(response.ok){
-                return true;
+                return {
+                    isSuccessful: true,
+                    value: undefined
+                };
             }
             const data = await response.json();
-            console.log(data)
             const error = data as ApiError;
-            onError && onError(error.detail);
-            return false;
+            return {
+                isSuccessful: false,
+                message: error.detail,
+            };
         }
         
         catch (_error) {
-            onError && onError(UNEXPECTED_ERROR_MESSAGE);
-            return false;
+            return {
+                isSuccessful: false,
+                message: UNEXPECTED_ERROR_MESSAGE,
+            };
         }
     }
 
