@@ -2,6 +2,7 @@ import { trimUTC } from "@/utils/date";
 import { ApiError, UNEXPECTED_ERROR_MESSAGE } from "../api-error";
 import { endpoints } from "../endpoints";
 import { PagedList, PagedListFields } from "../paged-list";
+import { Result, ResultFactory } from "../result";
 
 export const UserSortField = {
     username: "username",
@@ -34,7 +35,7 @@ export type ChangeUsernameRequest = {
 
 export const UserService = {
 
-    me: async (onError?: (description: string) => void): Promise<Me | null> => {
+    me: async (): Promise<Result<Me>> => {
         try {    
             const response = await fetch(endpoints.users.me(), {
                 method: "GET",
@@ -47,22 +48,22 @@ export const UserService = {
             const data = await response.json();
 
             if(response.ok){
-                return {
+                return ResultFactory.success<Me>({
                     ...data,
                     createdOnUTC: trimUTC(data.createdOnUTC),
-                }
+                }); 
             }
 
-            return null;
+            const error = data as ApiError;
+            return ResultFactory.error(error.detail);
         }
         
         catch (_error) {
-            onError && onError(UNEXPECTED_ERROR_MESSAGE);
-            return null;
+            return ResultFactory.error(UNEXPECTED_ERROR_MESSAGE);
         }
     },
 
-    user: async (id: string, onError?: (description: string) => void): Promise<User | null> => {
+    user: async (id: string): Promise<Result<User>> => {
         try {
             const response = await fetch(endpoints.users.getById(id), {
                 method: "GET",
@@ -76,21 +77,21 @@ export const UserService = {
             const data = await response.json();
 
             if(response.ok){
-                return {
+                return ResultFactory.success<User>({
                     ...data,
                     createdOnUTC: trimUTC(data.createdOnUTC),
-                }
+                });
             }
 
-            return null;
+            const error = data as ApiError;
+            return ResultFactory.error(error.detail);
         }
         catch (_error) {
-            onError && onError(UNEXPECTED_ERROR_MESSAGE);
-            return null;
+            return ResultFactory.error(UNEXPECTED_ERROR_MESSAGE);
         }
     },
 
-    profile: async(id: string, onError?: (description: string) => void): Promise<Profile | null> => {
+    profile: async(id: string): Promise<Result<Profile>> => {
         try {
             const response = await fetch(endpoints.users.profile(id), {
                 method: "GET",
@@ -106,17 +107,17 @@ export const UserService = {
             if(response.ok){
                 const user = data.user;
                 user.createdOnUTC = trimUTC(user.createdOnUTC);
-                return {
+                return ResultFactory.success<Profile>({
                     ...data,
                     user: user,
-                }
+                });
             }
 
-            return null;
+            const error = data as ApiError;
+            return ResultFactory.error(error.detail);
         }
         catch (_error) {
-            onError && onError(UNEXPECTED_ERROR_MESSAGE);
-            return null;
+            return ResultFactory.error(UNEXPECTED_ERROR_MESSAGE);
         }
     },
 
@@ -165,7 +166,7 @@ export const UserService = {
         }
     },
 
-    changeUsername: async (changeUsernameRequest: ChangeUsernameRequest, onSuccess?: (description: string) => void, onError?: (description: string) => void): Promise<boolean> => {
+    changeUsername: async (changeUsernameRequest: ChangeUsernameRequest): Promise<Result<void>> => {
         try{
             const response = await fetch(endpoints.users.changeUsername(), {
                 method: "PATCH",
@@ -179,21 +180,18 @@ export const UserService = {
 
             const data = await response.json();
             if(response.ok){
-                onSuccess && onSuccess("Username changed successfully.");
-                return true;
+                return ResultFactory.success<void>(undefined);
             }
             
             const error = data as ApiError;
-            onError && onError(error.detail);
-            return false;
+            return ResultFactory.error(error.detail);
         }
         catch (_error) {
-            onError && onError(UNEXPECTED_ERROR_MESSAGE);
-            return false;
+            return ResultFactory.error(UNEXPECTED_ERROR_MESSAGE);
         }
     },
     
-    delete: async (onError?: (description: string) => void): Promise<boolean> => {
+    delete: async (): Promise<Result<void>> => {
         try{
             const response = await fetch(endpoints.users.delete(), {
                 method: "DELETE",
@@ -204,17 +202,15 @@ export const UserService = {
             });
 
             if(response.ok){
-                return true;
+                return ResultFactory.success<void>(undefined);
             }
 
             const data = await response.json();
             const error = data as ApiError;
-            onError && onError(error.detail);
-            return false;
+            return ResultFactory.error(error.detail);
         }
         catch (_error){
-            onError && onError(UNEXPECTED_ERROR_MESSAGE);
-            return false;
+            return ResultFactory.error(UNEXPECTED_ERROR_MESSAGE);
         }
     }
 

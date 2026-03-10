@@ -8,7 +8,7 @@ import CheckIcon from "@/assets/svg/check-icon.svg?react";
 import XIcon from "@/assets/svg/x-icon.svg?react";
 import { FollowService, FollowRequest, Follow } from "@/api/follows/follow";
 import { Toasts } from "@/utils/toasts";
-import { User, UserService } from "@/api/users/user";
+import { Profile as ProfileType, User, UserService } from "@/api/users/user";
 import { useAuth } from "@/contexts/auth-provider";
 import { useIsLg } from "@/hooks/use-lg";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -34,9 +34,11 @@ export const Profile = () => {
                 setDisplayedUser(user);
             }
             else{
-                const profile = await UserService.profile(profileId);
-                setDisplayedUser(profile ? profile.user : null);
-                setIsFollowing(profile ? profile.isFollowing : false);
+                const getProfileResult: Result<ProfileType> = await UserService.profile(profileId);
+                if (getProfileResult.isSuccessful){
+                    setDisplayedUser(getProfileResult.value.user);
+                    setIsFollowing(getProfileResult.value.isFollowing);
+                }
             }
             setIsDisplayedUserLoading(false);
         };

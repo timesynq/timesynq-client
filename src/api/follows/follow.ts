@@ -1,7 +1,7 @@
 import { endpoints } from "../endpoints";
 import { ApiError, UNEXPECTED_ERROR_MESSAGE } from "../api-error";
 import { trimUTC } from "@/utils/date";
-import { Result } from "../result";
+import { Result, ResultFactory } from "../result";
 
 export type Follow = {
     followerId: string;
@@ -16,7 +16,7 @@ export type FollowRequest = {
 export const FollowService = {
 
     follow: async (followRequest: FollowRequest): Promise<Result<Follow>> => {
-        try {    
+        try {   
             const response = await fetch(endpoints.follow.follow(), {
                 method: "POST",
                 credentials: 'include',
@@ -30,27 +30,18 @@ export const FollowService = {
             const data = await response.json();
 
             if(response.ok){
-                return {
-                    isSuccessful: true,
-                    value: {
-                        ...data,
-                        createdOnUTC: trimUTC(data.createdOnUTC),
-                    }
-                }
+                return ResultFactory.success<Follow>({
+                    ...data,
+                    createdOnUTC: trimUTC(data.createdOnUTC),
+                });
             }
             
             const error = data as ApiError;
-            return {
-                isSuccessful: false,
-                message: error.detail,
-            };
+            return ResultFactory.error(error.detail);
         }
         
         catch (_error) {
-            return {
-                isSuccessful: false,
-                message: UNEXPECTED_ERROR_MESSAGE,
-            };
+            return ResultFactory.error(UNEXPECTED_ERROR_MESSAGE);
         }
     },
 
@@ -66,24 +57,15 @@ export const FollowService = {
             });
 
             if(response.ok){
-                return {
-                    isSuccessful: true,
-                    value: undefined
-                };
+                return ResultFactory.success<void>(undefined);
             }
             const data = await response.json();
             const error = data as ApiError;
-            return {
-                isSuccessful: false,
-                message: error.detail,
-            };
+            return ResultFactory.error(error.detail);
         }
         
         catch (_error) {
-            return {
-                isSuccessful: false,
-                message: UNEXPECTED_ERROR_MESSAGE,
-            };
+            return ResultFactory.error(UNEXPECTED_ERROR_MESSAGE);
         }
     }
 

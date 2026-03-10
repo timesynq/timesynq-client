@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import * as signalR from "@microsoft/signalr";
 import { refreshCookie } from "@/api/auth/refresh";
 import { hubs } from "@/api/endpoints";
+import { Result } from "@/api/result";
 
 interface AuthProviderState {
   user: Me | null;
@@ -32,12 +33,15 @@ export const AuthProvider = ({children}: AuthProviderProps) => {
 
   const fetchUser = async (): Promise<void> => {
     try {
-        const user = await UserService.me();
-        setUser(user);
-        
-        if(user === null){
+        const getUserResult: Result<Me> = await UserService.me();
+        if (getUserResult.isSuccessful){
+          setUser(getUserResult.value);
+        }
+        else{
           return;
         }
+
+        const user: Me = getUserResult.value;
 
         if(user.emailConfirmed){
           localStorage.removeItem(REMEMBER_ME_KEY);
