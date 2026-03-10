@@ -8,31 +8,6 @@ export type EmailStatus = {
     isEmailConfirmed: boolean
 }
 
-//deprecated, UserService.Me returns a Me type which effectively unions a User with EmailStatus
-export const email = async (onError?: (description: string) => void): Promise<EmailStatus | null> => {
-    try {
-        const response = await fetch(endpoints.auth.email(), {
-            method: "GET",
-            credentials: 'include',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-        });
-        
-        if (response.ok){
-            const data = await response.json();
-            return data as EmailStatus;
-        }
-
-        return null;
-    }
-    catch (_error) {
-        onError && onError(UNEXPECTED_ERROR_MESSAGE);
-        return null;
-    }
-}
-
 export type ChangeEmailRequest = {
     oldEmail: string
     newEmail: string
