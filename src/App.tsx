@@ -8,8 +8,6 @@ import { Room } from './pages/room';
 import { Explore } from './pages/explore';
 import { ThemeProvider } from './contexts/theme-provider';
 import { Toaster } from 'sonner';
-import { Tracker } from './tracker/tracker-page';
-import { Sandbox } from './sandbox/sandbox-landing-page';
 import { AuthProvider } from './contexts/auth-provider';
 import { PrivateRoute } from './private-route';
 import { NavBar } from './components/nav-bar';
@@ -21,7 +19,6 @@ export default function App() {
 
     const isMobile = useIsMobile();
     const location = useLocation();
-    const isSandbox = import.meta.env.VITE_SANDBOX_MODE === "true";
 
     const isHeightFixed: boolean = location.pathname.startsWith("/room/")
 
@@ -98,13 +95,6 @@ export default function App() {
                                 </PrivateRoute>
                             } 
                         />
-                        {/* Sandbox routes */}
-                        {isSandbox && (
-                            <>
-                            <Route path="/sandbox" element={<Sandbox />} />
-                            <Route path="/sandbox/tracker" element={<Tracker />} />
-                            </>
-                        )}
                     </Routes>
                     {isMobile && <NavBarFooter />}
                 </div>
