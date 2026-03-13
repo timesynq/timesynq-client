@@ -1,11 +1,27 @@
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import MusicIcon from "@/assets/svg/music-icon.svg?react";
 import PlusIcon from "@/assets/svg/plus-icon.svg?react";
 import HeartIcon from "@/assets/svg/heart-icon.svg?react";
+import { Toasts } from "@/utils/toasts";
+import { useNavigate } from "react-router-dom";
+import { Wip, WipService } from "@/api/wips/wip";
+import { WipSearchDialog } from "@/components/wip-search-dialog";
+import { Result } from "@/api/result";
 
 export const Create = () => {
+
+    const navigate = useNavigate();
+
+    const createNewWip = async(): Promise<void> => {
+        const createWipResult: Result<Wip> = await WipService.create();
+        if (createWipResult.isSuccessful){
+            navigate(`/room/${createWipResult.value.id}`);
+        }
+        else{
+            Toasts.error(createWipResult.message);
+        }
+    }
 
     return (
         <main className="flex-1 flex flex-col items-center justify-center m-4 mt-4">
@@ -24,7 +40,7 @@ export const Create = () => {
                                 <p className="text-sm text-muted-foreground">Load a work in progress.</p>
                             </CardContent>
                             <CardFooter className="w-full mt-4">
-                                <Button className="w-full" variant="outline">Select Song</Button>
+                                <WipSearchDialog isShared={false}/>
                             </CardFooter>
                         </Card>
                         <Card className="flex flex-col items-center justify-between p-4 text-center">
@@ -36,24 +52,19 @@ export const Create = () => {
                                 <p className="text-sm text-muted-foreground">Create something from scratch.</p>
                             </CardContent>
                             <CardFooter className="w-full mt-4">
-                                <Button className="w-full" variant="outline">Create New Song</Button>
+                                <Button onClick={createNewWip} className="w-full" variant="outline">Create New Song</Button>
                             </CardFooter>
                         </Card>
                         <Card className="flex flex-col items-center justify-between p-4 text-center">
                             <CardHeader className="flex flex-col items-center justify-center space-y-8">
                                 <HeartIcon className="w-12 h-12 text-timesynq-red" />
-                                <CardTitle className="text-lg font-semibold">Join Room</CardTitle>
+                                <CardTitle className="text-lg font-semibold">Open Room with Shared Song</CardTitle>
                             </CardHeader>
                             <CardContent className="w-full">
-                                <p className="text-sm text-muted-foreground">Enter a room code to join an existing session.</p>
+                                <p className="text-sm text-muted-foreground">Load a work in progress that was shared with you.</p>
                             </CardContent>
-                            <CardFooter className="w-full mt-4 flex flex-col items-center justify-center space-y-4">
-                                <div className="flex w-full max-w-sm items-center gap-2">
-                                    <Input placeholder="Enter room code" />
-                                    <Button type="submit" variant="positive" className="cursor-pointer">
-                                        Join
-                                    </Button>
-                                </div>
+                            <CardFooter className="w-full mt-4">
+                                <WipSearchDialog isShared={true}/>
                             </CardFooter>
                         </Card>
                     </div>

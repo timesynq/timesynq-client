@@ -6,12 +6,13 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import CheckIcon from "@/assets/svg/check-icon.svg?react";
 import XIcon from "@/assets/svg/x-icon.svg?react";
-import { FollowService, FollowRequest, UnfollowRequest } from "@/api/follows/follow";
+import { FollowService, FollowRequest, Follow } from "@/api/follows/follow";
 import { Toasts } from "@/utils/toasts";
-import { User, UserService } from "@/api/users/user";
+import { Profile as ProfileType, User, UserService } from "@/api/users/user";
 import { useAuth } from "@/contexts/auth-provider";
 import { useIsLg } from "@/hooks/use-lg";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Result } from "@/api/result";
 
 export const Profile = () => {
     
@@ -33,9 +34,11 @@ export const Profile = () => {
                 setDisplayedUser(user);
             }
             else{
-                const profile = await UserService.profile(profileId);
-                setDisplayedUser(profile ? profile.user : null);
-                setIsFollowing(profile ? profile.isFollowing : false);
+                const getProfileResult: Result<ProfileType> = await UserService.profile(profileId);
+                if (getProfileResult.isSuccessful){
+                    setDisplayedUser(getProfileResult.value.user);
+                    setIsFollowing(getProfileResult.value.isFollowing);
+                }
             }
             setIsDisplayedUserLoading(false);
         };
@@ -50,8 +53,8 @@ export const Profile = () => {
         const request: FollowRequest = {
             followeeId: displayedUser.id
         }
-        const followResult = await FollowService.follow(request, (description: string) => {Toasts.error(description)});
-        if(followResult){
+        const followResult: Result<Follow> = await FollowService.follow(request);
+        if(followResult.isSuccessful){
             setDisplayedUser({
                 ...displayedUser,
                 followerCount: displayedUser.followerCount + 1,
@@ -59,21 +62,24 @@ export const Profile = () => {
             setIsFollowing(true);
             setIsHoveringFollowButton(false);
         }
+        else{
+            Toasts.error(followResult.message);
+        }
     }
 
     const handleUnfollow = async (): Promise<void> => {
         if(!displayedUser)
             return;
-        const request: UnfollowRequest = {
-            followeeId: displayedUser.id,
-        }
-        const unfollowResult = await FollowService.unfollow(request, (description: string) => {Toasts.error(description)});
-        if(unfollowResult){
+        const unfollowResult: Result<void> = await FollowService.unfollow(displayedUser.id);
+        if(unfollowResult.isSuccessful){
             setDisplayedUser({
                 ...displayedUser,
                 followerCount: displayedUser.followerCount - 1,
             });
             setIsFollowing(false);
+        }
+        else{
+            Toasts.error(unfollowResult.message);
         }
     }
 

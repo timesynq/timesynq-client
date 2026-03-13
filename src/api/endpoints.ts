@@ -20,7 +20,7 @@ export const endpoints = {
         me: () => addBaseToPath("/users/me"),
         getById: (id: string) => addBaseToPath(`/users/${id}`),
         profile: (id: string) => addBaseToPath(`/users/${id}/profile`),
-        search: (searchString: string) => addBaseToPath(`/users/search/${searchString}`),
+        search: () => addBaseToPath("/users"),
         changeUsername: () => addBaseToPath("/users/username"),
         delete: () => addBaseToPath("/users"), 
     },
@@ -29,8 +29,20 @@ export const endpoints = {
         followers: (userId: string) => addBaseToPath(`/follows/${userId}/followers`),
         followees: (userId: string) => addBaseToPath(`/follows/${userId}/followees`),
         follow: () => addBaseToPath("/follows"),
-        unfollow: () => addBaseToPath("/follows"),
+        unfollow: (followeeId: string) => addBaseToPath(`/follows/${followeeId}`),
     },
+    wips: {
+        getById: (wipId: string) => addBaseToPath(`/wips/${wipId}`),
+        getMyWips: () => addBaseToPath("/wips"),
+        create: () => addBaseToPath("/wips"),
+        delete: (wipId: string) => addBaseToPath(`/wips/${wipId}`),
+        changeWipName: (wipId: string) => addBaseToPath(`/wips/${wipId}/name`),
+        getSharedWips: () => addBaseToPath("/wips/shared"),
+        getSharedUsers: (wipId: string) => addBaseToPath(`/wips/${wipId}/shares`),
+        share: (wipId: string) => addBaseToPath(`/wips/${wipId}/shares`),  
+        unshareOne: (wipId: string, userId: string) => addBaseToPath(`/wips/${wipId}/shares/${userId}`),
+        unshareAll: (wipId: string) => addBaseToPath(`/wips/${wipId}/shares`)
+    }
 }
 
 export const hubs = {

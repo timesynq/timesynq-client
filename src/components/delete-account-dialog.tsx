@@ -6,6 +6,7 @@ import { Toasts } from "@/utils/toasts";
 import { UserService } from "@/api/users/user";
 import { useAuth } from "@/contexts/auth-provider";
 import LoadingIndicator from "@/assets/svg/loading-indicator.svg?react";
+import { Result } from "@/api/result";
 
 export const DeleteAccountDialog = () => {
 
@@ -30,15 +31,13 @@ export const DeleteAccountDialog = () => {
 
     const handleDelete = async () => {
         setIsDeleteAccountLoading(true);
-
-        const onError = (description: string) => {Toasts.error(description)};
-
-        const isDeleteSuccessful = await UserService.delete(onError);
-        if(isDeleteSuccessful){
+        const deleteResult: Result<void> = await UserService.delete();
+        if(deleteResult.isSuccessful){
             await handleLogout();
         }
         else{
             setIsDeleteAccountLoading(false);
+            Toasts.error(deleteResult.message);
         }
     }
 

@@ -15,6 +15,7 @@ import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { changeEmail, ChangeEmailRequest, EmailStatus, resendConfirmationEmail, ResendConfirmationEmailRequest } from "@/api/auth/email";
 import LoadingIndicator from "@/assets/svg/loading-indicator.svg?react";
+import { Result } from "@/api/result";
 
 export const AccountSettings = () => {
 
@@ -44,17 +45,17 @@ export const AccountSettings = () => {
             newUserName: formData.get("username") as string
         }
 
-        const onSuccess = (description: string) => {Toasts.success(description)};
-        const onError = (description: string) => {Toasts.error(description)};
-
         if(changeUsernameRequest.newUserName == user.userName){
-            onError("Already using username.");
+            Toasts.error("Already using username.");
             return;
         }
 
-        const changeUsernameResult = await UserService.changeUsername(changeUsernameRequest, onSuccess, onError);
-        if(changeUsernameResult){
-            //todo:
+        const changeUsernameResult: Result<void> = await UserService.changeUsername(changeUsernameRequest);
+        if(changeUsernameResult.isSuccessful){
+            Toasts.success("Username changed successfully.");
+        }
+        else{
+            Toasts.error(changeUsernameResult.message);
         }
 
         setIsChangeUsernameLoading(false);
@@ -71,13 +72,14 @@ export const AccountSettings = () => {
             newEmail: formData.get("email") as string
         }
 
-        const onSuccess = (description: string) => {Toasts.success(description)};
-        const onError = (description: string) => {Toasts.error(description)};
+        const newEmailStatusResult: Result<EmailStatus> = await changeEmail(changeEmailRequest);
 
-        const newEmailStatus = await changeEmail(changeEmailRequest, onSuccess, onError);
-
-        if(newEmailStatus){
-            setEmailStatus(newEmailStatus);
+        if(newEmailStatusResult.isSuccessful){
+            setEmailStatus(newEmailStatusResult.value);
+            Toasts.success("Email changed successfully.");
+        }
+        else{
+            Toasts.error(newEmailStatusResult.message);
         }
 
         setIsChangeEmailLoading(false);
@@ -93,9 +95,12 @@ export const AccountSettings = () => {
             email: emailStatus.email,
         }
 
-        const isResendSuccessful = await resendConfirmationEmail(request, (description: string) => {Toasts.error(description)});
-        if(isResendSuccessful){
+        const resendResult: Result<void> = await resendConfirmationEmail(request);
+        if(resendResult.isSuccessful){
             Toasts.success("Verification email sent!");
+        }
+        else{
+            Toasts.error(resendResult.message);
         }
         setIsResendConfirmationEmailLoading(false);
     }

@@ -1,35 +1,11 @@
 import { UNEXPECTED_ERROR_MESSAGE } from "../api-error";
 import { endpoints } from "../endpoints";
+import { Result, ResultFactory } from "../result";
 import { AuthFieldValidation } from "./validation";
 
 export type EmailStatus = {
     email: string
     isEmailConfirmed: boolean
-}
-
-//deprecated, UserService.Me returns a Me type which effectively unions a User with EmailStatus
-export const email = async (onError?: (description: string) => void): Promise<EmailStatus | null> => {
-    try {
-        const response = await fetch(endpoints.auth.email(), {
-            method: "GET",
-            credentials: 'include',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-        });
-        
-        if (response.ok){
-            const data = await response.json();
-            return data as EmailStatus;
-        }
-
-        return null;
-    }
-    catch (_error) {
-        onError && onError(UNEXPECTED_ERROR_MESSAGE);
-        return null;
-    }
 }
 
 export type ChangeEmailRequest = {
@@ -53,15 +29,14 @@ const validateResetPasswordInputs = (changeEmailRequest: ChangeEmailRequest): st
     return errors.length > 0 ? errors[0] : "";
 }
 
-export const changeEmail = async (changeEmailRequest: ChangeEmailRequest, onSuccess?: (description: string) => void, onError?: (description: string) => void): Promise<EmailStatus | null> => {
+export const changeEmail = async (changeEmailRequest: ChangeEmailRequest): Promise<Result<EmailStatus>> => {
     try{
         //we can get the error by 0 index because for emails specifically, the api only provides an "Email 'x' is invalid" message
         //it is unlikely that that point is ever even reached though
 
         const validationError: string = validateResetPasswordInputs(changeEmailRequest);
         if(validationError !== ""){
-            onError && onError(validationError);
-            return null;
+            return ResultFactory.error(validationError);
         }
 
         const response = await fetch(endpoints.auth.changeEmail(), {
@@ -77,8 +52,7 @@ export const changeEmail = async (changeEmailRequest: ChangeEmailRequest, onSucc
         const data = await response.json();
 
         if(response.ok){
-            onSuccess && onSuccess("Verification email sent!");
-            return data as EmailStatus;
+            return ResultFactory.success(data as EmailStatus);
         }
         
         const simplifiedError: ChangeEmailError = {
@@ -94,12 +68,16 @@ export const changeEmail = async (changeEmailRequest: ChangeEmailRequest, onSucc
             }
         }
 
-        onError && onError(simplifiedError.errors.length > 0 ? simplifiedError.errors[0] : simplifiedError.detail ? simplifiedError.detail : "Unknown error");
-        return null;
+        return ResultFactory.error(
+            simplifiedError.errors.length > 0 ?
+            simplifiedError.errors[0] :
+                simplifiedError.detail ? 
+                simplifiedError.detail :
+                "Unknown error"
+        );
     }
     catch (_error) {
-        onError && onError(UNEXPECTED_ERROR_MESSAGE);
-        return null;
+        return ResultFactory.error(UNEXPECTED_ERROR_MESSAGE);
     }
 }
 
@@ -109,7 +87,7 @@ export type ResendConfirmationEmailRequest = {
 
 export type ResendConfirmationEmailError = ChangeEmailError;
 
-export const resendConfirmationEmail = async(resendConfirmationEmailRequest: ResendConfirmationEmailRequest, onError?: (description: string) => void): Promise<boolean> => {
+export const resendConfirmationEmail = async(resendConfirmationEmailRequest: ResendConfirmationEmailRequest): Promise<Result<void>> => {
     try {
         const response = await fetch(endpoints.auth.resendConfirmationEmail(), {
             method: "POST",
@@ -121,14 +99,12 @@ export const resendConfirmationEmail = async(resendConfirmationEmailRequest: Res
         });
         
         if (response.ok){
-            return true;
+            return ResultFactory.success<void>(undefined);
         }
 
-        onError && onError("Resend failed. Please try again later.");
-        return false;
+        return ResultFactory.error("Resend failed. Please try again later.");
     }
     catch (_error) {
-        onError && onError(UNEXPECTED_ERROR_MESSAGE);
-        return false;
+        return ResultFactory.error(UNEXPECTED_ERROR_MESSAGE);
     }
 }

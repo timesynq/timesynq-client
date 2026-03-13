@@ -1,5 +1,7 @@
 import { endpoints } from "../endpoints";
 import { ApiError, UNEXPECTED_ERROR_MESSAGE } from "../api-error";
+import { trimUTC } from "@/utils/date";
+import { Result, ResultFactory } from "../result";
 
 export type Follow = {
     followerId: string;
@@ -11,12 +13,10 @@ export type FollowRequest = {
     followeeId: string
 }
 
-export type UnfollowRequest = FollowRequest;
-
 export const FollowService = {
 
-    follow: async (followRequest: FollowRequest, onError?: (description: string) => void): Promise<Follow | null> => {
-        try {    
+    follow: async (followRequest: FollowRequest): Promise<Result<Follow>> => {
+        try {   
             const response = await fetch(endpoints.follow.follow(), {
                 method: "POST",
                 credentials: 'include',
@@ -30,48 +30,42 @@ export const FollowService = {
             const data = await response.json();
 
             if(response.ok){
-                const trimmedTimestamp = data.createdOnUTC.slice(0, 23);
-                return {
+                return ResultFactory.success<Follow>({
                     ...data,
-                    createdOnUTC: new Date(trimmedTimestamp),
-                }
+                    createdOnUTC: trimUTC(data.createdOnUTC),
+                });
             }
             
             const error = data as ApiError;
-            onError && onError(error.detail);
-            return null;
+            return ResultFactory.error(error.detail);
         }
         
         catch (_error) {
-            onError && onError(UNEXPECTED_ERROR_MESSAGE);
-            return null;
+            return ResultFactory.error(UNEXPECTED_ERROR_MESSAGE);
         }
     },
 
-    unfollow: async (unfollowRequest: UnfollowRequest, onError?: (description: string) => void): Promise<boolean> => {
-        try {    
-            const response = await fetch(endpoints.follow.unfollow(), {
+    unfollow: async (followeeId: string): Promise<Result<void>> => {
+        try {
+            const response = await fetch(endpoints.follow.unfollow(followeeId), {
                 method: "DELETE",
                 credentials: 'include',
                 headers: {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(unfollowRequest),
             });
-            
+
             if(response.ok){
-                return true;
+                return ResultFactory.success<void>(undefined);
             }
             const data = await response.json();
             const error = data as ApiError;
-            onError && onError(error.detail);
-            return false;
+            return ResultFactory.error(error.detail);
         }
         
         catch (_error) {
-            onError && onError(UNEXPECTED_ERROR_MESSAGE);
-            return false;
+            return ResultFactory.error(UNEXPECTED_ERROR_MESSAGE);
         }
     }
 

@@ -40,7 +40,7 @@ export const ChangePasswordDialog = () => {
             newPassword: formData.get("new-password") as string,
         };
 
-        const changePasswordError = await changePassword(changePasswordRequest, (description: string) => {Toasts.success(description)});
+        const changePasswordError = await changePassword(changePasswordRequest);
 
         if (changePasswordError) {
             setErrors(changePasswordError);
@@ -48,6 +48,7 @@ export const ChangePasswordDialog = () => {
             return;
         }
 
+        Toasts.success("Password successfully changed.");
         setIsOpen(false);
     }
 

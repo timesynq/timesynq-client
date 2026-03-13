@@ -1,7 +1,8 @@
 import { UNEXPECTED_ERROR_MESSAGE } from "../api-error";
 import { endpoints } from "../endpoints";
+import { Result, ResultFactory } from "../result";
 
-export const logout = async (onError?: (description: string) => void): Promise<boolean> => {
+export const logout = async (): Promise<Result<void>> => {
 
     try {
         const response = await fetch(endpoints.auth.logout(), {
@@ -13,16 +14,14 @@ export const logout = async (onError?: (description: string) => void): Promise<b
         });
 
         if (response.ok){
-            return true;
+            return ResultFactory.success<void>(undefined);
         }
 
-        onError && onError("Logout failed.");
-        return false;
+        return ResultFactory.error("Logout failed.");
     }
     
     catch (_error) {
-        onError && onError(UNEXPECTED_ERROR_MESSAGE);
-        return false;
+        return ResultFactory.error(UNEXPECTED_ERROR_MESSAGE);
     }
 
 }

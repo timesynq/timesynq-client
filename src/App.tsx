@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import { Home } from './pages/home';
 import { Create } from './pages/create';
 import { EmailConfirmed } from './pages/email-confirmed';
@@ -20,7 +20,10 @@ import { AccountSettings } from './pages/account-settings';
 export default function App() {
 
     const isMobile = useIsMobile();
+    const location = useLocation();
     const isSandbox = import.meta.env.VITE_SANDBOX_MODE === "true";
+
+    const isHeightFixed: boolean = location.pathname.startsWith("/room/")
 
     return (
         <AuthProvider>
@@ -41,7 +44,7 @@ export default function App() {
                         }
                     }}
                 />
-                <div className="flex flex-col min-h-screen">
+                <div className={`flex flex-col ${isHeightFixed ? "h-screen" : "min-h-screen"}`}>
                     <NavBar />
                     <Routes>
                         <Route path="/" element={<Home />} />
@@ -80,7 +83,7 @@ export default function App() {
                             } 
                         /> 
                         <Route 
-                            path="/room"
+                            path="/room/:wipId"
                             element={
                                 <PrivateRoute>
                                     <Room />

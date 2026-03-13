@@ -43,13 +43,15 @@ export const RegisterDialog = () => {
             confirmPassword: formData.get("confirm-password") as string,
         };
 
-        const registerError = await register(registerRequest, (description: string) => {Toasts.success(description)});
+        const registerError = await register(registerRequest);
 
         if (registerError) {
             setErrors(registerError);
             setIsRegisterLoading(false);
             return;
         }
+
+        Toasts.success("Verification email sent!");
 
         const loginRequest: LoginRequest = {
             username: registerRequest.username,
