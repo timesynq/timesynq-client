@@ -34,6 +34,12 @@ export type ShareWipRequest = {
     shareWithId: string
 }
 
+export type ShareStatus = {
+    isAccepted: boolean,
+}
+export type SharedWip = Wip & ShareStatus;
+export type SharedUser = User & ShareStatus;
+
 export const WipService = {
 
     getMyWips: async (
@@ -226,44 +232,16 @@ export const WipService = {
         }
     },
 
-    getSharedUsers: async (
-        wipId: string,
-        searchString: string | null = null,
-        pageNumber: number = 1,
-        pageSize: number = 20,
-        sortOrder: string,
-        sortBy: string,
-    ): Promise<Result<PagedList<Wip>>> => {
+    getSharedUsers: async (wipId: string): Promise<Result<SharedUser[]>> => {
         try {
-            const url = new URL(endpoints.wips.getSharedUsers(wipId));
-            url.search = new URLSearchParams({
-                ...(searchString !== null && {searchString}),
-                pageNumber: `${pageNumber}`,
-                pageSize: `${pageSize}`,
-                sortOrder: sortOrder,
-                sortBy: sortBy,
-            }).toString();
-
-            const response = await fetch(url, {
+            const response = await fetch(endpoints.wips.getSharedUsers(wipId), {
                 method: "GET",
                 credentials: "include",
                 headers: { "Accept": "application/json" },
             });
 
             const data = await response.json();
-            const pagedListFields = {
-                items: data.items ?? [],
-                pageNumber: data.pageNumber,
-                pageSize: data.pageSize,
-                totalItems: data.totalItems,
-                totalPages: data.totalPages,
-                firstPageUrl: data.firstPageUrl ?? null,
-                lastPageUrl: data.lastPageUrl ?? null,
-                previousPageUrl: data.previousPageUrl ?? null,
-                nextPageUrl: data.nextPageUrl ?? null,
-            }
-    
-            return ResultFactory.success(new PagedList<Wip>(pagedListFields));
+            return ResultFactory.success(data as SharedUser[]);
         } 
         catch (_error) {
             return ResultFactory.error(UNEXPECTED_ERROR_MESSAGE);

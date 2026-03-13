@@ -6,6 +6,8 @@ import { ChatBox } from "@/components/chat-box";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
+import { Separator } from "@/components/ui/separator";
+import { WipShareDialog } from "@/components/wip-share-dialog";
 import { useAuth } from "@/contexts/auth-provider";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
@@ -117,6 +119,10 @@ export const Room = () => {
             }
             {!pageError && trackerHubClientRef.current !== null &&
                 <main className="flex-1 min-h-0 flex flex-col items-center justify-center overflow-auto">
+                    <div className="flex flex-row items-center justify-between w-full h-14 p-2">
+                        <WipShareDialog wipId={wipId}/>
+                    </div>
+                    <Separator />
                     <ResizablePanelGroup direction="horizontal" className="flex-1 min-h-0">
                         <ResizablePanel defaultSize={20} minSize={15} maxSize={25}>
                             <div className="flex-1 flex items-center justify-center">

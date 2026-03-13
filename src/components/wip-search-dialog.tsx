@@ -155,7 +155,7 @@ export const WipSearchDialog = ({isShared}: WipSearchDialogProps) => {
                     <Button className="w-full" variant="outline">Select Song</Button>
                 </DialogTrigger>
                 <DialogContent className={`${isMobile ? 'w-full' : 'min-w-[750px]'} h-[770px] flex flex-col`}>
-                    <DialogHeader className="text-2xl">
+                    <DialogHeader className="text-2xl items-start">
                         <DialogTitle>
                             Select Song
                         </DialogTitle>

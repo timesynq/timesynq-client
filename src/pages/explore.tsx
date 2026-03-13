@@ -191,6 +191,7 @@ export const Explore = () => {
                                 <li key={entry.id} className={`${isMobile ? 'w-full' : 'min-w-[700px] flex-1'}`}>
                                     <Link
                                         to={`/profile/${entry.id}`}
+                                        target="_blank"
                                         className="block bg-popover p-4 shadow-md hover:shadow-lg hover:bg-accent transition-all duration-200 border-border border-1"
                                     >
                                         <div className="flex items-center gap-4">
