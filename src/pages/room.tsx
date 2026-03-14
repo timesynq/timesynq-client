@@ -5,12 +5,15 @@ import { Wip } from "@/api/wips/wip";
 import { ChatBox } from "@/components/chat-box";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import LoadingIndicator from "@/assets/svg/loading-indicator.svg?react";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { Separator } from "@/components/ui/separator";
 import { WipShareDialog } from "@/components/wip-share-dialog";
 import { useAuth } from "@/contexts/auth-provider";
+import { Toasts } from "@/utils/toasts";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
 export type RoomMemberInfo = {
     userName: string,
@@ -26,6 +29,9 @@ export const Room = () => {
     const [pageError, setPageError] = useState<string | null>(null);
     const [wipInfo, setWipInfo] = useState<Wip | null>(null);
     const [members, setMembers] = useState<Map<string, RoomMemberInfo>>(new Map<string, RoomMemberInfo>())
+    const navigate = useNavigate();
+    const [leaveRoomState, setLeaveRoomState] = useState<boolean>(false);
+    const [isLeaveRoomLoading, setIsLeaveRoomLoading] = useState<boolean>(false);
 
     if (!user) return null;
 
@@ -59,6 +65,18 @@ export const Room = () => {
 
         return initialMembers;
     }, []);
+
+    const handleLeaveRoom = async () => {
+        const client = trackerHubClientRef.current;
+        if (!client) return;
+        setIsLeaveRoomLoading(true);
+        const leaveRoom: TrackerHubResult<void> = await client.leaveRoom();
+        if (leaveRoom.isSuccessful) 
+            navigate("/create");
+        else 
+            Toasts.error(leaveRoom.errorMessage ?? UNEXPECTED_ERROR_MESSAGE);
+        setIsLeaveRoomLoading(false);
+    }
 
     useEffect(() => {
         let unsubscribeUserJoinedRoom = (): boolean => {
@@ -96,10 +114,13 @@ export const Room = () => {
             }
             setWipInfo(joinRoomResult.value.wip);
             setMembers(initializeMembers(joinRoomResult.value.members));
+
         }
+
         setupTrackerHubClient();
         return () => {
             unsubscribeUserJoinedRoom();
+
         }
     }, []);
 
@@ -121,6 +142,9 @@ export const Room = () => {
                 <main className="flex-1 min-h-0 flex flex-col items-center justify-center overflow-auto">
                     <div className="flex flex-row items-center justify-between w-full h-14 p-2">
                         <WipShareDialog wipId={wipId}/>
+                        <Button className="cursor-pointer" variant="negative" onClick={() => setLeaveRoomState(true)}>
+                            Leave Room
+                        </Button>
                     </div>
                     <Separator />
                     <ResizablePanelGroup direction="horizontal" className="flex-1 min-h-0">
@@ -142,6 +166,28 @@ export const Room = () => {
                     </ResizablePanelGroup>
                 </main>
             }
+            <Dialog 
+                open={leaveRoomState} 
+                onOpenChange={(open) => setLeaveRoomState(open)} 
+            >
+                <DialogContent className="max-w-[425px]">
+                    <DialogHeader className="text-left">
+                        <DialogTitle>
+                            Are you sure you want to leave this room?
+                        </DialogTitle>
+                    </DialogHeader>
+                    <div className="grid gap-4">
+                        <DialogFooter>
+                            <DialogClose asChild>
+                                <Button variant="outline" className="cursor-pointer">Cancel</Button>
+                            </DialogClose>
+                            <Button onClick={handleLeaveRoom} variant="negative" className="cursor-pointer w-20">
+                                {isLeaveRoomLoading ? <LoadingIndicator /> : "Confirm"}
+                            </Button>
+                        </DialogFooter>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </>
     );
 }
