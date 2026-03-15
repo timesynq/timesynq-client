@@ -40,6 +40,7 @@ export const endpoints = {
         getSharedWips: () => addBaseToPath("/wips/shared"),
         getSharedUsers: (wipId: string) => addBaseToPath(`/wips/${wipId}/shares`),
         share: (wipId: string) => addBaseToPath(`/wips/${wipId}/shares`),  
+        acceptShare: (wipId: string) => addBaseToPath(`/wips/${wipId}/shares`),
         unshareOne: (wipId: string, userId: string) => addBaseToPath(`/wips/${wipId}/shares/${userId}`),
         unshareAll: (wipId: string) => addBaseToPath(`/wips/${wipId}/shares`)
     }

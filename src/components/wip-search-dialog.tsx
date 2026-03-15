@@ -10,22 +10,18 @@ import { Pagination, PaginationContent, PaginationItem, PaginationNext, Paginati
 import { useWipSearch } from "@/hooks/use-wip-search";
 import { Page } from "@/api/paged-list";
 import { Toasts } from "@/utils/toasts";
-import { Wip, WipService, WipShareSortField, WipSortField } from "@/api/wips/wip";
+import { Wip, WipService, WipSortField } from "@/api/wips/wip";
 import TrashIcon from "@/assets/svg/trash-icon.svg?react";
 import LoadingIndicator from "@/assets/svg/loading-indicator.svg?react";
 import { useNavigate } from "react-router-dom";
 import { Result } from "@/api/result";
-
-export interface WipSearchDialogProps {
-    isShared: boolean
-}
 
 interface DeleteDialogState {
     open: boolean,
     wip?: Wip
 }
 
-export const WipSearchDialog = ({isShared}: WipSearchDialogProps) => {
+export const WipSearchDialog = () => {
 
     const isMobile = useIsMobile();
     const [nameQuery, setNameQuery] = useState<string>("");
@@ -53,7 +49,7 @@ export const WipSearchDialog = ({isShared}: WipSearchDialogProps) => {
         updateSortBy,
         trySearch,
         tryGoTo
-    } = useWipSearch(isShared);
+    } = useWipSearch();
 
     useEffect(() => {
         const fetchInitialWips = async(): Promise<void> => {
@@ -201,7 +197,7 @@ export const WipSearchDialog = ({isShared}: WipSearchDialogProps) => {
                                 </DropdownMenuCheckboxItem>
                                 <DropdownMenuSeparator />
                                     <DropdownMenuRadioGroup value={sortBy} onValueChange={(value) => handleUpdateSortBy(value)}>
-                                        { isShared && 
+                                        { /*false && 
                                             <>
                                                 <DropdownMenuRadioItem value={WipShareSortField.name} onSelect={(e) => e.preventDefault()} onClick={(e) => e.stopPropagation()} className="cursor-pointer">
                                                     Sort by name
@@ -210,21 +206,16 @@ export const WipSearchDialog = ({isShared}: WipSearchDialogProps) => {
                                                     Sort by most recently shared
                                                 </DropdownMenuRadioItem>
                                             </>
-                                        }
-                                        {
-                                            !isShared &&
-                                            <>
-                                                <DropdownMenuRadioItem value={WipSortField.name} onSelect={(e) => e.preventDefault()} onClick={(e) => e.stopPropagation()} className="cursor-pointer">
-                                                    Sort by name
-                                                </DropdownMenuRadioItem>
-                                                <DropdownMenuRadioItem value={WipSortField.lastOpened} onSelect={(e) => e.preventDefault()} onClick={(e) => e.stopPropagation()} className="cursor-pointer">
-                                                    Sort by most recently opened
-                                                </DropdownMenuRadioItem>
-                                                <DropdownMenuRadioItem value={WipSortField.wipage} onSelect={(e) => e.preventDefault()} onClick={(e) => e.stopPropagation()} className="cursor-pointer">
-                                                    Sort by age
-                                                </DropdownMenuRadioItem>
-                                            </> 
-                                        }
+                                         */}
+                                        <DropdownMenuRadioItem value={WipSortField.name} onSelect={(e) => e.preventDefault()} onClick={(e) => e.stopPropagation()} className="cursor-pointer">
+                                            Sort by name
+                                        </DropdownMenuRadioItem>
+                                        <DropdownMenuRadioItem value={WipSortField.lastOpened} onSelect={(e) => e.preventDefault()} onClick={(e) => e.stopPropagation()} className="cursor-pointer">
+                                            Sort by most recently opened
+                                        </DropdownMenuRadioItem>
+                                        <DropdownMenuRadioItem value={WipSortField.wipage} onSelect={(e) => e.preventDefault()} onClick={(e) => e.stopPropagation()} className="cursor-pointer">
+                                            Sort by age
+                                        </DropdownMenuRadioItem>
                                     </DropdownMenuRadioGroup>
                             </DropdownMenuContent>
                         </DropdownMenu>

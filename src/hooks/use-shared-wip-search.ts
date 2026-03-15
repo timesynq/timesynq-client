@@ -1,15 +1,15 @@
-import { MAX_WIP_NAME_LENGTH, Wip, WipService, WipSortField } from "@/api/wips/wip";
+import { MAX_WIP_NAME_LENGTH, SharedWip, WipService, WipShareSortField } from "@/api/wips/wip";
 import { InitialPaginationState, usePagination } from "./use-pagination";
 import { fetchHypermedia } from "@/api/hypermedia";
 import { Result, ResultFactory } from "@/api/result";
 
-export const useWipSearch = () => {
+export const useSharedWipSearch = (isAccepted: boolean) => {
 
     const defaultPaginationState: InitialPaginationState = {
         pageNumber: 1,
         pageSize: 10,
         sortReverse: false,
-        sortBy: WipSortField.name
+        sortBy: WipShareSortField.shareAge
     }
 
     const {
@@ -29,9 +29,9 @@ export const useWipSearch = () => {
         updateSortBy,
         search,
         tryGoTo
-    } = usePagination<Wip>(
+    } = usePagination<SharedWip>(
         defaultPaginationState,
-        WipService.getMyWips,
+        isAccepted ? WipService.getAcceptedWipsSharedWithMe : WipService.getUnacceptedWipsSharedWithMe,
         fetchHypermedia,
         true,
     );
