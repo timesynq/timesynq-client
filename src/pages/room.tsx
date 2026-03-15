@@ -30,8 +30,6 @@ export const Room = () => {
     const [wipInfo, setWipInfo] = useState<Wip | null>(null);
     const [members, setMembers] = useState<Map<string, RoomMemberInfo>>(new Map<string, RoomMemberInfo>())
     const navigate = useNavigate();
-    const [leaveRoomState, setLeaveRoomState] = useState<boolean>(false);
-    const [isLeaveRoomLoading, setIsLeaveRoomLoading] = useState<boolean>(false);
 
     if (!user) return null;
 
@@ -68,14 +66,13 @@ export const Room = () => {
 
     const handleLeaveRoom = async () => {
         const client = trackerHubClientRef.current;
-        if (!client) return;
-        setIsLeaveRoomLoading(true);
+        if (!client) 
+            return;
         const leaveRoom: TrackerHubResult<void> = await client.leaveRoom();
         if (leaveRoom.isSuccessful) 
             navigate("/create");
         else 
             Toasts.error(leaveRoom.errorMessage ?? UNEXPECTED_ERROR_MESSAGE);
-        setIsLeaveRoomLoading(false);
     }
 
     useEffect(() => {
@@ -124,6 +121,12 @@ export const Room = () => {
         }
     }, []);
 
+    useEffect(() => {
+        return () => {
+            handleLeaveRoom();
+        };
+    }, []);
+
     return (
         <>
             {pageError && 
@@ -142,9 +145,6 @@ export const Room = () => {
                 <main className="flex-1 min-h-0 flex flex-col items-center justify-center overflow-auto">
                     <div className="flex flex-row items-center justify-between w-full h-14 p-2">
                         <WipShareDialog wipId={wipId}/>
-                        <Button className="cursor-pointer" variant="negative" onClick={() => setLeaveRoomState(true)}>
-                            Leave Room
-                        </Button>
                     </div>
                     <Separator />
                     <ResizablePanelGroup direction="horizontal" className="flex-1 min-h-0">
@@ -166,28 +166,6 @@ export const Room = () => {
                     </ResizablePanelGroup>
                 </main>
             }
-            <Dialog 
-                open={leaveRoomState} 
-                onOpenChange={(open) => setLeaveRoomState(open)} 
-            >
-                <DialogContent className="max-w-[425px]">
-                    <DialogHeader className="text-left">
-                        <DialogTitle>
-                            Are you sure you want to leave this room?
-                        </DialogTitle>
-                    </DialogHeader>
-                    <div className="grid gap-4">
-                        <DialogFooter>
-                            <DialogClose asChild>
-                                <Button variant="outline" className="cursor-pointer">Cancel</Button>
-                            </DialogClose>
-                            <Button onClick={handleLeaveRoom} variant="negative" className="cursor-pointer w-20">
-                                {isLeaveRoomLoading ? <LoadingIndicator /> : "Confirm"}
-                            </Button>
-                        </DialogFooter>
-                    </div>
-                </DialogContent>
-            </Dialog>
         </>
     );
 }
