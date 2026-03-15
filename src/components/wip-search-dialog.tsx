@@ -236,31 +236,31 @@ export const WipSearchDialog = () => {
                                             className="block bg-popover p-4 shadow-md hover:shadow-lg hover:bg-accent transition-all duration-200 border-border border-1 cursor-pointer"
                                         >
                                             <div className="flex items-center gap-4">
-                                                <div className="flex flex-col w-full">
-                                                    <span className="flex flex-row justify-between text-lg font-semibold text-foreground">
-                                                        <span>{entry.name}</span>
-                                                        <div>
-                                                            <Button 
-                                                                variant="negative"
-                                                                size="icon"
-                                                                className="cursor-pointer"
-                                                                onClick={(e) => {
-                                                                    e.preventDefault();
-                                                                    e.stopPropagation();
-                                                                    setDeleteDialogState({
-                                                                        open: true,
-                                                                        wip: entry
-                                                                    })
-                                                                }}
-                                                            >
-                                                                <TrashIcon />
-                                                            </Button>
-                                                        </div>
+                                                <div className="flex flex-row items-center w-full justify-between">
+                                                    <span className="flex flex-col justify-between">
+                                                        <span className="text-lg font-semibold text-foreground">{entry.name}</span>
+                                                        <span className="flex flex-row space-x-3 text-muted-foreground text-sm">
+                                                            <span>Created {entry.createdOnUTC.toLocaleDateString()}</span>
+                                                            <span>Last opened {entry.lastOpenedOnUTC.toLocaleString()}</span>
+                                                        </span>
                                                     </span>
-                                                    <span className="flex flex-row space-x-3 text-muted-foreground text-sm">
-                                                        <span>Created {entry.createdOnUTC.toLocaleDateString()}</span>
-                                                        <span>Last opened {entry.lastOpenedOnUTC.toLocaleString()}</span>
-                                                    </span>
+                                                    <div>
+                                                        <Button 
+                                                            variant="negative"
+                                                            size="icon"
+                                                            className="cursor-pointer"
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                e.stopPropagation();
+                                                                setDeleteDialogState({
+                                                                    open: true,
+                                                                    wip: entry
+                                                                })
+                                                            }}
+                                                        >
+                                                            <TrashIcon />
+                                                        </Button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>

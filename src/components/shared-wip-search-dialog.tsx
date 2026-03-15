@@ -584,7 +584,7 @@ const UnacceptedWipDialogContent = () => {
                 }
             </div>
             <div className="h-[500px] overflow-y-auto -mx-4 px-4 no-scrollbar">
-                <ul className={`${isMobile ? 'w-full' : 'min-w-[600px]'}  space-y-2 flex flex-col items-center justify-center`}>
+                <ul className={`${isMobile ? 'w-full' : 'min-w-[600px]'} mt-4 space-y-2 flex flex-col items-center justify-center`}>
                     { items.length > 0 ? (
                         items.map((entry) => (
                             <li key={entry.id} className={`${isMobile ? 'w-full' : 'min-w-[700px] flex-1'}`}>
