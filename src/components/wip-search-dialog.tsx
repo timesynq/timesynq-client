@@ -99,9 +99,7 @@ export const WipSearchDialog = () => {
     }
 
     const handleUpdateSortBy = async (newSortBy: string) => {
-        const updateSortByResult: Result<void> = await updateSortBy(newSortBy);
-        if (!updateSortByResult.isSuccessful)
-            Toasts.error(updateSortByResult.message);
+        await updateSortBy(newSortBy);
     }
 
     const handlePageQuery = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -139,9 +137,7 @@ export const WipSearchDialog = () => {
     }
 
     const handleTryGoTo = async (page: Page) => {
-        const tryGoToResult: Result<void> = await tryGoTo(page);
-        if(!tryGoToResult.isSuccessful)
-            Toasts.error(tryGoToResult.message);
+        await tryGoTo(page);
     }
 
     return (
@@ -197,16 +193,6 @@ export const WipSearchDialog = () => {
                                 </DropdownMenuCheckboxItem>
                                 <DropdownMenuSeparator />
                                     <DropdownMenuRadioGroup value={sortBy} onValueChange={(value) => handleUpdateSortBy(value)}>
-                                        { /*false && 
-                                            <>
-                                                <DropdownMenuRadioItem value={WipShareSortField.name} onSelect={(e) => e.preventDefault()} onClick={(e) => e.stopPropagation()} className="cursor-pointer">
-                                                    Sort by name
-                                                </DropdownMenuRadioItem>
-                                                <DropdownMenuRadioItem value={WipShareSortField.shareAge} onSelect={(e) => e.preventDefault()} onClick={(e) => e.stopPropagation()} className="cursor-pointer">
-                                                    Sort by most recently shared
-                                                </DropdownMenuRadioItem>
-                                            </>
-                                         */}
                                         <DropdownMenuRadioItem value={WipSortField.name} onSelect={(e) => e.preventDefault()} onClick={(e) => e.stopPropagation()} className="cursor-pointer">
                                             Sort by name
                                         </DropdownMenuRadioItem>

@@ -63,9 +63,7 @@ export const Explore = () => {
     }
 
     const handleUpdateSortBy = async (newSortBy: string) => {
-        const updateSortByResult: Result<void> = await updateSortBy(newSortBy);
-        if (!updateSortByResult.isSuccessful)
-            Toasts.error(updateSortByResult.message);
+        await updateSortBy(newSortBy);
     }
 
     const handlePageSizeChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -97,9 +95,7 @@ export const Explore = () => {
     }
 
     const handleTryGoTo = async (page: Page) => {
-        const tryGoToResult: Result<void> = await tryGoTo(page);
-        if(!tryGoToResult.isSuccessful)
-            Toasts.error(tryGoToResult.message);
+        await tryGoTo(page);
     }
 
     return (

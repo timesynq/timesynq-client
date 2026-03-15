@@ -82,9 +82,7 @@ export const WipShareDialog = ({wipId}: WipShareDialogProps) => {
     }
 
     const handleTryGoTo = async (page: Page) => {
-        const tryGoToResult: Result<void> = await tryGoTo(page);
-        if(!tryGoToResult.isSuccessful)
-            Toasts.error(tryGoToResult.message);
+        await tryGoTo(page);
     }
 
     const handleShareWip = async(userId: string | null | undefined) => {
