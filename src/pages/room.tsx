@@ -70,7 +70,7 @@ export const Room = () => {
             return;
         const leaveRoom: TrackerHubResult<void> = await client.leaveRoom();
         if (leaveRoom.isSuccessful) 
-            navigate("/create");
+            return;
         else 
             Toasts.error(leaveRoom.errorMessage ?? UNEXPECTED_ERROR_MESSAGE);
     }
