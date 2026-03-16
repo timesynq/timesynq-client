@@ -24,6 +24,11 @@ export const ChatBox = ({ client, members }: ChatBoxProps) => {
     const [input, setInput] = useState<string>('');
     const [messages, setMessages] = useState<Message[]>([]);
     const bottomRef = useRef<HTMLDivElement | null>(null);
+    const membersRef = useRef<Map<string, RoomMemberInfo>>(members);
+
+    useEffect(() => {
+        membersRef.current = members;
+    }, [members]);
 
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -31,7 +36,7 @@ export const ChatBox = ({ client, members }: ChatBoxProps) => {
 
     useEffect(() => {
         const callback = (userId: string, message: string) => {
-            const info = members.get(userId);
+            const info: RoomMemberInfo | undefined = membersRef.current.get(userId);
             const newMessage: Message = {
                 color: info?.chatColor ?? "text-timesynq-red",
                 username: info?.userName ?? userId,
@@ -46,7 +51,7 @@ export const ChatBox = ({ client, members }: ChatBoxProps) => {
         return () => { 
             unsubscribeChat();
         }; 
-    }, []);
+    }, [members]);
 
     const sendMessage = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
         event.preventDefault();

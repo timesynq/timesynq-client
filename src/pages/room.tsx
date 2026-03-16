@@ -5,15 +5,13 @@ import { Wip } from "@/api/wips/wip";
 import { ChatBox } from "@/components/chat-box";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import LoadingIndicator from "@/assets/svg/loading-indicator.svg?react";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { Separator } from "@/components/ui/separator";
 import { WipShareDialog } from "@/components/wip-share-dialog";
 import { useAuth } from "@/contexts/auth-provider";
 import { Toasts } from "@/utils/toasts";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
 export type RoomMemberInfo = {
     userName: string,
@@ -29,7 +27,6 @@ export const Room = () => {
     const [pageError, setPageError] = useState<string | null>(null);
     const [wipInfo, setWipInfo] = useState<Wip | null>(null);
     const [members, setMembers] = useState<Map<string, RoomMemberInfo>>(new Map<string, RoomMemberInfo>())
-    const navigate = useNavigate();
 
     if (!user) return null;
 
@@ -47,7 +44,7 @@ export const Room = () => {
         const initialMembers = new Map<string, RoomMemberInfo>();
 
         roomMembers.forEach((roomMember) => {
-            let roomMemberInfo = initialMembers.get(roomMember.userId);
+            let roomMemberInfo: RoomMemberInfo | undefined = initialMembers.get(roomMember.userId);
             if (!roomMemberInfo){
                 const set = new Set<string>();
                 const color: string = generateRandomChatColor();
@@ -68,11 +65,7 @@ export const Room = () => {
         const client = trackerHubClientRef.current;
         if (!client) 
             return;
-        const leaveRoom: TrackerHubResult<void> = await client.leaveRoom();
-        if (leaveRoom.isSuccessful) 
-            return;
-        else 
-            Toasts.error(leaveRoom.errorMessage ?? UNEXPECTED_ERROR_MESSAGE);
+        await client.leaveRoom();
     }
 
     useEffect(() => {
@@ -86,7 +79,7 @@ export const Room = () => {
 
             // register TrackerHubClient listeners here
             const callback = (roomMember: RoomMember) => {
-                let roomMemberInfo = members.get(roomMember.userId);
+                let roomMemberInfo: RoomMemberInfo | undefined = members.get(roomMember.userId);
                 if (!roomMemberInfo){
                     const set = new Set<string>();
                     const color: string = generateRandomChatColor();
@@ -97,7 +90,7 @@ export const Room = () => {
                     }
                     members.set(roomMember.userId, roomMemberInfo);
                 }    
-                roomMemberInfo.connectionIds.add(roomMember.connectionId); 
+                roomMemberInfo.connectionIds.add(roomMember.connectionId);
                 setMembers(new Map<string, RoomMemberInfo>(members));
             }
             unsubscribeUserJoinedRoom = client.onUserJoinedRoom(callback);
@@ -110,14 +103,15 @@ export const Room = () => {
                 return;
             }
             setWipInfo(joinRoomResult.value.wip);
-            setMembers(initializeMembers(joinRoomResult.value.members));
-
+            setMembers(prev => {
+                const existingMembers = initializeMembers(joinRoomResult.value!.members);
+                return new Map([...prev, ...existingMembers]);
+            });
         }
 
         setupTrackerHubClient();
         return () => {
             unsubscribeUserJoinedRoom();
-
         }
     }, []);
 
