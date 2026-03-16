@@ -12,7 +12,7 @@ import { Toasts } from "@/utils/toasts";
 import { SharedWip, WipService, WipShareSortField } from "@/api/wips/wip";
 import TrashIcon from "@/assets/svg/trash-icon.svg?react";
 import LoadingIndicator from "@/assets/svg/loading-indicator.svg?react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Result } from "@/api/result";
 import { useSharedWipSearch } from "@/hooks/use-shared-wip-search";
 import { useAuth } from "@/contexts/auth-provider";
@@ -308,7 +308,9 @@ const PaginatedDialogContent = ({isAccepted, query, setQuery, search}: SharedWip
                                             <span className="flex flex-col justify-between">
                                                 <span className="text-lg font-semibold text-foreground">{entry.name}</span>
                                                 <span className="flex flex-row space-x-3 text-muted-foreground text-sm">
-                                                    <span>by {entry.ownerName}</span>
+                                                    <span>by&nbsp;
+                                                        <Link target="_blank" to={`/profile/${entry.ownerId}`} className="hover:underline">{entry.ownerName}</Link>
+                                                    </span>
                                                     <span>Shared on {entry.lastOpenedOnUTC.toLocaleDateString()}</span>
                                                 </span>
                                             </span>
