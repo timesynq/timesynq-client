@@ -9,7 +9,6 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/componen
 import { Separator } from "@/components/ui/separator";
 import { WipShareDialog } from "@/components/wip-share-dialog";
 import { useAuth } from "@/contexts/auth-provider";
-import { Toasts } from "@/utils/toasts";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
@@ -138,7 +137,7 @@ export const Room = () => {
             {!pageError && trackerHubClientRef.current !== null &&
                 <main className="flex-1 min-h-0 flex flex-col items-center justify-center overflow-auto">
                     <div className="flex flex-row items-center justify-between w-full h-14 p-2">
-                        <WipShareDialog wipId={wipId}/>
+                        {user.id === wipInfo?.ownerId && <WipShareDialog wipId={wipId}/>} 
                     </div>
                     <Separator />
                     <ResizablePanelGroup direction="horizontal" className="flex-1 min-h-0">
