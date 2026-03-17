@@ -223,19 +223,19 @@ const PaginatedDialogContent = ({isAccepted, query, setQuery, search}: SharedWip
 
     return (
         <>
-            <form onSubmit={handleSubmit} className="w-full flex flex-row items-center space-x-2 pb-4">
+            <form onSubmit={handleSubmit} className="w-full flex flex-row space-x-2 items-center pb-4">
                 <Input
-                    className="w-full"
+                    className="w-full flex-1 w-[500px]"
                     placeholder="Search..."
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                 />
-                <Button type="submit" variant="positive" size="icon" className="cursor-pointer w-12">
+                <Button type="submit" variant="positive" size="icon" className="cursor-pointer">
                     <SearchIcon />
                 </Button>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button type="button" variant="negative" size="icon" className="cursor-pointer w-12">
+                        <Button type="button" variant="negative" size="icon" className="cursor-pointer">
                             <SettingsIcon />
                         </Button>
                     </DropdownMenuTrigger>

@@ -111,17 +111,17 @@ export const Explore = () => {
                 <TabsContent value="users">
                     <form onSubmit={handleSubmit} className={`${isMobile ? 'w-full' : 'min-w-[700px]'} flex flex-row items-center space-x-2 pb-4`}>
                         <Input
-                            className="w-full"
+                            className="w-full flex-1 min-w-[350px]"
                             placeholder="Search..."
                             value={userQuery}
                             onChange={(e) => setUserQuery(e.target.value)}
                         />
-                        <Button type="submit" variant="positive" size="icon" className="cursor-pointer w-12">
+                        <Button type="submit" variant="positive" size="icon" className="cursor-pointer">
                             <SearchIcon />
                         </Button>
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                    <Button type="button" variant="negative" size="icon" className="cursor-pointer w-12">
+                                    <Button type="button" variant="negative" size="icon" className="cursor-pointer">
                                         <SettingsIcon />
                                     </Button>
                                 </DropdownMenuTrigger>
