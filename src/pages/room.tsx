@@ -1,8 +1,8 @@
 import { UNEXPECTED_ERROR_MESSAGE } from "@/api/api-error";
 import { TrackerHubClient } from "@/api/tracker/tracker-hub-client";
-import { RoomInitializer, RoomMember, TrackerHubResult } from "@/api/tracker/tracker-hub-models";
+import { RoomInitializer, RoomMember, TrackerConnection, TrackerHubResult } from "@/api/tracker/tracker-hub-models";
 import { Wip } from "@/api/wips/wip";
-import { ChatBox } from "@/components/chat-box";
+import { ChatBox, Message } from "@/components/chat-box";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
@@ -25,7 +25,13 @@ export const Room = () => {
     const trackerHubClientRef = useRef<TrackerHubClient | null>(null);
     const [pageError, setPageError] = useState<string | null>(null);
     const [wipInfo, setWipInfo] = useState<Wip | null>(null);
-    const [members, setMembers] = useState<Map<string, RoomMemberInfo>>(new Map<string, RoomMemberInfo>())
+    const [messages, setMessages] = useState<Message[]>([]);
+
+    const [members, setMembers] = useState<Map<string, RoomMemberInfo>>(new Map<string, RoomMemberInfo>());
+    const membersRef = useRef<Map<string, RoomMemberInfo>>(members);
+    useEffect(() => {
+        membersRef.current = members;
+    }, [members]);
 
     if (!user) return null;
 
@@ -37,6 +43,14 @@ export const Room = () => {
         ]
         const randomIndex: number = Math.floor(Math.random() * (possibleColors.length));
         return possibleColors[randomIndex];
+    }
+
+    const serverMessage = (message: string): Message => {
+        return {
+            color: "text-muted-foreground",
+            username: "SERVER",
+            message: message,
+        }
     }
 
     const initializeMembers = useCallback((roomMembers: RoomMember[]): Map<string, RoomMemberInfo> => {
@@ -71,14 +85,18 @@ export const Room = () => {
         let unsubscribeUserJoinedRoom = (): boolean => {
             return false;
         }
+        let unsubscribeUserLeftRoom = (): boolean => {
+            return false;
+        }
+
         const setupTrackerHubClient = async (): Promise<(void)> => {
             if (trackerHubClientRef.current !== null || !wipId)
                 return;
             const client = new TrackerHubClient();
 
             // register TrackerHubClient listeners here
-            const callback = (roomMember: RoomMember) => {
-                let roomMemberInfo: RoomMemberInfo | undefined = members.get(roomMember.userId);
+            const userJoinedRoomCallback = (roomMember: RoomMember) => {
+                let roomMemberInfo: RoomMemberInfo | undefined = membersRef.current.get(roomMember.userId);
                 if (!roomMemberInfo){
                     const set = new Set<string>();
                     const color: string = generateRandomChatColor();
@@ -87,13 +105,27 @@ export const Room = () => {
                         connectionIds: set,
                         chatColor: color,
                     }
-                    members.set(roomMember.userId, roomMemberInfo);
+                    membersRef.current.set(roomMember.userId, roomMemberInfo);
+                    setMessages(prev => [...prev, serverMessage(`${roomMember.userName} has joined the room.`)]);
                 }    
                 roomMemberInfo.connectionIds.add(roomMember.connectionId);
-                setMembers(new Map<string, RoomMemberInfo>(members));
+                setMembers(new Map<string, RoomMemberInfo>(membersRef.current));
             }
-            unsubscribeUserJoinedRoom = client.onUserJoinedRoom(callback);
+            unsubscribeUserJoinedRoom = client.onUserJoinedRoom(userJoinedRoomCallback);
             
+            const userLeftRoomCallback = (trackerConnection: TrackerConnection) => {
+                let roomMemberInfo: RoomMemberInfo | undefined = membersRef.current.get(trackerConnection.userId);
+                if (!roomMemberInfo)
+                    return;
+                roomMemberInfo.connectionIds.delete(trackerConnection.connectionId);
+                if(roomMemberInfo.connectionIds.size === 0){
+                    setMessages(prev => [...prev, serverMessage(`${roomMemberInfo.userName} has left the room.`)]);
+                    membersRef.current.delete(trackerConnection.userId);
+                }
+                setMembers(new Map<string, RoomMemberInfo>(membersRef.current));
+            }
+            unsubscribeUserLeftRoom = client.onUserLeftRoom(userLeftRoomCallback);
+
             await client.start();
             trackerHubClientRef.current = client;
             const joinRoomResult: TrackerHubResult<RoomInitializer> = await trackerHubClientRef.current.joinRoom(wipId);
@@ -111,6 +143,7 @@ export const Room = () => {
         setupTrackerHubClient();
         return () => {
             unsubscribeUserJoinedRoom();
+            unsubscribeUserLeftRoom();
         }
     }, []);
 
@@ -154,7 +187,12 @@ export const Room = () => {
                         </ResizablePanel>
                         <ResizableHandle />
                         <ResizablePanel defaultSize={20} minSize={15} maxSize={25} className="flex flex-col">
-                            <ChatBox client={trackerHubClientRef.current} members={members}/>
+                            <ChatBox 
+                                client={trackerHubClientRef.current}
+                                members={members}
+                                messages={messages}
+                                setMessages={setMessages}
+                            />
                         </ResizablePanel>
                     </ResizablePanelGroup>
                 </main>

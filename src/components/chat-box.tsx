@@ -8,21 +8,22 @@ import { ScrollArea } from "./ui/scroll-area";
 import { TrackerHubResult } from "@/api/tracker/tracker-hub-models";
 import { RoomMemberInfo } from "@/pages/room";
 
-type Message = {
+export type Message = {
     color: string;
     username: string;
     message: string;
 }
 
 interface ChatBoxProps {
-    client: TrackerHubClient
-    members: Map<string, RoomMemberInfo>
+    client: TrackerHubClient;
+    members: Map<string, RoomMemberInfo>;
+    messages: Message[];
+    setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
 } 
 
-export const ChatBox = ({ client, members }: ChatBoxProps) => {
+export const ChatBox = ({ client, members, messages, setMessages }: ChatBoxProps) => {
 
     const [input, setInput] = useState<string>('');
-    const [messages, setMessages] = useState<Message[]>([]);
     const bottomRef = useRef<HTMLDivElement | null>(null);
     const membersRef = useRef<Map<string, RoomMemberInfo>>(members);
 

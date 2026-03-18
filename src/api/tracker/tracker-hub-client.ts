@@ -1,7 +1,7 @@
 import * as signalR from "@microsoft/signalr";
 import { hubs } from "../endpoints";
 import { UNEXPECTED_ERROR_MESSAGE } from "../api-error";
-import { RoomInitializer, RoomMember, TrackerHubResult } from "./tracker-hub-models";
+import { RoomInitializer, RoomMember, TrackerConnection, TrackerHubResult } from "./tracker-hub-models";
 
 const TrackerHubServerFunctions = {
     JoinRoom: "JoinRoom",
@@ -18,8 +18,9 @@ const TrackerHubClientCallbacks = {
 export class TrackerHubClient{
 
     private _connection: signalR.HubConnection;
-    private _chatMessageListeners: Set<(userId: string, message: string) => void>; 
+    private _chatMessageListeners: Set<(userId: string, message: string) => void>;
     private _userJoinedRoomListeners: Set<(roomMember: RoomMember) => void>;
+    private _userLeftRoomListeners: Set<(trackerConnection: TrackerConnection) => void>;
 
     constructor(){
         this._connection = new signalR.HubConnectionBuilder()
@@ -29,6 +30,7 @@ export class TrackerHubClient{
 
         this._chatMessageListeners = new Set<(userId: string, message: string) => void>();
         this._userJoinedRoomListeners = new Set<(roomMember: RoomMember) => void>();
+        this._userLeftRoomListeners = new Set<(trackerConnection: TrackerConnection) => void>();
         this.registerListeners();
     }
 
@@ -45,6 +47,12 @@ export class TrackerHubClient{
                 this._userJoinedRoomListeners.forEach(callback => callback(roomMember));
             }
         )
+        this._connection.on(
+            TrackerHubClientCallbacks.UserLeftRoom,
+            (trackerConnection: TrackerConnection) => {
+                this._userLeftRoomListeners.forEach(callback => callback(trackerConnection));
+            }
+        )
     }
 
     onChatMessageReceived(callback: (userId: string, message: string) => void): () => boolean {
@@ -55,6 +63,11 @@ export class TrackerHubClient{
     onUserJoinedRoom(callback: (roomMember: RoomMember) => void): () => boolean {
         this._userJoinedRoomListeners.add(callback);
         return () => this._userJoinedRoomListeners.delete(callback);
+    }
+
+    onUserLeftRoom(callback: (trackerConnection: TrackerConnection) => void): () => boolean {
+        this._userLeftRoomListeners.add(callback);
+        return () => this._userLeftRoomListeners.delete(callback);
     }
 
     private serverError<T>(): TrackerHubResult<T> {
