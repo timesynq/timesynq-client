@@ -264,11 +264,11 @@ const PaginatedDialogContent = ({isAccepted, query, setQuery, search}: SharedWip
                         </DropdownMenuCheckboxItem>
                         <DropdownMenuSeparator />
                             <DropdownMenuRadioGroup value={sortBy} onValueChange={(value) => handleUpdateSortBy(value)}>
-                                <DropdownMenuRadioItem value={WipShareSortField.name} onSelect={(e) => e.preventDefault()} onClick={(e) => e.stopPropagation()} className="cursor-pointer">
-                                    Sort by name
-                                </DropdownMenuRadioItem>
                                 <DropdownMenuRadioItem value={WipShareSortField.shareAge} onSelect={(e) => e.preventDefault()} onClick={(e) => e.stopPropagation()} className="cursor-pointer">
                                     Sort by most recently shared
+                                </DropdownMenuRadioItem>
+                                <DropdownMenuRadioItem value={WipShareSortField.name} onSelect={(e) => e.preventDefault()} onClick={(e) => e.stopPropagation()} className="cursor-pointer">
+                                    Sort by name
                                 </DropdownMenuRadioItem>
                             </DropdownMenuRadioGroup>
                     </DropdownMenuContent>
