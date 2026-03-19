@@ -10,13 +10,14 @@ import { Pagination, PaginationContent, PaginationItem, PaginationNext, Paginati
 import { useWipSearch } from "@/hooks/use-wip-search";
 import { Page } from "@/api/paged-list";
 import { Toasts } from "@/utils/toasts";
-import { Wip, WipService, WipSortField } from "@/api/wips/wip";
+import { ChangeWipNameRequest, MAX_WIP_NAME_LENGTH, Wip, WipService, WipSortField } from "@/api/wips/wip";
 import TrashIcon from "@/assets/svg/trash-icon.svg?react";
 import LoadingIndicator from "@/assets/svg/loading-indicator.svg?react";
 import { useNavigate } from "react-router-dom";
 import { Result } from "@/api/result";
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuTrigger } from "./ui/context-menu";
 
-interface DeleteDialogState {
+interface UpdateWipDialogState {
     open: boolean,
     wip?: Wip
 }
@@ -27,7 +28,10 @@ export const WipSearchDialog = () => {
     const [nameQuery, setNameQuery] = useState<string>("");
     const [searchResultMessage, setSearchResultMessage] = useState<string>("All wips");
     const [isPageQueryOpen, setIsPageQueryOpen] = useState<boolean>(false);
-    const [deleteDialogState, setDeleteDialogState] = useState<DeleteDialogState>({open: false});
+    const [renameDialogState, setRenameDialogState] = useState<UpdateWipDialogState>({open: false});
+    const [renameDialogInput, setRenameDialogInput] = useState<string>("");
+    const [isRenameLoading, setIsRenameLoading] = useState<boolean>(false);
+    const [deleteDialogState, setDeleteDialogState] = useState<UpdateWipDialogState>({open: false});
     const [isDeleteLoading, setIsDeleteLoading] = useState<boolean>(false);
 
     const navigate = useNavigate();
@@ -76,6 +80,10 @@ export const WipSearchDialog = () => {
         setIsPageQueryOpen(open);
     }
 
+    const closeRenameDialog = () => {
+        setRenameDialogState(prev => ({...prev, open: false}));
+    }
+
     const closeDeleteDialog = () => {
         setDeleteDialogState(prev => ({...prev, open: false}));
     }
@@ -116,6 +124,37 @@ export const WipSearchDialog = () => {
             Toasts.error(queryByPageResult.message);
 
         setIsPageQueryOpen(false);
+    }
+
+    const handleRename = async (wipId: string | null | undefined) => {
+        
+        if(wipId === null || wipId === undefined)
+            return;
+
+        if (!renameDialogInput.trim())
+            return;
+        
+        if (renameDialogInput.length < 1 || renameDialogInput.length > MAX_WIP_NAME_LENGTH){
+            Toasts.error(`Name must be between 1 and ${MAX_WIP_NAME_LENGTH} characters.`);
+            return;
+        }
+
+        setIsRenameLoading(true);
+        
+        const changeWipNameRequest: ChangeWipNameRequest = {
+            newName: renameDialogInput
+        }
+        const changeWipNameResult: Result<void> = await WipService.changeWipName(wipId, changeWipNameRequest);
+        if(changeWipNameResult.isSuccessful){
+            Toasts.success("Rename successful.");
+            await trySearch(nameQuery);
+            closeRenameDialog();
+        }
+        else{
+            Toasts.error(changeWipNameResult.message);
+        }
+
+        setIsRenameLoading(false);
     }
 
     const handleDelete = async (wipId: string | null | undefined) => {
@@ -193,11 +232,11 @@ export const WipSearchDialog = () => {
                                 </DropdownMenuCheckboxItem>
                                 <DropdownMenuSeparator />
                                     <DropdownMenuRadioGroup value={sortBy} onValueChange={(value) => handleUpdateSortBy(value)}>
-                                        <DropdownMenuRadioItem value={WipSortField.name} onSelect={(e) => e.preventDefault()} onClick={(e) => e.stopPropagation()} className="cursor-pointer">
-                                            Sort by name
-                                        </DropdownMenuRadioItem>
                                         <DropdownMenuRadioItem value={WipSortField.lastOpened} onSelect={(e) => e.preventDefault()} onClick={(e) => e.stopPropagation()} className="cursor-pointer">
                                             Sort by most recently opened
+                                        </DropdownMenuRadioItem>
+                                        <DropdownMenuRadioItem value={WipSortField.name} onSelect={(e) => e.preventDefault()} onClick={(e) => e.stopPropagation()} className="cursor-pointer">
+                                            Sort by name
                                         </DropdownMenuRadioItem>
                                         <DropdownMenuRadioItem value={WipSortField.wipage} onSelect={(e) => e.preventDefault()} onClick={(e) => e.stopPropagation()} className="cursor-pointer">
                                             Sort by age
@@ -230,41 +269,66 @@ export const WipSearchDialog = () => {
                         <ul className={`${isMobile ? 'w-full' : 'min-w-[600px]'} mt-4 space-y-2 flex flex-col items-center justify-center`}>
                             { items.length > 0 ? (
                                 items.map((entry) => (
-                                    <li key={entry.id} className={`${isMobile ? 'w-full' : 'min-w-[700px] flex-1'}`}>
-                                        <div 
-                                            onDoubleClick={() => navigate(`/room/${entry.id}`)}
-                                            className="block bg-popover p-4 shadow-md hover:shadow-lg hover:bg-accent transition-all duration-200 border-border border-1 cursor-pointer"
-                                        >
-                                            <div className="flex items-center gap-4">
-                                                <div className="flex flex-row items-center w-full justify-between">
-                                                    <span className="flex flex-col justify-between">
-                                                        <span className="text-lg font-semibold text-foreground">{entry.name}</span>
-                                                        <span className="flex flex-row space-x-3 text-muted-foreground text-sm">
-                                                            <span>Created {entry.createdOnUTC.toLocaleDateString()}</span>
-                                                            <span>Last opened {entry.lastOpenedOnUTC.toLocaleString()}</span>
-                                                        </span>
-                                                    </span>
-                                                    <div>
-                                                        <Button 
-                                                            variant="negative"
-                                                            size="icon"
-                                                            className="cursor-pointer"
-                                                            onClick={(e) => {
-                                                                e.preventDefault();
-                                                                e.stopPropagation();
-                                                                setDeleteDialogState({
-                                                                    open: true,
-                                                                    wip: entry
-                                                                })
-                                                            }}
-                                                        >
-                                                            <TrashIcon />
-                                                        </Button>
+                                    <ContextMenu>
+                                        <ContextMenuTrigger>
+                                            <li key={entry.id} className={`${isMobile ? 'w-full' : 'min-w-[700px] flex-1'}`}>
+                                                <div 
+                                                    onDoubleClick={() => navigate(`/room/${entry.id}`)}
+                                                    className="block bg-popover p-4 shadow-md hover:shadow-lg hover:bg-accent transition-all duration-200 border-border border-1 cursor-pointer"
+                                                >
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="flex flex-row items-center w-full justify-between">
+                                                            <span className="flex flex-col justify-between">
+                                                                <span className="text-lg font-semibold text-foreground">{entry.name}</span>
+                                                                <span className="flex flex-row space-x-3 text-muted-foreground text-sm">
+                                                                    <span>Created {entry.createdOnUTC.toLocaleDateString()}</span>
+                                                                    <span>Last opened {entry.lastOpenedOnUTC.toLocaleString()}</span>
+                                                                </span>
+                                                            </span>
+                                                            <div>
+                                                                <Button 
+                                                                    variant="negative"
+                                                                    size="icon"
+                                                                    className="cursor-pointer"
+                                                                    onClick={(e) => {
+                                                                        e.preventDefault();
+                                                                        e.stopPropagation();
+                                                                        setDeleteDialogState({
+                                                                            open: true,
+                                                                            wip: entry
+                                                                        })
+                                                                    }}
+                                                                >
+                                                                    <TrashIcon />
+                                                                </Button>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        </div>
-                                    </li>
+                                            </li>
+                                        </ContextMenuTrigger>
+                                        <ContextMenuContent>
+                                            <ContextMenuItem>Download (not implemented)</ContextMenuItem>
+                                            <ContextMenuSeparator />
+                                            <ContextMenuItem
+                                                onClick={() => {
+                                                    setRenameDialogState({
+                                                        open: true,
+                                                        wip: entry
+                                                    })
+                                                    setRenameDialogInput(entry.name);
+                                                }}
+                                            >
+                                                Rename
+                                            </ContextMenuItem>
+                                            <ContextMenuSeparator />
+                                            <ContextMenuItem>Copy (not implemented)</ContextMenuItem>
+                                            <ContextMenuSeparator />
+                                            <ContextMenuItem>Delete (not implemented)</ContextMenuItem>
+                                            <ContextMenuSeparator />
+                                            <ContextMenuItem>Share (not implemented)</ContextMenuItem>
+                                        </ContextMenuContent>
+                                    </ContextMenu>
                                 ))
                             ) : (
                                 items.length == 0 && <p className="text-muted-foreground">No wips found.</p>
@@ -313,6 +377,38 @@ export const WipSearchDialog = () => {
                             </Button>
                         </div>
                     }
+                </DialogContent>
+            </Dialog>
+
+            <Dialog 
+                open={renameDialogState.open} 
+                onOpenChange={(open) => {
+                    if (!open)
+                        closeRenameDialog();
+                }} 
+            >
+                <DialogContent className="max-w-[425px]">
+                    <DialogHeader className="text-left">
+                        <DialogTitle>
+                            Rename {renameDialogState.wip?.name}
+                        </DialogTitle>
+                    </DialogHeader>
+                    <Input
+                        className="w-full flex-1 w-full"
+                        placeholder="Search..."
+                        value={renameDialogInput}
+                        onChange={(e) => setRenameDialogInput(e.target.value)}
+                    />
+                    <div className="grid gap-4">
+                        <DialogFooter>
+                            <DialogClose asChild>
+                                <Button variant="outline" className="cursor-pointer">Cancel</Button>
+                            </DialogClose>
+                            <Button onClick={() => handleRename(renameDialogState.wip?.id)} variant="positive" className="cursor-pointer w-20">
+                                {isRenameLoading ? <LoadingIndicator /> : "Confirm"}
+                            </Button>
+                        </DialogFooter>
+                    </div>
                 </DialogContent>
             </Dialog>
 
