@@ -94,6 +94,9 @@ export const Room = () => {
         let unsubscribeAccessExpired = (): boolean => {
             return false;
         }
+        let unsubscribeWipNameChanged = (): boolean => {
+            return false;
+        }
 
         const setupTrackerHubClient = async (): Promise<(void)> => {
             if (trackerHubClientRef.current !== null || !wipId)
@@ -137,6 +140,18 @@ export const Room = () => {
             }
             unsubscribeAccessExpired = client.onAccessExpired(accessExpiredCallback);
 
+            const wipNameChangedCallback = (newName: string) => {
+                setWipInfo(prev => {
+                    if (prev === null) 
+                        return prev;
+                    return {
+                        ...prev,
+                        name: newName
+                    };
+                });
+            }
+            unsubscribeWipNameChanged = client.onWipNameChanged(wipNameChangedCallback);
+
             await client.start();
             trackerHubClientRef.current = client;
             const joinRoomResult: TrackerHubResult<RoomInitializer> = await trackerHubClientRef.current.joinRoom(wipId);
@@ -156,6 +171,7 @@ export const Room = () => {
             unsubscribeUserJoinedRoom();
             unsubscribeUserLeftRoom();
             unsubscribeAccessExpired();
+            unsubscribeWipNameChanged();
         }
     }, []);
 

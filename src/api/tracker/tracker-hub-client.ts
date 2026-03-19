@@ -14,6 +14,7 @@ const TrackerHubClientCallbacks = {
     UserLeftRoom: "UserLeftRoom",
     MessageAddedToChat: "MessageAddedToChat",
     AccessExpired: "AccessExpired",
+    WipNameChanged: "WipNameChanged",
 }
 
 export class TrackerHubClient{
@@ -23,6 +24,7 @@ export class TrackerHubClient{
     private _userJoinedRoomListeners: Set<(roomMember: RoomMember) => void>;
     private _userLeftRoomListeners: Set<(trackerConnection: TrackerConnection) => void>;
     private _accessExpiredListeners: Set<() => void>;
+    private _wipNameChangedListeners: Set<(newName: string) => void>;
 
     constructor(){
         this._connection = new signalR.HubConnectionBuilder()
@@ -34,6 +36,7 @@ export class TrackerHubClient{
         this._userJoinedRoomListeners = new Set<(roomMember: RoomMember) => void>();
         this._userLeftRoomListeners = new Set<(trackerConnection: TrackerConnection) => void>();
         this._accessExpiredListeners = new Set<() => void>();
+        this._wipNameChangedListeners = new Set<(newName: string) => void>;
         this.registerListeners();
     }
 
@@ -62,6 +65,12 @@ export class TrackerHubClient{
                 this._accessExpiredListeners.forEach(callback => callback());
             }
         )
+        this._connection.on(
+            TrackerHubClientCallbacks.WipNameChanged,
+            (newName: string) => {
+                this._wipNameChangedListeners.forEach(callback => callback(newName));
+            }
+        )
     }
 
     onChatMessageReceived(callback: (userId: string, message: string) => void): () => boolean {
@@ -82,6 +91,11 @@ export class TrackerHubClient{
     onAccessExpired(callback: () => void): () => boolean {
         this._accessExpiredListeners.add(callback);
         return () => this._accessExpiredListeners.delete(callback);
+    }
+
+    onWipNameChanged(callback: (newName: string) => void): () => boolean {
+        this._wipNameChangedListeners.add(callback);
+        return () => this._wipNameChangedListeners.delete(callback);
     }
 
     private serverError<T>(): TrackerHubResult<T> {
