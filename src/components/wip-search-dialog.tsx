@@ -16,6 +16,8 @@ import LoadingIndicator from "@/assets/svg/loading-indicator.svg?react";
 import { useNavigate } from "react-router-dom";
 import { Result } from "@/api/result";
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuTrigger } from "./ui/context-menu";
+import { WipShareDialog } from "./wip-share-dialog";
+import { cn } from "@/lib/utils";
 
 interface UpdateWipDialogState {
     open: boolean,
@@ -335,7 +337,17 @@ export const WipSearchDialog = () => {
                                                 Delete
                                             </ContextMenuItem>
                                             <ContextMenuSeparator />
-                                            <ContextMenuItem>Share (not implemented)</ContextMenuItem>
+                                            <WipShareDialog 
+                                                wipId={entry.id}
+                                                trigger={
+                                                    /* todo: since this is not a ContextMenuItem it doesn't behave exactly the same way. the hover style will still activate when the browser tab isn't focused, unlike the rest of the ContextMenuItems. low priority to fix just for visual consistency */
+                                                    <div className={cn(
+                                                          "hover:bg-accent relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+                                                        )}>
+                                                        Share
+                                                    </div>
+                                                }
+                                            />
                                         </ContextMenuContent>
                                     </ContextMenu>
                                 ))

@@ -19,7 +19,8 @@ import PlusIcon from "@/assets/svg/plus-icon.svg?react";
 import { User } from "@/api/users/user";
 
 export interface WipShareDialogProps {
-    wipId: string | undefined, 
+    wipId: string | undefined,
+    trigger?: React.ReactNode, 
 }
 
 interface ShareConfirmationDialogState {
@@ -32,7 +33,7 @@ interface DeleteOneDialogState {
     user?: SharedUser,
 }
 
-export const WipShareDialog = ({wipId}: WipShareDialogProps) => {
+export const WipShareDialog = ({wipId, trigger}: WipShareDialogProps) => {
 
     const isMobile = useIsMobile();
     const [userQuery, setUserQuery] = useState<string>("");
@@ -161,7 +162,10 @@ export const WipShareDialog = ({wipId}: WipShareDialogProps) => {
         <>
             <Dialog>
                 <DialogTrigger asChild>
-                    <Button variant="link" className="text-foreground cursor-pointer text-lg">Share</Button>
+                    {
+                        trigger ??
+                            <Button variant="link" className="text-foreground cursor-pointer text-lg">Share</Button>
+                    }
                 </DialogTrigger>
                 <DialogContent className={`${isMobile ? 'w-full' : 'min-w-[750px]'} h-[780px] flex flex-col`}>
                     <DialogHeader className="text-2xl items-start">
