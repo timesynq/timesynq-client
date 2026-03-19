@@ -18,6 +18,7 @@ import { useSharedWipSearch } from "@/hooks/use-shared-wip-search";
 import { useAuth } from "@/contexts/auth-provider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import PlusIcon from "@/assets/svg/plus-icon.svg?react";
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuTrigger } from "./ui/context-menu";
 
 interface AcceptDialogState {
     open: boolean,
@@ -298,60 +299,73 @@ const PaginatedDialogContent = ({isAccepted, query, setQuery, search}: SharedWip
                 <ul className='w-full mt-4 space-y-2 flex flex-col items-center justify-center'>
                     { items.length > 0 ? (
                         items.map((entry) => (
-                            <li key={entry.id} className={`${isMobile ? 'w-[450px]' : 'w-[700px] flex-1'}`}>
-                                <div 
-                                    onDoubleClick={() => isAccepted && navigate(`/room/${entry.id}`)}
-                                    className="block bg-popover p-4 shadow-md hover:shadow-lg hover:bg-accent transition-all duration-200 border-border border-1 cursor-pointer"
-                                >
-                                    <div className="flex items-center gap-4">
-                                        <div className="flex flex-row items-center w-full justify-between space-x-12">
-                                            <span className="flex flex-col min-w-0 justify-between truncate whitespace-nowrap text-ellipsis">
-                                                <span className="text-lg font-semibold text-foreground truncate">{entry.name}</span>
-                                                <span className="flex flex-row space-x-3 text-muted-foreground text-sm">
-                                                    <span>by&nbsp;
-                                                        <Link target="_blank" to={`/profile/${entry.ownerId}`} className="hover:underline">{entry.ownerName}</Link>
+                            <ContextMenu>
+                                <ContextMenuTrigger>
+                                    <li key={entry.id} className={`${isMobile ? 'w-[450px]' : 'w-[700px] flex-1'}`}>
+                                        <div 
+                                            onDoubleClick={() => isAccepted && navigate(`/room/${entry.id}`)}
+                                            className="block bg-popover p-4 shadow-md hover:shadow-lg hover:bg-accent transition-all duration-200 border-border border-1 cursor-pointer"
+                                        >
+                                            <div className="flex items-center gap-4">
+                                                <div className="flex flex-row items-center w-full justify-between space-x-12">
+                                                    <span className="flex flex-col min-w-0 justify-between truncate whitespace-nowrap text-ellipsis">
+                                                        <span className="text-lg font-semibold text-foreground truncate">{entry.name}</span>
+                                                        <span className="flex flex-row space-x-3 text-muted-foreground text-sm">
+                                                            <span>by&nbsp;
+                                                                <Link target="_blank" to={`/profile/${entry.ownerId}`} className="hover:underline">{entry.ownerName}</Link>
+                                                            </span>
+                                                            <span>Shared on {entry.lastOpenedOnUTC.toLocaleDateString()}</span>
+                                                        </span>
                                                     </span>
-                                                    <span>Shared on {entry.lastOpenedOnUTC.toLocaleDateString()}</span>
-                                                </span>
-                                            </span>
-                                            <div className="flex flex-row space-x-2">
-                                                { !isAccepted &&
-                                                    <Button 
-                                                        variant="positive"
-                                                        size="icon"
-                                                        className="cursor-pointer"
-                                                        onClick={(e) => {
-                                                            e.preventDefault();
-                                                            e.stopPropagation();
-                                                            setAcceptDialogState({
-                                                                open: true,
-                                                                sharedWip: entry
-                                                            })
-                                                        }}
-                                                    >
-                                                        <PlusIcon />
-                                                    </Button>
-                                                }
-                                                <Button 
-                                                    variant="negative"
-                                                    size="icon"
-                                                    className="cursor-pointer"
-                                                    onClick={(e) => {
-                                                        e.preventDefault();
-                                                        e.stopPropagation();
-                                                        setDeleteDialogState({
-                                                            open: true,
-                                                            sharedWip: entry
-                                                        })
-                                                    }}
-                                                >
-                                                    <TrashIcon />
-                                                </Button>
+                                                    <div className="flex flex-row space-x-2">
+                                                        { !isAccepted &&
+                                                            <Button 
+                                                                variant="positive"
+                                                                size="icon"
+                                                                className="cursor-pointer"
+                                                                onClick={(e) => {
+                                                                    e.preventDefault();
+                                                                    e.stopPropagation();
+                                                                    setAcceptDialogState({
+                                                                        open: true,
+                                                                        sharedWip: entry
+                                                                    })
+                                                                }}
+                                                            >
+                                                                <PlusIcon />
+                                                            </Button>
+                                                        }
+                                                        <Button 
+                                                            variant="negative"
+                                                            size="icon"
+                                                            className="cursor-pointer"
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                e.stopPropagation();
+                                                                setDeleteDialogState({
+                                                                    open: true,
+                                                                    sharedWip: entry
+                                                                })
+                                                            }}
+                                                        >
+                                                            <TrashIcon />
+                                                        </Button>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </div>
-                            </li>
+                                    </li>
+                                </ContextMenuTrigger>
+                                <ContextMenuContent>
+                                    { isAccepted &&
+                                        <>
+                                            <ContextMenuItem>Download (not implemented)</ContextMenuItem>
+                                            <ContextMenuSeparator />
+                                        </>
+                                    }
+                                    <ContextMenuItem>Delete (not implemented)</ContextMenuItem>
+                                </ContextMenuContent>
+                            </ContextMenu>
                         ))
                     ) : (
                         items.length == 0 && <p className="text-muted-foreground">{isAccepted ? "No wips found." : "No invites found."}</p>
