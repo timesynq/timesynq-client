@@ -3,6 +3,7 @@ import { TrackerHubClient } from "@/api/tracker/tracker-hub-client";
 import { RoomInitializer, RoomMember, TrackerConnection, TrackerHubResult } from "@/api/tracker/tracker-hub-models";
 import { Wip } from "@/api/wips/wip";
 import { ChatBox, Message } from "@/components/chat-box";
+import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
@@ -10,7 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { WipShareDialog } from "@/components/wip-share-dialog";
 import { useAuth } from "@/contexts/auth-provider";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
 export type RoomMemberInfo = {
     userName: string,
@@ -20,12 +21,14 @@ export type RoomMemberInfo = {
 
 export const Room = () => {
 
+    const navigate = useNavigate();
     const { user } = useAuth();
     const { wipId } = useParams();
     const trackerHubClientRef = useRef<TrackerHubClient | null>(null);
     const [pageError, setPageError] = useState<string | null>(null);
     const [wipInfo, setWipInfo] = useState<Wip | null>(null);
     const [messages, setMessages] = useState<Message[]>([]);
+    const [accessExpired, setAccessExpired] = useState<boolean>(false);
 
     const [members, setMembers] = useState<Map<string, RoomMemberInfo>>(new Map<string, RoomMemberInfo>());
     const membersRef = useRef<Map<string, RoomMemberInfo>>(members);
@@ -88,6 +91,9 @@ export const Room = () => {
         let unsubscribeUserLeftRoom = (): boolean => {
             return false;
         }
+        let unsubscribeAccessExpired = (): boolean => {
+            return false;
+        }
 
         const setupTrackerHubClient = async (): Promise<(void)> => {
             if (trackerHubClientRef.current !== null || !wipId)
@@ -126,6 +132,11 @@ export const Room = () => {
             }
             unsubscribeUserLeftRoom = client.onUserLeftRoom(userLeftRoomCallback);
 
+            const accessExpiredCallback = () => {
+                setAccessExpired(true);
+            }
+            unsubscribeAccessExpired = client.onAccessExpired(accessExpiredCallback);
+
             await client.start();
             trackerHubClientRef.current = client;
             const joinRoomResult: TrackerHubResult<RoomInitializer> = await trackerHubClientRef.current.joinRoom(wipId);
@@ -144,6 +155,7 @@ export const Room = () => {
         return () => {
             unsubscribeUserJoinedRoom();
             unsubscribeUserLeftRoom();
+            unsubscribeAccessExpired();
         }
     }, []);
 
@@ -168,34 +180,59 @@ export const Room = () => {
                 </main>
             }
             {!pageError && trackerHubClientRef.current !== null &&
-                <main className="flex-1 min-h-0 flex flex-col items-center justify-center overflow-auto">
-                    <div className="flex flex-row items-center justify-between w-full h-14 p-2">
-                        {user.id === wipInfo?.ownerId && <WipShareDialog wipId={wipId}/>} 
-                    </div>
-                    <Separator />
-                    <ResizablePanelGroup direction="horizontal" className="flex-1 min-h-0">
-                        <ResizablePanel defaultSize={20} minSize={15} maxSize={25}>
-                            <div className="flex-1 flex items-center justify-center">
-                                {wipInfo?.name}
-                            </div>
-                        </ResizablePanel>
-                        <ResizableHandle />
-                        <ResizablePanel defaultSize={60} minSize={50} maxSize={70}>
-                            <div className="flex-1 flex items-center justify-center">
-                                {wipInfo?.id}
-                            </div>
-                        </ResizablePanel>
-                        <ResizableHandle />
-                        <ResizablePanel defaultSize={20} minSize={15} maxSize={25} className="flex flex-col">
-                            <ChatBox 
-                                client={trackerHubClientRef.current}
-                                members={members}
-                                messages={messages}
-                                setMessages={setMessages}
-                            />
-                        </ResizablePanel>
-                    </ResizablePanelGroup>
-                </main>
+                <>
+                    <main className="flex-1 min-h-0 flex flex-col items-center justify-center overflow-auto">
+                        <div className="flex flex-row items-center justify-between w-full h-14 p-2">
+                            {user.id === wipInfo?.ownerId && <WipShareDialog wipId={wipId}/>} 
+                        </div>
+                        <Separator />
+                        <ResizablePanelGroup direction="horizontal" className="flex-1 min-h-0">
+                            <ResizablePanel defaultSize={20} minSize={15} maxSize={25}>
+                                <div className="flex-1 flex items-center justify-center">
+                                    {wipInfo?.name}
+                                </div>
+                            </ResizablePanel>
+                            <ResizableHandle />
+                            <ResizablePanel defaultSize={60} minSize={50} maxSize={70}>
+                                <div className="flex-1 flex items-center justify-center">
+                                    {wipInfo?.id}
+                                </div>
+                            </ResizablePanel>
+                            <ResizableHandle />
+                            <ResizablePanel defaultSize={20} minSize={15} maxSize={25} className="flex flex-col">
+                                <ChatBox 
+                                    client={trackerHubClientRef.current}
+                                    members={members}
+                                    messages={messages}
+                                    setMessages={setMessages}
+                                />
+                            </ResizablePanel>
+                        </ResizablePanelGroup>
+                    </main>
+                    { accessExpired &&
+                        <AlertDialog open={accessExpired}>
+                            <AlertDialogContent className="max-w-[425px]">
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>
+                                        Access Expired
+                                    </AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        Your access to view and edit this wip has expired.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <Button 
+                                        variant="negative"
+                                        onClick={() => navigate("/create")} 
+                                        className="cursor-pointer"
+                                    >
+                                        Exit
+                                    </Button>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                    }
+                </>
             }
         </>
     );

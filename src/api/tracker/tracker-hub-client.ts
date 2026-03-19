@@ -13,6 +13,7 @@ const TrackerHubClientCallbacks = {
     UserJoinedRoom: "UserJoinedRoom",
     UserLeftRoom: "UserLeftRoom",
     MessageAddedToChat: "MessageAddedToChat",
+    AccessExpired: "AccessExpired",
 }
 
 export class TrackerHubClient{
@@ -21,6 +22,7 @@ export class TrackerHubClient{
     private _chatMessageListeners: Set<(userId: string, message: string) => void>;
     private _userJoinedRoomListeners: Set<(roomMember: RoomMember) => void>;
     private _userLeftRoomListeners: Set<(trackerConnection: TrackerConnection) => void>;
+    private _accessExpiredListeners: Set<() => void>;
 
     constructor(){
         this._connection = new signalR.HubConnectionBuilder()
@@ -31,6 +33,7 @@ export class TrackerHubClient{
         this._chatMessageListeners = new Set<(userId: string, message: string) => void>();
         this._userJoinedRoomListeners = new Set<(roomMember: RoomMember) => void>();
         this._userLeftRoomListeners = new Set<(trackerConnection: TrackerConnection) => void>();
+        this._accessExpiredListeners = new Set<() => void>();
         this.registerListeners();
     }
 
@@ -53,6 +56,12 @@ export class TrackerHubClient{
                 this._userLeftRoomListeners.forEach(callback => callback(trackerConnection));
             }
         )
+        this._connection.on(
+            TrackerHubClientCallbacks.AccessExpired,
+            () => {
+                this._accessExpiredListeners.forEach(callback => callback());
+            }
+        )
     }
 
     onChatMessageReceived(callback: (userId: string, message: string) => void): () => boolean {
@@ -68,6 +77,11 @@ export class TrackerHubClient{
     onUserLeftRoom(callback: (trackerConnection: TrackerConnection) => void): () => boolean {
         this._userLeftRoomListeners.add(callback);
         return () => this._userLeftRoomListeners.delete(callback);
+    }
+
+    onAccessExpired(callback: () => void): () => boolean {
+        this._accessExpiredListeners.add(callback);
+        return () => this._accessExpiredListeners.delete(callback);
     }
 
     private serverError<T>(): TrackerHubResult<T> {
