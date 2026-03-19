@@ -322,9 +322,18 @@ export const WipSearchDialog = () => {
                                                 Rename
                                             </ContextMenuItem>
                                             <ContextMenuSeparator />
-                                            <ContextMenuItem>Copy (not implemented)</ContextMenuItem>
+                                            <ContextMenuItem>Duplicate (not implemented)</ContextMenuItem>
                                             <ContextMenuSeparator />
-                                            <ContextMenuItem>Delete (not implemented)</ContextMenuItem>
+                                            <ContextMenuItem
+                                                onClick={() => {
+                                                    setDeleteDialogState({
+                                                        open: true,
+                                                        wip: entry
+                                                    })
+                                                }}
+                                            >
+                                                Delete
+                                            </ContextMenuItem>
                                             <ContextMenuSeparator />
                                             <ContextMenuItem>Share (not implemented)</ContextMenuItem>
                                         </ContextMenuContent>

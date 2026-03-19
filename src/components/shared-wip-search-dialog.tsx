@@ -363,7 +363,16 @@ const PaginatedDialogContent = ({isAccepted, query, setQuery, search}: SharedWip
                                             <ContextMenuSeparator />
                                         </>
                                     }
-                                    <ContextMenuItem>Delete (not implemented)</ContextMenuItem>
+                                    <ContextMenuItem
+                                        onClick={() => {
+                                            setDeleteDialogState({
+                                                open: true,
+                                                sharedWip: entry
+                                            })
+                                        }}
+                                    >
+                                        Delete
+                                    </ContextMenuItem>
                                 </ContextMenuContent>
                             </ContextMenu>
                         ))
