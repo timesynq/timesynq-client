@@ -409,8 +409,8 @@ const PaginatedDialogContent = ({isAccepted, query, setQuery, search}: SharedWip
             >
                 <DialogContent className="max-w-[425px]">
                     <DialogHeader className="text-left">
-                        <DialogTitle>
-                            Accept invite to edit {acceptDialogState.sharedWip?.name}? 
+                        <DialogTitle className="p-2 break-words wrap-anywhere">
+                            Accept invite to edit "{acceptDialogState.sharedWip?.name}"? 
                         </DialogTitle>
                     </DialogHeader>
                     <div className="grid gap-4">
@@ -434,8 +434,8 @@ const PaginatedDialogContent = ({isAccepted, query, setQuery, search}: SharedWip
             >
                 <DialogContent className="max-w-[425px]">
                     <DialogHeader className="text-left">
-                        <DialogTitle>
-                            Unshare {deleteDialogState.sharedWip?.name} with yourself? 
+                        <DialogTitle className="p-2 break-words wrap-anywhere">
+                            Unshare "{deleteDialogState.sharedWip?.name}" with yourself? 
                         </DialogTitle>
                     </DialogHeader>
                     <div className="grid gap-4">

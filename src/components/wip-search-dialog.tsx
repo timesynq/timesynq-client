@@ -387,10 +387,10 @@ export const WipSearchDialog = () => {
                         closeRenameDialog();
                 }} 
             >
-                <DialogContent className="max-w-[425px]">
+                <DialogContent className="w-[425px]">
                     <DialogHeader className="text-left">
-                        <DialogTitle>
-                            Rename {renameDialogState.wip?.name}
+                        <DialogTitle className="p-2 break-words wrap-anywhere">
+                            Rename "{renameDialogState.wip?.name}"
                         </DialogTitle>
                     </DialogHeader>
                     <Input
@@ -419,10 +419,10 @@ export const WipSearchDialog = () => {
                         closeDeleteDialog();
                 }} 
             >
-                <DialogContent className="max-w-[425px]">
+                <DialogContent className="w-[425px]">
                     <DialogHeader className="text-left">
-                        <DialogTitle>
-                            Confirm deletion of {deleteDialogState.wip?.name}
+                        <DialogTitle className="p-2 break-words wrap-anywhere">
+                            Confirm deletion of "{deleteDialogState.wip?.name}"
                         </DialogTitle>
                     </DialogHeader>
                     <div className="grid gap-4">
