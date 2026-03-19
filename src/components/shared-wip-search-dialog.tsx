@@ -295,18 +295,18 @@ const PaginatedDialogContent = ({isAccepted, query, setQuery, search}: SharedWip
                 }
             </div>
             <div className="h-[500px] overflow-y-auto -mx-4 px-4 no-scrollbar">
-                <ul className={`${isMobile ? 'w-full' : 'min-w-[600px]'} mt-4 space-y-2 flex flex-col items-center justify-center`}>
+                <ul className='w-full mt-4 space-y-2 flex flex-col items-center justify-center'>
                     { items.length > 0 ? (
                         items.map((entry) => (
-                            <li key={entry.id} className={`${isMobile ? 'w-full' : 'min-w-[700px] flex-1'}`}>
+                            <li key={entry.id} className={`${isMobile ? 'w-[450px]' : 'w-[700px] flex-1'}`}>
                                 <div 
                                     onDoubleClick={() => isAccepted && navigate(`/room/${entry.id}`)}
                                     className="block bg-popover p-4 shadow-md hover:shadow-lg hover:bg-accent transition-all duration-200 border-border border-1 cursor-pointer"
                                 >
                                     <div className="flex items-center gap-4">
-                                        <div className="flex flex-row items-center w-full justify-between">
-                                            <span className="flex flex-col justify-between">
-                                                <span className="text-lg font-semibold text-foreground">{entry.name}</span>
+                                        <div className="flex flex-row items-center w-full justify-between space-x-12">
+                                            <span className="flex flex-col min-w-0 justify-between truncate whitespace-nowrap text-ellipsis">
+                                                <span className="text-lg font-semibold text-foreground truncate">{entry.name}</span>
                                                 <span className="flex flex-row space-x-3 text-muted-foreground text-sm">
                                                     <span>by&nbsp;
                                                         <Link target="_blank" to={`/profile/${entry.ownerId}`} className="hover:underline">{entry.ownerName}</Link>

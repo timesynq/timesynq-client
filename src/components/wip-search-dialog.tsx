@@ -266,20 +266,20 @@ export const WipSearchDialog = () => {
                         }
                     </div>
                     <div className="h-[480px] overflow-y-auto -mx-4 px-4 no-scrollbar">
-                        <ul className={`${isMobile ? 'w-full' : 'min-w-[600px]'} mt-4 space-y-2 flex flex-col items-center justify-center`}>
+                        <ul className='w-full mt-4 space-y-2 flex flex-col items-center justify-center'>
                             { items.length > 0 ? (
                                 items.map((entry) => (
                                     <ContextMenu>
                                         <ContextMenuTrigger>
-                                            <li key={entry.id} className={`${isMobile ? 'w-full' : 'min-w-[700px] flex-1'}`}>
+                                            <li key={entry.id} className={`${isMobile ? 'w-[450px]' : 'w-[700px] flex-1'}`}>
                                                 <div 
                                                     onDoubleClick={() => navigate(`/room/${entry.id}`)}
                                                     className="block bg-popover p-4 shadow-md hover:shadow-lg hover:bg-accent transition-all duration-200 border-border border-1 cursor-pointer"
                                                 >
                                                     <div className="flex items-center gap-4">
-                                                        <div className="flex flex-row items-center w-full justify-between">
-                                                            <span className="flex flex-col justify-between">
-                                                                <span className="text-lg font-semibold text-foreground">{entry.name}</span>
+                                                        <div className="flex flex-row items-center w-full justify-between space-x-12">
+                                                            <span className="flex flex-col min-w-0 justify-between truncate whitespace-nowrap text-ellipsis">
+                                                                <span className="text-lg font-semibold text-foreground truncate">{entry.name}</span>
                                                                 <span className="flex flex-row space-x-3 text-muted-foreground text-sm">
                                                                     <span>Created {entry.createdOnUTC.toLocaleDateString()}</span>
                                                                     <span>Last opened {entry.lastOpenedOnUTC.toLocaleString()}</span>
