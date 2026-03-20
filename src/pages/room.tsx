@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { Separator } from "@/components/ui/separator";
+import { WipOptionsDialog } from "@/components/wip-options-dialog";
 import { WipShareDialog } from "@/components/wip-share-dialog";
 import { useAuth } from "@/contexts/auth-provider";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -198,7 +199,8 @@ export const Room = () => {
             {!pageError && trackerHubClientRef.current !== null &&
                 <>
                     <main className="flex-1 min-h-0 flex flex-col items-center justify-center overflow-auto">
-                        <div className="flex flex-row items-center justify-between w-full h-14 p-2">
+                        <div className="flex flex-row items-center justify-start w-full h-14 p-2">
+                            {user.id === wipInfo?.ownerId && <WipOptionsDialog wip={wipInfo}/>}
                             {user.id === wipInfo?.ownerId && <WipShareDialog wipId={wipId}/>} 
                         </div>
                         <Separator />
