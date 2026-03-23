@@ -16,3 +16,8 @@ export type RoomInitializer = {
     wip: Wip,
     members: RoomMember[],
 }
+
+export type TrackerConnection = {
+    userId: string,
+    connectionId: string,
+}

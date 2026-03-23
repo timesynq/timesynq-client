@@ -1,16 +1,18 @@
 import { UNEXPECTED_ERROR_MESSAGE } from "@/api/api-error";
 import { TrackerHubClient } from "@/api/tracker/tracker-hub-client";
-import { RoomInitializer, RoomMember, TrackerHubResult } from "@/api/tracker/tracker-hub-models";
+import { RoomInitializer, RoomMember, TrackerConnection, TrackerHubResult } from "@/api/tracker/tracker-hub-models";
 import { Wip } from "@/api/wips/wip";
-import { ChatBox } from "@/components/chat-box";
+import { ChatBox, Message } from "@/components/chat-box";
+import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { Separator } from "@/components/ui/separator";
+import { WipOptionsDialog } from "@/components/wip-options-dialog";
 import { WipShareDialog } from "@/components/wip-share-dialog";
 import { useAuth } from "@/contexts/auth-provider";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
 export type RoomMemberInfo = {
     userName: string,
@@ -20,12 +22,20 @@ export type RoomMemberInfo = {
 
 export const Room = () => {
 
+    const navigate = useNavigate();
     const { user } = useAuth();
     const { wipId } = useParams();
     const trackerHubClientRef = useRef<TrackerHubClient | null>(null);
     const [pageError, setPageError] = useState<string | null>(null);
     const [wipInfo, setWipInfo] = useState<Wip | null>(null);
-    const [members, setMembers] = useState<Map<string, RoomMemberInfo>>(new Map<string, RoomMemberInfo>())
+    const [messages, setMessages] = useState<Message[]>([]);
+    const [accessExpired, setAccessExpired] = useState<boolean>(false);
+
+    const [members, setMembers] = useState<Map<string, RoomMemberInfo>>(new Map<string, RoomMemberInfo>());
+    const membersRef = useRef<Map<string, RoomMemberInfo>>(members);
+    useEffect(() => {
+        membersRef.current = members;
+    }, [members]);
 
     if (!user) return null;
 
@@ -37,6 +47,14 @@ export const Room = () => {
         ]
         const randomIndex: number = Math.floor(Math.random() * (possibleColors.length));
         return possibleColors[randomIndex];
+    }
+
+    const serverMessage = (message: string): Message => {
+        return {
+            color: "text-muted-foreground",
+            username: "SERVER",
+            message: message,
+        }
     }
 
     const initializeMembers = useCallback((roomMembers: RoomMember[]): Map<string, RoomMemberInfo> => {
@@ -71,14 +89,24 @@ export const Room = () => {
         let unsubscribeUserJoinedRoom = (): boolean => {
             return false;
         }
+        let unsubscribeUserLeftRoom = (): boolean => {
+            return false;
+        }
+        let unsubscribeAccessExpired = (): boolean => {
+            return false;
+        }
+        let unsubscribeWipNameChanged = (): boolean => {
+            return false;
+        }
+
         const setupTrackerHubClient = async (): Promise<(void)> => {
             if (trackerHubClientRef.current !== null || !wipId)
                 return;
             const client = new TrackerHubClient();
 
             // register TrackerHubClient listeners here
-            const callback = (roomMember: RoomMember) => {
-                let roomMemberInfo: RoomMemberInfo | undefined = members.get(roomMember.userId);
+            const userJoinedRoomCallback = (roomMember: RoomMember) => {
+                let roomMemberInfo: RoomMemberInfo | undefined = membersRef.current.get(roomMember.userId);
                 if (!roomMemberInfo){
                     const set = new Set<string>();
                     const color: string = generateRandomChatColor();
@@ -87,13 +115,44 @@ export const Room = () => {
                         connectionIds: set,
                         chatColor: color,
                     }
-                    members.set(roomMember.userId, roomMemberInfo);
+                    membersRef.current.set(roomMember.userId, roomMemberInfo);
+                    setMessages(prev => [...prev, serverMessage(`${roomMember.userName} has joined the room.`)]);
                 }    
                 roomMemberInfo.connectionIds.add(roomMember.connectionId);
-                setMembers(new Map<string, RoomMemberInfo>(members));
+                setMembers(new Map<string, RoomMemberInfo>(membersRef.current));
             }
-            unsubscribeUserJoinedRoom = client.onUserJoinedRoom(callback);
+            unsubscribeUserJoinedRoom = client.onUserJoinedRoom(userJoinedRoomCallback);
             
+            const userLeftRoomCallback = (trackerConnection: TrackerConnection) => {
+                let roomMemberInfo: RoomMemberInfo | undefined = membersRef.current.get(trackerConnection.userId);
+                if (!roomMemberInfo)
+                    return;
+                roomMemberInfo.connectionIds.delete(trackerConnection.connectionId);
+                if(roomMemberInfo.connectionIds.size === 0){
+                    setMessages(prev => [...prev, serverMessage(`${roomMemberInfo.userName} has left the room.`)]);
+                    membersRef.current.delete(trackerConnection.userId);
+                }
+                setMembers(new Map<string, RoomMemberInfo>(membersRef.current));
+            }
+            unsubscribeUserLeftRoom = client.onUserLeftRoom(userLeftRoomCallback);
+
+            const accessExpiredCallback = () => {
+                setAccessExpired(true);
+            }
+            unsubscribeAccessExpired = client.onAccessExpired(accessExpiredCallback);
+
+            const wipNameChangedCallback = (newName: string) => {
+                setWipInfo(prev => {
+                    if (prev === null) 
+                        return prev;
+                    return {
+                        ...prev,
+                        name: newName
+                    };
+                });
+            }
+            unsubscribeWipNameChanged = client.onWipNameChanged(wipNameChangedCallback);
+
             await client.start();
             trackerHubClientRef.current = client;
             const joinRoomResult: TrackerHubResult<RoomInitializer> = await trackerHubClientRef.current.joinRoom(wipId);
@@ -111,6 +170,9 @@ export const Room = () => {
         setupTrackerHubClient();
         return () => {
             unsubscribeUserJoinedRoom();
+            unsubscribeUserLeftRoom();
+            unsubscribeAccessExpired();
+            unsubscribeWipNameChanged();
         }
     }, []);
 
@@ -135,29 +197,60 @@ export const Room = () => {
                 </main>
             }
             {!pageError && trackerHubClientRef.current !== null &&
-                <main className="flex-1 min-h-0 flex flex-col items-center justify-center overflow-auto">
-                    <div className="flex flex-row items-center justify-between w-full h-14 p-2">
-                        {user.id === wipInfo?.ownerId && <WipShareDialog wipId={wipId}/>} 
-                    </div>
-                    <Separator />
-                    <ResizablePanelGroup direction="horizontal" className="flex-1 min-h-0">
-                        <ResizablePanel defaultSize={20} minSize={15} maxSize={25}>
-                            <div className="flex-1 flex items-center justify-center">
-                                {wipInfo?.name}
-                            </div>
-                        </ResizablePanel>
-                        <ResizableHandle />
-                        <ResizablePanel defaultSize={60} minSize={50} maxSize={70}>
-                            <div className="flex-1 flex items-center justify-center">
-                                {wipInfo?.id}
-                            </div>
-                        </ResizablePanel>
-                        <ResizableHandle />
-                        <ResizablePanel defaultSize={20} minSize={15} maxSize={25} className="flex flex-col">
-                            <ChatBox client={trackerHubClientRef.current} members={members}/>
-                        </ResizablePanel>
-                    </ResizablePanelGroup>
-                </main>
+                <>
+                    <main className="flex-1 min-h-0 flex flex-col items-center justify-center overflow-auto">
+                        <div className="flex flex-row items-center justify-start w-full h-14 p-2">
+                            {user.id === wipInfo?.ownerId && <WipOptionsDialog wip={wipInfo}/>}
+                            {user.id === wipInfo?.ownerId && <WipShareDialog wipId={wipId}/>} 
+                        </div>
+                        <Separator />
+                        <ResizablePanelGroup direction="horizontal" className="flex-1 min-h-0">
+                            <ResizablePanel defaultSize={20} minSize={15} maxSize={25}>
+                                <div className="flex-1 flex items-center justify-center">
+                                    {wipInfo?.name}
+                                </div>
+                            </ResizablePanel>
+                            <ResizableHandle />
+                            <ResizablePanel defaultSize={60} minSize={50} maxSize={70}>
+                                <div className="flex-1 flex items-center justify-center">
+                                    {wipInfo?.id}
+                                </div>
+                            </ResizablePanel>
+                            <ResizableHandle />
+                            <ResizablePanel defaultSize={20} minSize={15} maxSize={25} className="flex flex-col">
+                                <ChatBox 
+                                    client={trackerHubClientRef.current}
+                                    members={members}
+                                    messages={messages}
+                                    setMessages={setMessages}
+                                />
+                            </ResizablePanel>
+                        </ResizablePanelGroup>
+                    </main>
+                    { accessExpired &&
+                        <AlertDialog open={accessExpired}>
+                            <AlertDialogContent className="max-w-[425px]">
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>
+                                        Access Expired
+                                    </AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        Your access to view and edit this wip has expired.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <Button 
+                                        variant="negative"
+                                        onClick={() => navigate("/create")} 
+                                        className="cursor-pointer"
+                                    >
+                                        Exit
+                                    </Button>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                    }
+                </>
             }
         </>
     );

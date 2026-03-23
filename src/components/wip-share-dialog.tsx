@@ -19,7 +19,8 @@ import PlusIcon from "@/assets/svg/plus-icon.svg?react";
 import { User } from "@/api/users/user";
 
 export interface WipShareDialogProps {
-    wipId: string | undefined, 
+    wipId: string | undefined,
+    trigger?: React.ReactNode, 
 }
 
 interface ShareConfirmationDialogState {
@@ -32,7 +33,7 @@ interface DeleteOneDialogState {
     user?: SharedUser,
 }
 
-export const WipShareDialog = ({wipId}: WipShareDialogProps) => {
+export const WipShareDialog = ({wipId, trigger}: WipShareDialogProps) => {
 
     const isMobile = useIsMobile();
     const [userQuery, setUserQuery] = useState<string>("");
@@ -161,7 +162,10 @@ export const WipShareDialog = ({wipId}: WipShareDialogProps) => {
         <>
             <Dialog>
                 <DialogTrigger asChild>
-                    <Button variant="link" className="text-foreground cursor-pointer text-lg">Share</Button>
+                    {
+                        trigger ??
+                            <Button variant="link" className="text-foreground cursor-pointer text-lg">Share</Button>
+                    }
                 </DialogTrigger>
                 <DialogContent className={`${isMobile ? 'w-full' : 'min-w-[750px]'} h-[780px] flex flex-col`}>
                     <DialogHeader className="text-2xl items-start">
@@ -179,12 +183,12 @@ export const WipShareDialog = ({wipId}: WipShareDialogProps) => {
                             <div>
                                 <form onSubmit={handleSubmit} className={`${isMobile ? 'w-full' : 'min-w-[700px]'} flex flex-row items-center space-x-2 pb-4`}>
                                     <Input
-                                        className="w-full"
+                                        className="w-full flex-1 w-[500px]"
                                         placeholder="Search..."
                                         value={userQuery}
                                         onChange={(e) => setUserQuery(e.target.value)}
                                     />
-                                    <Button type="submit" variant="positive" size="icon" className="cursor-pointer w-10">
+                                    <Button type="submit" variant="positive" size="icon" className="cursor-pointer">
                                         <SearchIcon />
                                     </Button>
                                 </form>

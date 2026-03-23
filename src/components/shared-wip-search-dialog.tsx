@@ -18,6 +18,7 @@ import { useSharedWipSearch } from "@/hooks/use-shared-wip-search";
 import { useAuth } from "@/contexts/auth-provider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import PlusIcon from "@/assets/svg/plus-icon.svg?react";
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuTrigger } from "./ui/context-menu";
 
 interface AcceptDialogState {
     open: boolean,
@@ -223,19 +224,19 @@ const PaginatedDialogContent = ({isAccepted, query, setQuery, search}: SharedWip
 
     return (
         <>
-            <form onSubmit={handleSubmit} className="w-full flex flex-row items-center space-x-2 pb-4">
+            <form onSubmit={handleSubmit} className="w-full flex flex-row space-x-2 items-center pb-4">
                 <Input
-                    className="w-full"
+                    className="w-full flex-1 w-[500px]"
                     placeholder="Search..."
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                 />
-                <Button type="submit" variant="positive" size="icon" className="cursor-pointer w-12">
+                <Button type="submit" variant="positive" size="icon" className="cursor-pointer">
                     <SearchIcon />
                 </Button>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button type="button" variant="negative" size="icon" className="cursor-pointer w-12">
+                        <Button type="button" variant="negative" size="icon" className="cursor-pointer">
                             <SettingsIcon />
                         </Button>
                     </DropdownMenuTrigger>
@@ -264,11 +265,11 @@ const PaginatedDialogContent = ({isAccepted, query, setQuery, search}: SharedWip
                         </DropdownMenuCheckboxItem>
                         <DropdownMenuSeparator />
                             <DropdownMenuRadioGroup value={sortBy} onValueChange={(value) => handleUpdateSortBy(value)}>
-                                <DropdownMenuRadioItem value={WipShareSortField.name} onSelect={(e) => e.preventDefault()} onClick={(e) => e.stopPropagation()} className="cursor-pointer">
-                                    Sort by name
-                                </DropdownMenuRadioItem>
                                 <DropdownMenuRadioItem value={WipShareSortField.shareAge} onSelect={(e) => e.preventDefault()} onClick={(e) => e.stopPropagation()} className="cursor-pointer">
                                     Sort by most recently shared
+                                </DropdownMenuRadioItem>
+                                <DropdownMenuRadioItem value={WipShareSortField.name} onSelect={(e) => e.preventDefault()} onClick={(e) => e.stopPropagation()} className="cursor-pointer">
+                                    Sort by name
                                 </DropdownMenuRadioItem>
                             </DropdownMenuRadioGroup>
                     </DropdownMenuContent>
@@ -295,63 +296,85 @@ const PaginatedDialogContent = ({isAccepted, query, setQuery, search}: SharedWip
                 }
             </div>
             <div className="h-[500px] overflow-y-auto -mx-4 px-4 no-scrollbar">
-                <ul className={`${isMobile ? 'w-full' : 'min-w-[600px]'} mt-4 space-y-2 flex flex-col items-center justify-center`}>
+                <ul className='w-full mt-4 space-y-2 flex flex-col items-center justify-center'>
                     { items.length > 0 ? (
                         items.map((entry) => (
-                            <li key={entry.id} className={`${isMobile ? 'w-full' : 'min-w-[700px] flex-1'}`}>
-                                <div 
-                                    onDoubleClick={() => isAccepted && navigate(`/room/${entry.id}`)}
-                                    className="block bg-popover p-4 shadow-md hover:shadow-lg hover:bg-accent transition-all duration-200 border-border border-1 cursor-pointer"
-                                >
-                                    <div className="flex items-center gap-4">
-                                        <div className="flex flex-row items-center w-full justify-between">
-                                            <span className="flex flex-col justify-between">
-                                                <span className="text-lg font-semibold text-foreground">{entry.name}</span>
-                                                <span className="flex flex-row space-x-3 text-muted-foreground text-sm">
-                                                    <span>by&nbsp;
-                                                        <Link target="_blank" to={`/profile/${entry.ownerId}`} className="hover:underline">{entry.ownerName}</Link>
+                            <ContextMenu>
+                                <ContextMenuTrigger>
+                                    <li key={entry.id} className={`${isMobile ? 'w-[450px]' : 'w-[700px] flex-1'}`}>
+                                        <div 
+                                            onDoubleClick={() => isAccepted && navigate(`/room/${entry.id}`)}
+                                            className="block bg-popover p-4 shadow-md hover:shadow-lg hover:bg-accent transition-all duration-200 border-border border-1 cursor-pointer"
+                                        >
+                                            <div className="flex items-center gap-4">
+                                                <div className="flex flex-row items-center w-full justify-between space-x-12">
+                                                    <span className="flex flex-col min-w-0 justify-between truncate whitespace-nowrap text-ellipsis">
+                                                        <span className="text-lg font-semibold text-foreground truncate">{entry.name}</span>
+                                                        <span className="flex flex-row space-x-3 text-muted-foreground text-sm">
+                                                            <span>by&nbsp;
+                                                                <Link target="_blank" to={`/profile/${entry.ownerId}`} className="hover:underline">{entry.ownerName}</Link>
+                                                            </span>
+                                                            <span>Shared on {entry.lastOpenedOnUTC.toLocaleDateString()}</span>
+                                                        </span>
                                                     </span>
-                                                    <span>Shared on {entry.lastOpenedOnUTC.toLocaleDateString()}</span>
-                                                </span>
-                                            </span>
-                                            <div className="flex flex-row space-x-2">
-                                                { !isAccepted &&
-                                                    <Button 
-                                                        variant="positive"
-                                                        size="icon"
-                                                        className="cursor-pointer"
-                                                        onClick={(e) => {
-                                                            e.preventDefault();
-                                                            e.stopPropagation();
-                                                            setAcceptDialogState({
-                                                                open: true,
-                                                                sharedWip: entry
-                                                            })
-                                                        }}
-                                                    >
-                                                        <PlusIcon />
-                                                    </Button>
-                                                }
-                                                <Button 
-                                                    variant="negative"
-                                                    size="icon"
-                                                    className="cursor-pointer"
-                                                    onClick={(e) => {
-                                                        e.preventDefault();
-                                                        e.stopPropagation();
-                                                        setDeleteDialogState({
-                                                            open: true,
-                                                            sharedWip: entry
-                                                        })
-                                                    }}
-                                                >
-                                                    <TrashIcon />
-                                                </Button>
+                                                    <div className="flex flex-row space-x-2">
+                                                        { !isAccepted &&
+                                                            <Button 
+                                                                variant="positive"
+                                                                size="icon"
+                                                                className="cursor-pointer"
+                                                                onClick={(e) => {
+                                                                    e.preventDefault();
+                                                                    e.stopPropagation();
+                                                                    setAcceptDialogState({
+                                                                        open: true,
+                                                                        sharedWip: entry
+                                                                    })
+                                                                }}
+                                                            >
+                                                                <PlusIcon />
+                                                            </Button>
+                                                        }
+                                                        <Button 
+                                                            variant="negative"
+                                                            size="icon"
+                                                            className="cursor-pointer"
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                e.stopPropagation();
+                                                                setDeleteDialogState({
+                                                                    open: true,
+                                                                    sharedWip: entry
+                                                                })
+                                                            }}
+                                                        >
+                                                            <TrashIcon />
+                                                        </Button>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </div>
-                            </li>
+                                    </li>
+                                </ContextMenuTrigger>
+                                <ContextMenuContent>
+                                    { isAccepted &&
+                                        <>
+                                            <ContextMenuItem>Download (not implemented)</ContextMenuItem>
+                                            <ContextMenuSeparator />
+                                        </>
+                                    }
+                                    <ContextMenuItem
+                                        onClick={() => {
+                                            setDeleteDialogState({
+                                                open: true,
+                                                sharedWip: entry
+                                            })
+                                        }}
+                                    >
+                                        Delete
+                                    </ContextMenuItem>
+                                </ContextMenuContent>
+                            </ContextMenu>
                         ))
                     ) : (
                         items.length == 0 && <p className="text-muted-foreground">{isAccepted ? "No wips found." : "No invites found."}</p>
@@ -409,8 +432,8 @@ const PaginatedDialogContent = ({isAccepted, query, setQuery, search}: SharedWip
             >
                 <DialogContent className="max-w-[425px]">
                     <DialogHeader className="text-left">
-                        <DialogTitle>
-                            Accept invite to edit {acceptDialogState.sharedWip?.name}? 
+                        <DialogTitle className="p-2 break-words wrap-anywhere">
+                            Accept invite to edit "{acceptDialogState.sharedWip?.name}"? 
                         </DialogTitle>
                     </DialogHeader>
                     <div className="grid gap-4">
@@ -434,8 +457,8 @@ const PaginatedDialogContent = ({isAccepted, query, setQuery, search}: SharedWip
             >
                 <DialogContent className="max-w-[425px]">
                     <DialogHeader className="text-left">
-                        <DialogTitle>
-                            Unshare {deleteDialogState.sharedWip?.name} with yourself? 
+                        <DialogTitle className="p-2 break-words wrap-anywhere">
+                            Unshare "{deleteDialogState.sharedWip?.name}" with yourself? 
                         </DialogTitle>
                     </DialogHeader>
                     <div className="grid gap-4">

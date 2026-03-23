@@ -9,7 +9,7 @@ export const useWipSearch = () => {
         pageNumber: 1,
         pageSize: 10,
         sortReverse: false,
-        sortBy: WipSortField.name
+        sortBy: WipSortField.lastOpened
     }
 
     const {

@@ -131,10 +131,10 @@ export const WipService = {
         }
     },
 
-    changeWipName: async (changeWipNameRequest: ChangeWipNameRequest): Promise<Result<void>> => {
+    changeWipName: async (wipId: string, changeWipNameRequest: ChangeWipNameRequest): Promise<Result<void>> => {
         try{
-            const response = await fetch(endpoints.wips.changeWipName(changeWipNameRequest.newName), {
-                method: "POST",
+            const response = await fetch(endpoints.wips.changeWipName(wipId), {
+                method: "PATCH",
                 credentials: "include",
                 headers: {
                     'Accept': 'application/json',
