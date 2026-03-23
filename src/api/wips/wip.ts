@@ -37,7 +37,10 @@ export type ShareWipRequest = {
 export type ShareStatus = {
     isAccepted: boolean,
 }
-export type SharedWip = Wip & ShareStatus;
+export type SharedWip = Wip & ShareStatus & {
+    ownerName: string,
+    sharedOnUTC: Date,
+};
 export type SharedUser = User & ShareStatus;
 
 export const WipService = {
@@ -128,10 +131,10 @@ export const WipService = {
         }
     },
 
-    changeWipName: async (changeWipNameRequest: ChangeWipNameRequest): Promise<Result<void>> => {
+    changeWipName: async (wipId: string, changeWipNameRequest: ChangeWipNameRequest): Promise<Result<void>> => {
         try{
-            const response = await fetch(endpoints.wips.changeWipName(changeWipNameRequest.newName), {
-                method: "POST",
+            const response = await fetch(endpoints.wips.changeWipName(wipId), {
+                method: "PATCH",
                 credentials: "include",
                 headers: {
                     'Accept': 'application/json',
@@ -176,17 +179,18 @@ export const WipService = {
         }
     },
 
-    getWipsSharedWithMe: async (
+    getUnacceptedWipsSharedWithMe: async (
         searchString: string | null = null,
         pageNumber: number = 1,
         pageSize: number = 20,
         sortOrder: string,
         sortBy: string,
-    ): Promise<Result<PagedList<Wip>>> => {
+    ): Promise<Result<PagedList<SharedWip>>> => {
         try {
             const url = new URL(endpoints.wips.getSharedWips());
             url.search = new URLSearchParams({
                 ...(searchString !== null && {searchString}),
+                isAccepted: `${false}`,
                 pageNumber: `${pageNumber}`,
                 pageSize: `${pageSize}`,
                 sortOrder: sortOrder,
@@ -201,9 +205,12 @@ export const WipService = {
 
             const data = await response.json();
 
-            const items: Wip[] = (data.items ?? []).map((item: any) => {
+            const items: SharedWip[] = (data.items ?? []).map((item: any) => {
                 return {
                     ...item,
+                    sharedOnUTC: item.sharedOnUTC
+                        ? trimUTC(item.sharedOnUTC)
+                        : null,
                     createdOnUTC: item.createdOnUTC
                         ? trimUTC(item.createdOnUTC)
                         : null,
@@ -225,7 +232,67 @@ export const WipService = {
                 nextPageUrl: data.nextPageUrl ?? null,
             }
     
-            return ResultFactory.success(new PagedList<Wip>(pagedListFields));
+            return ResultFactory.success(new PagedList<SharedWip>(pagedListFields));
+        } 
+        catch (_error) {
+            return ResultFactory.error(UNEXPECTED_ERROR_MESSAGE);
+        }
+    },
+
+    getAcceptedWipsSharedWithMe: async (
+        searchString: string | null = null,
+        pageNumber: number = 1,
+        pageSize: number = 20,
+        sortOrder: string,
+        sortBy: string,
+    ): Promise<Result<PagedList<SharedWip>>> => {
+        try {
+            const url = new URL(endpoints.wips.getSharedWips());
+            url.search = new URLSearchParams({
+                ...(searchString !== null && {searchString}),
+                isAccepted: `${true}`,
+                pageNumber: `${pageNumber}`,
+                pageSize: `${pageSize}`,
+                sortOrder: sortOrder,
+                sortBy: sortBy,
+            }).toString();
+
+            const response = await fetch(url, {
+                method: "GET",
+                credentials: "include",
+                headers: { "Accept": "application/json" },
+            });
+
+            const data = await response.json();
+
+            const items: SharedWip[] = (data.items ?? []).map((item: any) => {
+                return {
+                    ...item,
+                    sharedOnUTC: item.sharedOnUTC
+                        ? trimUTC(item.sharedOnUTC)
+                        : null,
+                    createdOnUTC: item.createdOnUTC
+                        ? trimUTC(item.createdOnUTC)
+                        : null,
+                    lastOpenedOnUTC: item.lastOpenedOnUTC
+                        ? trimUTC(item.lastOpenedOnUTC)
+                        : null,
+                };
+            });
+
+            const pagedListFields = {
+                items: items,
+                pageNumber: data.pageNumber,
+                pageSize: data.pageSize,
+                totalItems: data.totalItems,
+                totalPages: data.totalPages,
+                firstPageUrl: data.firstPageUrl ?? null,
+                lastPageUrl: data.lastPageUrl ?? null,
+                previousPageUrl: data.previousPageUrl ?? null,
+                nextPageUrl: data.nextPageUrl ?? null,
+            }
+    
+            return ResultFactory.success(new PagedList<SharedWip>(pagedListFields));
         } 
         catch (_error) {
             return ResultFactory.error(UNEXPECTED_ERROR_MESSAGE);
@@ -269,6 +336,31 @@ export const WipService = {
             return ResultFactory.error(error.detail);
         }
         catch (_error) {
+            return ResultFactory.error(UNEXPECTED_ERROR_MESSAGE);
+        }
+    },
+
+    acceptShare: async (wipId: string): Promise<Result<void>> => {
+        try{
+            const response = await fetch(endpoints.wips.acceptShare(wipId), {
+                method: "PATCH",
+                credentials: "include",
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+            });
+
+            if(response.ok){
+                return ResultFactory.success<void>(undefined);
+            }
+
+            const data = await response.json();
+            const error = data as ApiError;
+            return ResultFactory.error(error.detail);
+        }
+        catch (_error) {
+            console.log(_error);
             return ResultFactory.error(UNEXPECTED_ERROR_MESSAGE);
         }
     },

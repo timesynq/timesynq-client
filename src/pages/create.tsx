@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { Wip, WipService } from "@/api/wips/wip";
 import { WipSearchDialog } from "@/components/wip-search-dialog";
 import { Result } from "@/api/result";
+import { SharedWipSearchDialog } from "@/components/shared-wip-search-dialog";
 
 export const Create = () => {
 
@@ -40,7 +41,7 @@ export const Create = () => {
                                 <p className="text-sm text-muted-foreground">Load a work in progress.</p>
                             </CardContent>
                             <CardFooter className="w-full mt-4">
-                                <WipSearchDialog isShared={false}/>
+                                <WipSearchDialog />
                             </CardFooter>
                         </Card>
                         <Card className="flex flex-col items-center justify-between p-4 text-center">
@@ -64,7 +65,7 @@ export const Create = () => {
                                 <p className="text-sm text-muted-foreground">Load a work in progress that was shared with you.</p>
                             </CardContent>
                             <CardFooter className="w-full mt-4">
-                                <WipSearchDialog isShared={true}/>
+                                <SharedWipSearchDialog />
                             </CardFooter>
                         </Card>
                     </div>
