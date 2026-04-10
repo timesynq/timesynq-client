@@ -3,6 +3,7 @@ import { TrackerHubClient } from "@/api/tracker/tracker-hub-client";
 import { RoomInitializer, RoomMember, TrackerConnection, TrackerHubResult } from "@/api/tracker/tracker-hub-models";
 import { Wip } from "@/api/wips/wip";
 import { ChatBox, Message } from "@/components/chat-box";
+import { FrameEditor } from "@/components/frame-editor";
 import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -212,8 +213,8 @@ export const Room = () => {
                             </ResizablePanel>
                             <ResizableHandle />
                             <ResizablePanel defaultSize={60} minSize={50} maxSize={70}>
-                                <div className="flex-1 flex items-center justify-center">
-                                    {wipInfo?.id}
+                                <div className="flex-1 flex h-full items-center justify-center">
+                                    <FrameEditor/>
                                 </div>
                             </ResizablePanel>
                             <ResizableHandle />
