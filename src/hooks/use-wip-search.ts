@@ -1,4 +1,4 @@
-import { MAX_WIP_NAME_LENGTH, Wip, WipService, WipSortField } from "@/api/wips/wip";
+import { Wip, WIP_CONSTANTS, WipService, WipSortField } from "@/api/wips/wip";
 import { InitialPaginationState, usePagination } from "./use-pagination";
 import { fetchHypermedia } from "@/api/hypermedia";
 import { Result, ResultFactory } from "@/api/result";
@@ -38,8 +38,8 @@ export const useWipSearch = () => {
 
     const trySearch = async (query: string): Promise<Result<void>> => {
         const trimmed = query.trim();
-        if (trimmed.length > MAX_WIP_NAME_LENGTH) {
-            return ResultFactory.error(`Wip names cannot exceed ${MAX_WIP_NAME_LENGTH} letters.`);
+        if (trimmed.length > WIP_CONSTANTS.MAX_NAME_LENGTH) {
+            return ResultFactory.error(`Wip names cannot exceed ${WIP_CONSTANTS.MAX_NAME_LENGTH} letters.`);
         }
         return await search(query);
     }

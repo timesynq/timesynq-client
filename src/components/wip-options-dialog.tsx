@@ -1,7 +1,7 @@
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
-import { ChangeWipNameRequest, MAX_WIP_NAME_LENGTH, Wip, WipService } from "@/api/wips/wip";
+import { ChangeWipNameRequest, Wip, WIP_CONSTANTS, WipService } from "@/api/wips/wip";
 import { useState } from "react";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
@@ -26,8 +26,8 @@ export const WipOptionsDialog = ({wip, trigger}: WipOptionsDialogProps) => {
         if (!nameChangeInput.trim())
             return;
         
-        if (nameChangeInput.length < 1 || nameChangeInput.length > MAX_WIP_NAME_LENGTH){
-            Toasts.error(`Name must be between 1 and ${MAX_WIP_NAME_LENGTH} characters.`);
+        if (nameChangeInput.length < 1 || nameChangeInput.length > WIP_CONSTANTS.MAX_NAME_LENGTH){
+            Toasts.error(`Name must be between 1 and ${WIP_CONSTANTS} characters.`);
             return;
         }
 

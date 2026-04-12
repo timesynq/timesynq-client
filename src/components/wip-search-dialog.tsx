@@ -10,7 +10,7 @@ import { Pagination, PaginationContent, PaginationItem, PaginationNext, Paginati
 import { useWipSearch } from "@/hooks/use-wip-search";
 import { Page } from "@/api/paged-list";
 import { Toasts } from "@/utils/toasts";
-import { ChangeWipNameRequest, MAX_WIP_NAME_LENGTH, Wip, WipService, WipSortField } from "@/api/wips/wip";
+import { ChangeWipNameRequest, Wip, WIP_CONSTANTS, WipService, WipSortField } from "@/api/wips/wip";
 import TrashIcon from "@/assets/svg/trash-icon.svg?react";
 import LoadingIndicator from "@/assets/svg/loading-indicator.svg?react";
 import { useNavigate } from "react-router-dom";
@@ -136,8 +136,8 @@ export const WipSearchDialog = () => {
         if (!renameDialogInput.trim())
             return;
         
-        if (renameDialogInput.length < 1 || renameDialogInput.length > MAX_WIP_NAME_LENGTH){
-            Toasts.error(`Name must be between 1 and ${MAX_WIP_NAME_LENGTH} characters.`);
+        if (renameDialogInput.length < 1 || renameDialogInput.length > WIP_CONSTANTS.MAX_NAME_LENGTH){
+            Toasts.error(`Name must be between 1 and ${WIP_CONSTANTS.MAX_NAME_LENGTH} characters.`);
             return;
         }
 

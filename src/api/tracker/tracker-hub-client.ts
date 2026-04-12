@@ -7,6 +7,8 @@ const TrackerHubServerFunctions = {
     JoinRoom: "JoinRoom",
     LeaveRoom: "LeaveRoom",
     SendChatMessage: "SendChatMessage",
+    UpdateBpm: "UpdateBpm",
+    UpdateChannelCount: "UpdateChannelCount",
 }
 
 const TrackerHubClientCallbacks = {
@@ -15,6 +17,8 @@ const TrackerHubClientCallbacks = {
     MessageAddedToChat: "MessageAddedToChat",
     AccessExpired: "AccessExpired",
     WipNameChanged: "WipNameChanged",
+    BpmUpdated: "BpmUpdated",
+    ChannelCountUpdated: "ChannelCountUpdated"
 }
 
 export class TrackerHubClient{
@@ -25,6 +29,8 @@ export class TrackerHubClient{
     private _userLeftRoomListeners: Set<(trackerConnection: TrackerConnection) => void>;
     private _accessExpiredListeners: Set<() => void>;
     private _wipNameChangedListeners: Set<(newName: string) => void>;
+    private _bpmUpdatedListeners: Set<(newBpm: number) => void>;
+    private _channelCountUpdatedListeners: Set<(newChannelCount: number) => void>;
 
     constructor(){
         this._connection = new signalR.HubConnectionBuilder()
@@ -36,7 +42,9 @@ export class TrackerHubClient{
         this._userJoinedRoomListeners = new Set<(roomMember: RoomMember) => void>();
         this._userLeftRoomListeners = new Set<(trackerConnection: TrackerConnection) => void>();
         this._accessExpiredListeners = new Set<() => void>();
-        this._wipNameChangedListeners = new Set<(newName: string) => void>;
+        this._wipNameChangedListeners = new Set<(newName: string) => void>();
+        this._bpmUpdatedListeners = new Set<(newBpm: number) => void>();
+        this._channelCountUpdatedListeners = new Set<(newChannelCount: number) => void>();
         this.registerListeners();
     }
 
@@ -71,6 +79,18 @@ export class TrackerHubClient{
                 this._wipNameChangedListeners.forEach(callback => callback(newName));
             }
         )
+        this._connection.on(
+            TrackerHubClientCallbacks.BpmUpdated,
+            (newBpm: number) => {
+                this._bpmUpdatedListeners.forEach(callback => callback(newBpm));
+            }
+        )
+        this._connection.on(
+            TrackerHubClientCallbacks.ChannelCountUpdated,
+            (newChannelCount: number) => {
+                this._channelCountUpdatedListeners.forEach(callback => callback(newChannelCount));
+            }
+        )
     }
 
     onChatMessageReceived(callback: (userId: string, message: string) => void): () => boolean {
@@ -96,6 +116,16 @@ export class TrackerHubClient{
     onWipNameChanged(callback: (newName: string) => void): () => boolean {
         this._wipNameChangedListeners.add(callback);
         return () => this._wipNameChangedListeners.delete(callback);
+    }
+
+    onBpmUpdated(callback: (newBpm: number) => void): () => boolean {
+        this._bpmUpdatedListeners.add(callback);
+        return () => this._bpmUpdatedListeners.delete(callback);
+    }
+
+    onChannelCountUpdated(callback: (newChannelCount: number) => void): () => boolean {
+        this._channelCountUpdatedListeners.add(callback);
+        return () => this._channelCountUpdatedListeners.delete(callback);
     }
 
     private serverError<T>(): TrackerHubResult<T> {
@@ -146,6 +176,22 @@ export class TrackerHubClient{
 
     async sendChatMessage(message: string): Promise<TrackerHubResult<void>> {
         const result = await this._connection.invoke<TrackerHubResult<void>>(TrackerHubServerFunctions.SendChatMessage, message)
+            .catch(() => {
+                return this.serverError<void>();
+            });
+        return result;
+    }
+
+    async updateBpm(newBpm: number): Promise<TrackerHubResult<void>> {
+        const result = await this._connection.invoke<TrackerHubResult<void>>(TrackerHubServerFunctions.UpdateBpm, newBpm)
+            .catch(() => {
+                return this.serverError<void>();
+            });
+        return result;
+    }
+
+    async updateChannelCount(newChannelCount: number): Promise<TrackerHubResult<void>> {
+        const result = await this._connection.invoke<TrackerHubResult<void>>(TrackerHubServerFunctions.UpdateChannelCount, newChannelCount)
             .catch(() => {
                 return this.serverError<void>();
             });

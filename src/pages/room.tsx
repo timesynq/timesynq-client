@@ -1,8 +1,9 @@
 import { UNEXPECTED_ERROR_MESSAGE } from "@/api/api-error";
 import { TrackerHubClient } from "@/api/tracker/tracker-hub-client";
 import { RoomInitializer, RoomMember, TrackerConnection, TrackerHubResult } from "@/api/tracker/tracker-hub-models";
-import { Wip } from "@/api/wips/wip";
+import { Wip, WIP_CONSTANTS } from "@/api/wips/wip";
 import { ChatBox, Message } from "@/components/chat-box";
+import { Counter } from "@/components/counter";
 import { FrameEditor } from "@/components/frame-editor";
 import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { WipOptionsDialog } from "@/components/wip-options-dialog";
 import { WipShareDialog } from "@/components/wip-share-dialog";
 import { useAuth } from "@/contexts/auth-provider";
+import { Toasts } from "@/utils/toasts";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
@@ -38,9 +40,39 @@ export const Room = () => {
         membersRef.current = members;
     }, [members]);
 
+    const [bpm, setBpm] = useState<number>(120 /*temporary, this will be read from the server*/);
+    const isValidBpm = (value: number): boolean => {
+        return !isNaN(value) &&
+            WIP_CONSTANTS.MIN_BPM <= value &&
+            value <= WIP_CONSTANTS.MAX_BPM;  
+    }
+    const handleBpmCounterUpdate = async (newBpm: number): Promise<void> => {
+        if (!isValidBpm(newBpm) || trackerHubClientRef.current === null)
+            return;
+        const result: TrackerHubResult<void> = await trackerHubClientRef.current.updateBpm(newBpm);
+        if (!result.isSuccessful){
+            Toasts.error(result.errorMessage ?? UNEXPECTED_ERROR_MESSAGE);
+        }
+    }
+
+    const [channelCount, setChannelCount] = useState<number>(4 /*temporary, this will be read from the server*/);
+    const isValidChannelCount = (value: number): boolean => {
+        return !isNaN(value) &&
+            WIP_CONSTANTS.MIN_CHANNELS <= value &&
+            value <= WIP_CONSTANTS.MAX_CHANNELS;
+    }
+    const handleChannelCounterUpdate = async (newChannelCount: number): Promise<void> => {
+        if (!isValidChannelCount(newChannelCount) || trackerHubClientRef.current === null)
+            return;
+        const result: TrackerHubResult<void> = await trackerHubClientRef.current.updateChannelCount(newChannelCount);
+        if (!result.isSuccessful){
+            Toasts.error(result.errorMessage ?? UNEXPECTED_ERROR_MESSAGE);
+        }
+    }
+
     if (!user) return null;
 
-    const generateRandomChatColor = (): string => {
+    const generateRandomChatColor = useCallback((): string => {
         const possibleColors = [
             "text-timesynq-red",
             "text-timesynq-green",
@@ -48,15 +80,15 @@ export const Room = () => {
         ]
         const randomIndex: number = Math.floor(Math.random() * (possibleColors.length));
         return possibleColors[randomIndex];
-    }
+    }, []);
 
-    const serverMessage = (message: string): Message => {
+    const serverMessage = useCallback((message: string): Message => {
         return {
             color: "text-muted-foreground",
             username: "SERVER",
             message: message,
         }
-    }
+    }, []);
 
     const initializeMembers = useCallback((roomMembers: RoomMember[]): Map<string, RoomMemberInfo> => {
         const initialMembers = new Map<string, RoomMemberInfo>();
@@ -97,6 +129,12 @@ export const Room = () => {
             return false;
         }
         let unsubscribeWipNameChanged = (): boolean => {
+            return false;
+        }
+        let unsubscribeBpmUpdated = (): boolean => {
+            return false;
+        }
+        let unsubscribeChannelCountUpdated = (): boolean => {
             return false;
         }
 
@@ -154,6 +192,16 @@ export const Room = () => {
             }
             unsubscribeWipNameChanged = client.onWipNameChanged(wipNameChangedCallback);
 
+            const bpmUpdatedCallback = (newBpm: number) => {
+                setBpm(newBpm);
+            }
+            unsubscribeBpmUpdated = client.onBpmUpdated(bpmUpdatedCallback);
+
+            const channelCountUpdatedCallback = (newChannelCount: number) => {
+                setChannelCount(newChannelCount);
+            }
+            unsubscribeChannelCountUpdated = client.onChannelCountUpdated(channelCountUpdatedCallback);
+
             await client.start();
             trackerHubClientRef.current = client;
             const joinRoomResult: TrackerHubResult<RoomInitializer> = await trackerHubClientRef.current.joinRoom(wipId);
@@ -174,6 +222,8 @@ export const Room = () => {
             unsubscribeUserLeftRoom();
             unsubscribeAccessExpired();
             unsubscribeWipNameChanged();
+            unsubscribeBpmUpdated();
+            unsubscribeChannelCountUpdated();
         }
     }, []);
 
@@ -200,9 +250,19 @@ export const Room = () => {
             {!pageError && trackerHubClientRef.current !== null &&
                 <>
                     <main className="flex-1 min-h-0 flex flex-col items-center justify-center overflow-auto">
-                        <div className="flex flex-row items-center justify-start w-full h-14 p-2">
+                        <div className="flex flex-row items-center justify-start w-full h-14 p-2 space-x-2">
                             {user.id === wipInfo?.ownerId && <WipOptionsDialog wip={wipInfo}/>}
                             {user.id === wipInfo?.ownerId && <WipShareDialog wipId={wipId}/>} 
+                            <Counter 
+                                label="BPM"
+                                value={bpm}
+                                onChange={handleBpmCounterUpdate}
+                            />
+                            <Counter 
+                                label="Channels"
+                                value={channelCount}
+                                onChange={handleChannelCounterUpdate}
+                            />
                         </div>
                         <Separator />
                         <ResizablePanelGroup direction="horizontal" className="flex-1 min-h-0">

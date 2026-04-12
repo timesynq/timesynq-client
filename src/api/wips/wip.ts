@@ -5,7 +5,13 @@ import { PagedList } from "../paged-list";
 import { User } from "../users/user";
 import { Result, ResultFactory } from "../result";
 
-export const MAX_WIP_NAME_LENGTH = 100;
+export const WIP_CONSTANTS = {
+    MAX_NAME_LENGTH: 100,
+    MIN_BPM: 20,
+    MAX_BPM: 999,
+    MIN_CHANNELS: 1,
+    MAX_CHANNELS: 16,
+}
 
 export const WipSortField = {
     name: "name",
