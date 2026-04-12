@@ -31,6 +31,9 @@ export const Counter = ({ label, value, onChange }: CounterProps) => {
         const input: string = formData.get(label) as string;
         const newValue = parseInt(input);
 
+        if (isNaN(newValue))
+            return;
+
         onChange(newValue);
         setIsInputDialogOpen(false);
     };

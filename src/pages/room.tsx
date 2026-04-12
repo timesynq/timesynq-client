@@ -13,6 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { WipOptionsDialog } from "@/components/wip-options-dialog";
 import { WipShareDialog } from "@/components/wip-share-dialog";
 import { useAuth } from "@/contexts/auth-provider";
+import { clamp } from "@/utils/math";
 import { Toasts } from "@/utils/toasts";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -41,14 +42,10 @@ export const Room = () => {
     }, [members]);
 
     const [bpm, setBpm] = useState<number>(120 /*temporary, this will be read from the server*/);
-    const isValidBpm = (value: number): boolean => {
-        return !isNaN(value) &&
-            WIP_CONSTANTS.MIN_BPM <= value &&
-            value <= WIP_CONSTANTS.MAX_BPM;  
-    }
     const handleBpmCounterUpdate = async (newBpm: number): Promise<void> => {
-        if (!isValidBpm(newBpm) || trackerHubClientRef.current === null)
+        if (trackerHubClientRef.current === null)
             return;
+        newBpm = clamp(newBpm, WIP_CONSTANTS.MIN_BPM, WIP_CONSTANTS.MAX_BPM);
         const result: TrackerHubResult<void> = await trackerHubClientRef.current.updateBpm(newBpm);
         if (!result.isSuccessful){
             Toasts.error(result.errorMessage ?? UNEXPECTED_ERROR_MESSAGE);
@@ -56,14 +53,10 @@ export const Room = () => {
     }
 
     const [channelCount, setChannelCount] = useState<number>(4 /*temporary, this will be read from the server*/);
-    const isValidChannelCount = (value: number): boolean => {
-        return !isNaN(value) &&
-            WIP_CONSTANTS.MIN_CHANNELS <= value &&
-            value <= WIP_CONSTANTS.MAX_CHANNELS;
-    }
     const handleChannelCounterUpdate = async (newChannelCount: number): Promise<void> => {
-        if (!isValidChannelCount(newChannelCount) || trackerHubClientRef.current === null)
+        if (trackerHubClientRef.current === null)
             return;
+        newChannelCount = clamp(newChannelCount, WIP_CONSTANTS.MIN_CHANNELS, WIP_CONSTANTS.MAX_CHANNELS);
         const result: TrackerHubResult<void> = await trackerHubClientRef.current.updateChannelCount(newChannelCount);
         if (!result.isSuccessful){
             Toasts.error(result.errorMessage ?? UNEXPECTED_ERROR_MESSAGE);
