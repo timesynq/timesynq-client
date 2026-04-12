@@ -13,7 +13,6 @@ import { Separator } from "@/components/ui/separator";
 import { WipOptionsDialog } from "@/components/wip-options-dialog";
 import { WipShareDialog } from "@/components/wip-share-dialog";
 import { useAuth } from "@/contexts/auth-provider";
-import { clamp } from "@/utils/math";
 import { Toasts } from "@/utils/toasts";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -45,7 +44,6 @@ export const Room = () => {
     const handleBpmCounterUpdate = async (newBpm: number): Promise<void> => {
         if (trackerHubClientRef.current === null)
             return;
-        newBpm = clamp(newBpm, WIP_CONSTANTS.MIN_BPM, WIP_CONSTANTS.MAX_BPM);
         const result: TrackerHubResult<void> = await trackerHubClientRef.current.updateBpm(newBpm);
         if (!result.isSuccessful){
             Toasts.error(result.errorMessage ?? UNEXPECTED_ERROR_MESSAGE);
@@ -56,7 +54,6 @@ export const Room = () => {
     const handleChannelCounterUpdate = async (newChannelCount: number): Promise<void> => {
         if (trackerHubClientRef.current === null)
             return;
-        newChannelCount = clamp(newChannelCount, WIP_CONSTANTS.MIN_CHANNELS, WIP_CONSTANTS.MAX_CHANNELS);
         const result: TrackerHubResult<void> = await trackerHubClientRef.current.updateChannelCount(newChannelCount);
         if (!result.isSuccessful){
             Toasts.error(result.errorMessage ?? UNEXPECTED_ERROR_MESSAGE);
@@ -249,11 +246,15 @@ export const Room = () => {
                             <Counter 
                                 label="BPM"
                                 value={bpm}
+                                min={WIP_CONSTANTS.MIN_BPM}
+                                max={WIP_CONSTANTS.MAX_BPM}
                                 onChange={handleBpmCounterUpdate}
                             />
                             <Counter 
                                 label="Channels"
                                 value={channelCount}
+                                min={WIP_CONSTANTS.MIN_CHANNELS}
+                                max={WIP_CONSTANTS.MAX_CHANNELS}
                                 onChange={handleChannelCounterUpdate}
                             />
                         </div>
