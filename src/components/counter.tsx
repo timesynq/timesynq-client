@@ -3,6 +3,7 @@ import { Button } from "./ui/button";
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { Input } from "./ui/input";
 import { clamp } from "@/utils/math";
+import { toTwoDigitHex } from "@/utils/hex";
 
 export interface CounterProps {
     label: string;
@@ -10,9 +11,10 @@ export interface CounterProps {
     min: number;
     max: number;
     onChange: (newValue: number) => void;
+    displayHex?: boolean;
 }
 
-export const Counter = ({ label, value, min, max, onChange }: CounterProps) => {
+export const Counter = ({ label, value, min, max, onChange, displayHex = false }: CounterProps) => {
     const DELAY_MS = 250;
     const INTERVAL_MS = 25;
 
@@ -87,13 +89,13 @@ export const Counter = ({ label, value, min, max, onChange }: CounterProps) => {
 
     return (
         <div className="flex flex-row justify-center items-center space-x-4">
-            <span>{label}</span>
+            <span className="min-w-6">{label}</span>
 
             <div className="flex flex-row items-center">
                 <Button
                     size="icon"
                     variant="secondary"
-                    className="w-8 h-8 text-lg rounded-none"
+                    className="w-8 h-8 text-lg rounded-none cursor-pointer"
                     onMouseDown={() => startHolding(decrement)}
                     onMouseUp={stopHolding}
                     onMouseLeave={stopHolding}
@@ -106,7 +108,7 @@ export const Counter = ({ label, value, min, max, onChange }: CounterProps) => {
                 <Dialog open={isInputDialogOpen} onOpenChange={setIsInputDialogOpen}>
                     <DialogTrigger asChild>
                         <span className="w-10 h-8 flex items-center justify-center bg-background-darker cursor-pointer">
-                            {localValue}
+                            {displayHex ? toTwoDigitHex(localValue) : localValue}
                         </span>
                     </DialogTrigger>
 
@@ -143,7 +145,7 @@ export const Counter = ({ label, value, min, max, onChange }: CounterProps) => {
                 <Button
                     size="icon"
                     variant="secondary"
-                    className="w-8 h-8 text-lg rounded-none"
+                    className="w-8 h-8 text-lg rounded-none cursor-pointer"
                     onMouseDown={() => startHolding(increment)}
                     onMouseUp={stopHolding}
                     onMouseLeave={stopHolding}

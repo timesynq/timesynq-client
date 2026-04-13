@@ -11,6 +11,10 @@ export const WIP_CONSTANTS = {
     MAX_BPM: 999,
     MIN_CHANNELS: 1,
     MAX_CHANNELS: 16,
+    MIN_SEQUENCER_LENGTH: 1,
+    MAX_SEQUENCER_LENGTH: 256,
+    MIN_PATTERN: 0,
+    MAX_PATTERN: 63,
 }
 
 export const WipSortField = {

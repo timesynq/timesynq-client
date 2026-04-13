@@ -9,6 +9,7 @@ const TrackerHubServerFunctions = {
     SendChatMessage: "SendChatMessage",
     UpdateBpm: "UpdateBpm",
     UpdateChannelCount: "UpdateChannelCount",
+    UpdateSequencerLength: "UpdateSequencerLength",
 }
 
 const TrackerHubClientCallbacks = {
@@ -18,7 +19,8 @@ const TrackerHubClientCallbacks = {
     AccessExpired: "AccessExpired",
     WipNameChanged: "WipNameChanged",
     BpmUpdated: "BpmUpdated",
-    ChannelCountUpdated: "ChannelCountUpdated"
+    ChannelCountUpdated: "ChannelCountUpdated",
+    SequencerLengthUpdated: "SequencerLengthUpdated",
 }
 
 export class TrackerHubClient{
@@ -31,6 +33,7 @@ export class TrackerHubClient{
     private _wipNameChangedListeners: Set<(newName: string) => void>;
     private _bpmUpdatedListeners: Set<(newBpm: number) => void>;
     private _channelCountUpdatedListeners: Set<(newChannelCount: number) => void>;
+    private _sequencerLengthUpdatedListeners: Set<(newSequencerLength: number) => void>;
 
     constructor(){
         this._connection = new signalR.HubConnectionBuilder()
@@ -45,6 +48,7 @@ export class TrackerHubClient{
         this._wipNameChangedListeners = new Set<(newName: string) => void>();
         this._bpmUpdatedListeners = new Set<(newBpm: number) => void>();
         this._channelCountUpdatedListeners = new Set<(newChannelCount: number) => void>();
+        this._sequencerLengthUpdatedListeners = new Set<(newSequencerLength: number) => void>();
         this.registerListeners();
     }
 
@@ -91,6 +95,12 @@ export class TrackerHubClient{
                 this._channelCountUpdatedListeners.forEach(callback => callback(newChannelCount));
             }
         )
+        this._connection.on(
+            TrackerHubClientCallbacks.SequencerLengthUpdated,
+            (newSequencerLength: number) => {
+                this._sequencerLengthUpdatedListeners.forEach(callback => callback(newSequencerLength));
+            }
+        )
     }
 
     onChatMessageReceived(callback: (userId: string, message: string) => void): () => boolean {
@@ -126,6 +136,11 @@ export class TrackerHubClient{
     onChannelCountUpdated(callback: (newChannelCount: number) => void): () => boolean {
         this._channelCountUpdatedListeners.add(callback);
         return () => this._channelCountUpdatedListeners.delete(callback);
+    }
+
+    onSequencerLengthUpdated(callback: (newSequencerLength: number) => void): () => boolean {
+        this._sequencerLengthUpdatedListeners.add(callback);
+        return () => this._sequencerLengthUpdatedListeners.delete(callback);
     }
 
     private serverError<T>(): TrackerHubResult<T> {
@@ -192,6 +207,14 @@ export class TrackerHubClient{
 
     async updateChannelCount(newChannelCount: number): Promise<TrackerHubResult<void>> {
         const result = await this._connection.invoke<TrackerHubResult<void>>(TrackerHubServerFunctions.UpdateChannelCount, newChannelCount)
+            .catch(() => {
+                return this.serverError<void>();
+            });
+        return result;
+    }
+
+    async updateSequencerLength(newSequencerLength: number): Promise<TrackerHubResult<void>> {
+        const result = await this._connection.invoke<TrackerHubResult<void>>(TrackerHubServerFunctions.UpdateSequencerLength, newSequencerLength)
             .catch(() => {
                 return this.serverError<void>();
             });

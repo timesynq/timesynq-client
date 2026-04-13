@@ -5,6 +5,7 @@ import { Wip, WIP_CONSTANTS } from "@/api/wips/wip";
 import { ChatBox, Message } from "@/components/chat-box";
 import { Counter } from "@/components/counter";
 import { FrameEditor } from "@/components/frame-editor";
+import { Sequencer } from "@/components/sequencer";
 import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -261,9 +262,10 @@ export const Room = () => {
                         <Separator />
                         <ResizablePanelGroup direction="horizontal" className="flex-1 min-h-0">
                             <ResizablePanel defaultSize={20} minSize={15} maxSize={25}>
-                                <div className="flex-1 flex items-center justify-center">
-                                    {wipInfo?.name}
-                                </div>
+                                <Sequencer
+                                    client={trackerHubClientRef.current}
+                                    channelCount={channelCount}
+                                />
                             </ResizablePanel>
                             <ResizableHandle />
                             <ResizablePanel defaultSize={60} minSize={50} maxSize={70}>
@@ -272,7 +274,7 @@ export const Room = () => {
                                 </div>
                             </ResizablePanel>
                             <ResizableHandle />
-                            <ResizablePanel defaultSize={20} minSize={15} maxSize={25} className="flex flex-col">
+                            <ResizablePanel defaultSize={20} minSize={15} maxSize={25}>
                                 <ChatBox 
                                     client={trackerHubClientRef.current}
                                     members={members}
