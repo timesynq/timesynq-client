@@ -6,6 +6,7 @@ import { TrackerHubResult } from "@/api/tracker/tracker-hub-models";
 import { Toasts } from "@/utils/toasts";
 import { UNEXPECTED_ERROR_MESSAGE } from "@/api/api-error";
 import { defaultLineState, LineState, SequencerLine } from "./sequencer-line";
+import { ScrollArea, ScrollBar } from "./ui/scroll-area";
 
 export interface SequencerProps {
     client: TrackerHubClient;
@@ -46,17 +47,20 @@ export const Sequencer = ({client, channelCount}: SequencerProps) => {
                 max={WIP_CONSTANTS.MAX_SEQUENCER_LENGTH}
                 onChange={handleSequencerLengthUpdate}
             />
-            <div className="flex flex-col mr-4 ml-4 mb-4 justify-start items-start space-y-2 overflow-auto no-scrollbar">
-                { lineStates.map((line, index) => (
-                    index < length && 
-                    <SequencerLine 
-                        line={index}
-                        state={line}
-                        channelCount={channelCount}
-                        setPattern={()=>{}}
-                    />
-                ))}
-            </div>
+            <ScrollArea className="h-full pb-4 pl-4 pr-4">
+                <div className="flex flex-col justify-start items-start space-y-2 overflow-auto">
+                    { lineStates.map((line, index) => (
+                        index < length && 
+                        <SequencerLine 
+                            line={index}
+                            state={line}
+                            channelCount={channelCount}
+                            setPattern={()=>{}}
+                        />
+                    ))}
+                </div>
+                <ScrollBar orientation="horizontal" className="mb-1" />
+            </ScrollArea>
         </div>
     );  
 }
