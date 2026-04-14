@@ -2,7 +2,7 @@ import * as signalR from "@microsoft/signalr";
 import { hubs } from "../endpoints";
 import { UNEXPECTED_ERROR_MESSAGE } from "../api-error";
 import { RoomInitializer, RoomMember, TrackerConnection, TrackerHubResult } from "./tracker-hub-models";
-import { UpdateSequencerFrameCommand } from "./tracker-hub-commands";
+import { UpdateSequencerChannelCommand, UpdateSequencerFrameCommand } from "./tracker-hub-commands";
 
 const TrackerHubServerFunctions = {
     JoinRoom: "JoinRoom",
@@ -12,6 +12,7 @@ const TrackerHubServerFunctions = {
     UpdateChannelCount: "UpdateChannelCount",
     UpdateSequencerLength: "UpdateSequencerLength",
     UpdateSequencerFrame: "UpdateSequencerFrame",
+    UpdateSequencerChannel: "UpdateSequencerChannel",
 }
 
 const TrackerHubClientCallbacks = {
@@ -24,6 +25,7 @@ const TrackerHubClientCallbacks = {
     ChannelCountUpdated: "ChannelCountUpdated",
     SequencerLengthUpdated: "SequencerLengthUpdated",
     SequencerFrameUpdated: "SequencerFrameUpdated",
+    SequencerChannelUpdated: "SequencerChannelUpdated",
 }
 
 export class TrackerHubClient{
@@ -38,6 +40,7 @@ export class TrackerHubClient{
     private _channelCountUpdatedListeners: Set<(newChannelCount: number) => void>;
     private _sequencerLengthUpdatedListeners: Set<(newSequencerLength: number) => void>;
     private _sequencerFrameUpdatedListeners: Set<(command: UpdateSequencerFrameCommand) => void>;
+    private _sequencerChannelUpdatedListeners: Set<(command: UpdateSequencerChannelCommand) => void>;
 
     constructor(){
         this._connection = new signalR.HubConnectionBuilder()
@@ -54,6 +57,7 @@ export class TrackerHubClient{
         this._channelCountUpdatedListeners = new Set<(newChannelCount: number) => void>();
         this._sequencerLengthUpdatedListeners = new Set<(newSequencerLength: number) => void>();
         this._sequencerFrameUpdatedListeners = new Set<(command: UpdateSequencerFrameCommand) => void>();
+        this._sequencerChannelUpdatedListeners = new Set<(command: UpdateSequencerChannelCommand) => void>(); 
         this.registerListeners();
     }
 
@@ -112,6 +116,12 @@ export class TrackerHubClient{
                 this._sequencerFrameUpdatedListeners.forEach(callback => callback(command));
             }
         )
+        this._connection.on(
+            TrackerHubClientCallbacks.SequencerChannelUpdated,
+            (command: UpdateSequencerChannelCommand) => {
+                this._sequencerChannelUpdatedListeners.forEach(callback => callback(command));
+            }
+        )
     }
 
     onChatMessageReceived(callback: (userId: string, message: string) => void): () => boolean {
@@ -157,6 +167,11 @@ export class TrackerHubClient{
     onSequencerFrameUpdated(callback: (command: UpdateSequencerFrameCommand) => void): () => boolean {
         this._sequencerFrameUpdatedListeners.add(callback);
         return () => this._sequencerFrameUpdatedListeners.delete(callback);
+    }
+
+    onSequencerChannelUpdated(callback: (command: UpdateSequencerChannelCommand) => void): () => boolean {
+        this._sequencerChannelUpdatedListeners.add(callback);
+        return () => this._sequencerChannelUpdatedListeners.delete(callback);
     }
 
     private serverError<T>(): TrackerHubResult<T> {
@@ -239,6 +254,14 @@ export class TrackerHubClient{
 
     async updateSequencerFrame(command: UpdateSequencerFrameCommand): Promise<TrackerHubResult<void>> {
         const result = await this._connection.invoke<TrackerHubResult<void>>(TrackerHubServerFunctions.UpdateSequencerFrame, command)
+            .catch(() => {
+                return this.serverError<void>();
+            });
+        return result;
+    }
+
+    async updateSequencerChannel(command: UpdateSequencerChannelCommand): Promise<TrackerHubResult<void>> {
+        const result = await this._connection.invoke<TrackerHubResult<void>>(TrackerHubServerFunctions.UpdateSequencerChannel, command)
             .catch(() => {
                 return this.serverError<void>();
             });

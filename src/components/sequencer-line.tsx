@@ -5,12 +5,7 @@ import { Button } from "./ui/button";
 
 export type LineState = {
     frame: number;
-    channelMuteStates: boolean[];
-}
-
-export const defaultLineState: LineState = {
-    frame: 0,
-    channelMuteStates: new Array(WIP_CONSTANTS.MAX_CHANNELS).fill(true)
+    isChannelOn: boolean[];
 }
 
 export interface SequencerLineProps {
@@ -18,9 +13,11 @@ export interface SequencerLineProps {
     state: LineState,
     channelCount: number,
     setFrame: (newFrame: number) => void,
+    setChannel: (channel: number, isOn: boolean) => void,
 } 
 
-export const SequencerLine = ({line, state, channelCount, setFrame}: SequencerLineProps) => {
+export const SequencerLine = ({line, state, channelCount, setFrame, setChannel}: SequencerLineProps) => {
+
     return(
         <div className="flex flex-row space-x-4">
             <Counter
@@ -33,10 +30,12 @@ export const SequencerLine = ({line, state, channelCount, setFrame}: SequencerLi
             />
             <div className="flex flex-row space-x-1">
                 { 
-                    state.channelMuteStates.map((unmuted, index) => (
-                        <ChannelToggleButton 
-                            unmuted={unmuted}
+                    state.isChannelOn.map((isOn, index) => (
+                        <ChannelToggleButton
+                            isOn={isOn}
                             disabled={index >= channelCount}
+                            channel={index}
+                            toggle={setChannel}
                         />
                     ))
                 }
@@ -46,16 +45,22 @@ export const SequencerLine = ({line, state, channelCount, setFrame}: SequencerLi
 }
 
 interface ChannelToggleButtonProps {
-    unmuted: boolean;
+    isOn: boolean;
     disabled: boolean;
+    channel: number;
+    toggle: (channel: number, isOn: boolean) => void;
 }
 
-const ChannelToggleButton = ({unmuted, disabled}: ChannelToggleButtonProps) => {
+const ChannelToggleButton = ({isOn, disabled, channel, toggle}: ChannelToggleButtonProps) => {
     return (
         <Button
             size="icon"
-            variant={disabled ? "secondary" : unmuted ? "positive" : "negative"}
+            variant={disabled ? "secondary" : isOn ? "positive" : "negative"}
             className={`${!disabled && "cursor-pointer"} w-8 h-8 rounded-none border ${disabled && "hover:bg-muted"}`}
+            onClick={() => {
+                if (disabled) return;
+                toggle(channel, !isOn)
+            }}
         />
     );
 }

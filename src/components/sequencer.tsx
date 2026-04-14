@@ -5,9 +5,9 @@ import { useCallback, useEffect, useState } from "react";
 import { TrackerHubResult } from "@/api/tracker/tracker-hub-models";
 import { Toasts } from "@/utils/toasts";
 import { UNEXPECTED_ERROR_MESSAGE } from "@/api/api-error";
-import { defaultLineState, LineState, SequencerLine } from "./sequencer-line";
+import { LineState, SequencerLine } from "./sequencer-line";
 import { ScrollArea, ScrollBar } from "./ui/scroll-area";
-import { UpdateSequencerFrameCommand } from "@/api/tracker/tracker-hub-commands";
+import { UpdateSequencerChannelCommand, UpdateSequencerFrameCommand } from "@/api/tracker/tracker-hub-commands";
 
 export interface SequencerProps {
     client: TrackerHubClient;
@@ -26,8 +26,13 @@ export const Sequencer = ({client, channelCount}: SequencerProps) => {
 
     const [lineStates, setLineStates] = useState<LineState[]>(
         new Array(WIP_CONSTANTS.MAX_SEQUENCER_LENGTH)
-            .fill(defaultLineState)
+            .fill(null)
+            .map(() => ({
+                frame: 0,
+                isChannelOn: new Array(WIP_CONSTANTS.MAX_CHANNELS).fill(true)
+            }))
     );
+
     const handleSequencerFrameUpdate = async (command: UpdateSequencerFrameCommand): Promise<void> => {
         const result: TrackerHubResult<void> = await client.updateSequencerFrame(command);
         if (!result.isSuccessful){
@@ -38,27 +43,61 @@ export const Sequencer = ({client, channelCount}: SequencerProps) => {
         handleSequencerFrameUpdate({line: line, newFrame: newFrame});
     }, [handleSequencerFrameUpdate])
 
+    const handleSequencerChannelUpdate = async (command: UpdateSequencerChannelCommand): Promise<void> => {
+        console.log(command);
+
+        const result: TrackerHubResult<void> = await client.updateSequencerChannel(command);
+        if (!result.isSuccessful){
+            Toasts.error(result.errorMessage ?? UNEXPECTED_ERROR_MESSAGE);
+        }
+    }
+    const handleSetChannel = useCallback((line: number) => (channel: number, isOn: boolean) => {
+        handleSequencerChannelUpdate({line: line, channel: channel, isOn: isOn})
+    }, [handleSequencerChannelUpdate]);
+
     useEffect(() => {
+
         const sequencerLengthUpdatedCallback = (newSequencerLength: number) => {
             setLength(newSequencerLength);
         }
         const unsubscribeSequencerLengthUpdated = client.onSequencerLengthUpdated(sequencerLengthUpdatedCallback);
+
         const sequencerFrameUpdatedCallback = (command: UpdateSequencerFrameCommand) => {
-            const currentLineState: LineState = lineStates[command.line];
-            const newLineState: LineState = {
-                frame: command.newFrame,
-                channelMuteStates: currentLineState.channelMuteStates
-            }
             setLineStates(prev => {
+                const currentLineState = prev[command.line];
+
                 const updated = [...prev];
-                updated[command.line] = newLineState;
-                return updated
+                updated[command.line] = {
+                    frame: command.newFrame,
+                    isChannelOn: currentLineState.isChannelOn
+                };
+
+                return updated;
             });
         }
         const unsubscribeSequencerFrameUpdated = client.onSequencerFrameUpdated(sequencerFrameUpdatedCallback);
+        
+        const sequencerChannelUpdatedCallback = (command: UpdateSequencerChannelCommand) => {
+            setLineStates(prev => {
+                const currentLineState = prev[command.line];
+                const newChannelStates = [...currentLineState.isChannelOn];
+                newChannelStates[command.channel] = command.isOn;
+
+                const updated = [...prev];
+                updated[command.line] = {
+                    frame: currentLineState.frame,
+                    isChannelOn: newChannelStates
+                };
+
+                return updated;
+            });
+        }
+        const unsubscribeSequencerChannelUpdated = client.onSequencerChannelUpdated(sequencerChannelUpdatedCallback);
+
         return () => {
             unsubscribeSequencerLengthUpdated();
             unsubscribeSequencerFrameUpdated();
+            unsubscribeSequencerChannelUpdated();
         }
     }, []);
 
@@ -80,6 +119,7 @@ export const Sequencer = ({client, channelCount}: SequencerProps) => {
                             state={line}
                             channelCount={channelCount}
                             setFrame={handleSetFrame(index)}
+                            setChannel={handleSetChannel(index)}
                         />
                     ))}
                 </div>
