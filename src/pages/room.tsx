@@ -151,7 +151,7 @@ export const Room = () => {
                 roomMemberInfo.connectionIds.add(roomMember.connectionId);
                 setMembers(new Map<string, RoomMemberInfo>(membersRef.current));
             }
-            unsubscribeUserJoinedRoom = client.onUserJoinedRoom(userJoinedRoomCallback);
+            unsubscribeUserJoinedRoom = client.subscribeUserJoinedRoom(userJoinedRoomCallback);
             
             const userLeftRoomCallback = (trackerConnection: TrackerConnection) => {
                 let roomMemberInfo: RoomMemberInfo | undefined = membersRef.current.get(trackerConnection.userId);
@@ -164,12 +164,12 @@ export const Room = () => {
                 }
                 setMembers(new Map<string, RoomMemberInfo>(membersRef.current));
             }
-            unsubscribeUserLeftRoom = client.onUserLeftRoom(userLeftRoomCallback);
+            unsubscribeUserLeftRoom = client.subscribeUserLeftRoom(userLeftRoomCallback);
 
             const accessExpiredCallback = () => {
                 setAccessExpired(true);
             }
-            unsubscribeAccessExpired = client.onAccessExpired(accessExpiredCallback);
+            unsubscribeAccessExpired = client.subscribeAccessExpired(accessExpiredCallback);
 
             const wipNameChangedCallback = (newName: string) => {
                 setWipInfo(prev => {
@@ -181,17 +181,17 @@ export const Room = () => {
                     };
                 });
             }
-            unsubscribeWipNameChanged = client.onWipNameChanged(wipNameChangedCallback);
+            unsubscribeWipNameChanged = client.subscribeWipNameUpdated(wipNameChangedCallback);
 
             const bpmUpdatedCallback = (newBpm: number) => {
                 setBpm(newBpm);
             }
-            unsubscribeBpmUpdated = client.onBpmUpdated(bpmUpdatedCallback);
+            unsubscribeBpmUpdated = client.subscribeBpmUpdated(bpmUpdatedCallback);
 
             const channelCountUpdatedCallback = (newChannelCount: number) => {
                 setChannelCount(newChannelCount);
             }
-            unsubscribeChannelCountUpdated = client.onChannelCountUpdated(channelCountUpdatedCallback);
+            unsubscribeChannelCountUpdated = client.subscribeChannelCountUpdated(channelCountUpdatedCallback);
 
             await client.start();
             trackerHubClientRef.current = client;

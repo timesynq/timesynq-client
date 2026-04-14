@@ -20,7 +20,7 @@ const TrackerHubClientCallbacks = {
     UserLeftRoom: "UserLeftRoom",
     MessageAddedToChat: "MessageAddedToChat",
     AccessExpired: "AccessExpired",
-    WipNameChanged: "WipNameChanged",
+    WipNameUpdated: "WipNameUpdated",
     BpmUpdated: "BpmUpdated",
     ChannelCountUpdated: "ChannelCountUpdated",
     SequencerLengthUpdated: "SequencerLengthUpdated",
@@ -35,7 +35,7 @@ export class TrackerHubClient{
     private _userJoinedRoomListeners: Set<(roomMember: RoomMember) => void>;
     private _userLeftRoomListeners: Set<(trackerConnection: TrackerConnection) => void>;
     private _accessExpiredListeners: Set<() => void>;
-    private _wipNameChangedListeners: Set<(newName: string) => void>;
+    private _wipNameUpdatedListeners: Set<(newName: string) => void>;
     private _bpmUpdatedListeners: Set<(newBpm: number) => void>;
     private _channelCountUpdatedListeners: Set<(newChannelCount: number) => void>;
     private _sequencerLengthUpdatedListeners: Set<(newSequencerLength: number) => void>;
@@ -52,7 +52,7 @@ export class TrackerHubClient{
         this._userJoinedRoomListeners = new Set<(roomMember: RoomMember) => void>();
         this._userLeftRoomListeners = new Set<(trackerConnection: TrackerConnection) => void>();
         this._accessExpiredListeners = new Set<() => void>();
-        this._wipNameChangedListeners = new Set<(newName: string) => void>();
+        this._wipNameUpdatedListeners = new Set<(newName: string) => void>();
         this._bpmUpdatedListeners = new Set<(newBpm: number) => void>();
         this._channelCountUpdatedListeners = new Set<(newChannelCount: number) => void>();
         this._sequencerLengthUpdatedListeners = new Set<(newSequencerLength: number) => void>();
@@ -87,9 +87,9 @@ export class TrackerHubClient{
             }
         )
         this._connection.on(
-            TrackerHubClientCallbacks.WipNameChanged,
+            TrackerHubClientCallbacks.WipNameUpdated,
             (newName: string) => {
-                this._wipNameChangedListeners.forEach(callback => callback(newName));
+                this._wipNameUpdatedListeners.forEach(callback => callback(newName));
             }
         )
         this._connection.on(
@@ -124,52 +124,52 @@ export class TrackerHubClient{
         )
     }
 
-    onChatMessageReceived(callback: (userId: string, message: string) => void): () => boolean {
+    subscribeChatMessageReceived(callback: (userId: string, message: string) => void): () => boolean {
         this._chatMessageListeners.add(callback);
         return () => this._chatMessageListeners.delete(callback);
     }
 
-    onUserJoinedRoom(callback: (roomMember: RoomMember) => void): () => boolean {
+    subscribeUserJoinedRoom(callback: (roomMember: RoomMember) => void): () => boolean {
         this._userJoinedRoomListeners.add(callback);
         return () => this._userJoinedRoomListeners.delete(callback);
     }
 
-    onUserLeftRoom(callback: (trackerConnection: TrackerConnection) => void): () => boolean {
+    subscribeUserLeftRoom(callback: (trackerConnection: TrackerConnection) => void): () => boolean {
         this._userLeftRoomListeners.add(callback);
         return () => this._userLeftRoomListeners.delete(callback);
     }
 
-    onAccessExpired(callback: () => void): () => boolean {
+    subscribeAccessExpired(callback: () => void): () => boolean {
         this._accessExpiredListeners.add(callback);
         return () => this._accessExpiredListeners.delete(callback);
     }
 
-    onWipNameChanged(callback: (newName: string) => void): () => boolean {
-        this._wipNameChangedListeners.add(callback);
-        return () => this._wipNameChangedListeners.delete(callback);
+    subscribeWipNameUpdated(callback: (newName: string) => void): () => boolean {
+        this._wipNameUpdatedListeners.add(callback);
+        return () => this._wipNameUpdatedListeners.delete(callback);
     }
 
-    onBpmUpdated(callback: (newBpm: number) => void): () => boolean {
+    subscribeBpmUpdated(callback: (newBpm: number) => void): () => boolean {
         this._bpmUpdatedListeners.add(callback);
         return () => this._bpmUpdatedListeners.delete(callback);
     }
 
-    onChannelCountUpdated(callback: (newChannelCount: number) => void): () => boolean {
+    subscribeChannelCountUpdated(callback: (newChannelCount: number) => void): () => boolean {
         this._channelCountUpdatedListeners.add(callback);
         return () => this._channelCountUpdatedListeners.delete(callback);
     }
 
-    onSequencerLengthUpdated(callback: (newSequencerLength: number) => void): () => boolean {
+    subscribeSequencerLengthUpdated(callback: (newSequencerLength: number) => void): () => boolean {
         this._sequencerLengthUpdatedListeners.add(callback);
         return () => this._sequencerLengthUpdatedListeners.delete(callback);
     }
 
-    onSequencerFrameUpdated(callback: (command: UpdateSequencerFrameCommand) => void): () => boolean {
+    subscribeSequencerFrameUpdated(callback: (command: UpdateSequencerFrameCommand) => void): () => boolean {
         this._sequencerFrameUpdatedListeners.add(callback);
         return () => this._sequencerFrameUpdatedListeners.delete(callback);
     }
 
-    onSequencerChannelUpdated(callback: (command: UpdateSequencerChannelCommand) => void): () => boolean {
+    subscribeSequencerChannelUpdated(callback: (command: UpdateSequencerChannelCommand) => void): () => boolean {
         this._sequencerChannelUpdatedListeners.add(callback);
         return () => this._sequencerChannelUpdatedListeners.delete(callback);
     }

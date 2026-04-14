@@ -47,7 +47,7 @@ export const ChatBox = ({ client, members, messages, setMessages }: ChatBoxProps
             setMessages(prev => [...prev, newMessage]);
         }
 
-        const unsubscribeChat = client.onChatMessageReceived(callback);
+        const unsubscribeChat = client.subscribeChatMessageReceived(callback);
         
         return () => { 
             unsubscribeChat();

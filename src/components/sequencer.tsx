@@ -58,7 +58,7 @@ export const Sequencer = ({client, channelCount}: SequencerProps) => {
         const sequencerLengthUpdatedCallback = (newSequencerLength: number) => {
             setLength(newSequencerLength);
         }
-        const unsubscribeSequencerLengthUpdated = client.onSequencerLengthUpdated(sequencerLengthUpdatedCallback);
+        const unsubscribeSequencerLengthUpdated = client.subscribeSequencerLengthUpdated(sequencerLengthUpdatedCallback);
 
         const sequencerFrameUpdatedCallback = (command: UpdateSequencerFrameCommand) => {
             setLineStates(prev => {
@@ -73,7 +73,7 @@ export const Sequencer = ({client, channelCount}: SequencerProps) => {
                 return updated;
             });
         }
-        const unsubscribeSequencerFrameUpdated = client.onSequencerFrameUpdated(sequencerFrameUpdatedCallback);
+        const unsubscribeSequencerFrameUpdated = client.subscribeSequencerFrameUpdated(sequencerFrameUpdatedCallback);
         
         const sequencerChannelUpdatedCallback = (command: UpdateSequencerChannelCommand) => {
             setLineStates(prev => {
@@ -90,7 +90,7 @@ export const Sequencer = ({client, channelCount}: SequencerProps) => {
                 return updated;
             });
         }
-        const unsubscribeSequencerChannelUpdated = client.onSequencerChannelUpdated(sequencerChannelUpdatedCallback);
+        const unsubscribeSequencerChannelUpdated = client.subscribeSequencerChannelUpdated(sequencerChannelUpdatedCallback);
 
         return () => {
             unsubscribeSequencerLengthUpdated();
