@@ -200,70 +200,57 @@ export class TrackerHubClient{
     }
 
     async joinRoom(roomCode: string): Promise<TrackerHubResult<RoomInitializer>> {
-        return this.updateRoomState<RoomInitializer>(
-            TrackerHubServerFunctions.JoinRoom,
-            roomCode
+        return this.updateRoomState<RoomInitializer, string>(
+            TrackerHubServerFunctions.JoinRoom, roomCode
         );
     }
 
     async leaveRoom(): Promise<TrackerHubResult<void>> {
-        return this.updateRoomState<void>(
+        return this.updateRoomState<void, void>(
             TrackerHubServerFunctions.LeaveRoom
         );
     }
 
-    private async updateRoomState<T> (trackerHubServerFunction: string, ...args: string[]): Promise<TrackerHubResult<T>> {
-        const result = await this._connection.invoke<TrackerHubResult<T>>(trackerHubServerFunction, ...args)
-            .catch(() => {
-                return this.serverError<T>();
-            });
-        return result;
-    }
-
     async sendChatMessage(message: string): Promise<TrackerHubResult<void>> {
-        const result = await this._connection.invoke<TrackerHubResult<void>>(TrackerHubServerFunctions.SendChatMessage, message)
-            .catch(() => {
-                return this.serverError<void>();
-            });
-        return result;
+        return this.updateRoomState<void, string>(
+            TrackerHubServerFunctions.SendChatMessage, message
+        );
     }
 
     async updateBpm(newBpm: number): Promise<TrackerHubResult<void>> {
-        const result = await this._connection.invoke<TrackerHubResult<void>>(TrackerHubServerFunctions.UpdateBpm, newBpm)
-            .catch(() => {
-                return this.serverError<void>();
-            });
-        return result;
+        return this.updateRoomState<void, number>(
+            TrackerHubServerFunctions.UpdateBpm, newBpm
+        );
     }
 
     async updateChannelCount(newChannelCount: number): Promise<TrackerHubResult<void>> {
-        const result = await this._connection.invoke<TrackerHubResult<void>>(TrackerHubServerFunctions.UpdateChannelCount, newChannelCount)
-            .catch(() => {
-                return this.serverError<void>();
-            });
-        return result;
+        return this.updateRoomState<void, number>(
+            TrackerHubServerFunctions.UpdateChannelCount, newChannelCount
+        );
     }
 
     async updateSequencerLength(newSequencerLength: number): Promise<TrackerHubResult<void>> {
-        const result = await this._connection.invoke<TrackerHubResult<void>>(TrackerHubServerFunctions.UpdateSequencerLength, newSequencerLength)
-            .catch(() => {
-                return this.serverError<void>();
-            });
-        return result;
+        return this.updateRoomState<void, number>(
+            TrackerHubServerFunctions.UpdateSequencerLength, newSequencerLength
+        );
     }
 
     async updateSequencerFrame(command: UpdateSequencerFrameCommand): Promise<TrackerHubResult<void>> {
-        const result = await this._connection.invoke<TrackerHubResult<void>>(TrackerHubServerFunctions.UpdateSequencerFrame, command)
-            .catch(() => {
-                return this.serverError<void>();
-            });
-        return result;
+        return this.updateRoomState<void, UpdateSequencerFrameCommand>(
+            TrackerHubServerFunctions.UpdateSequencerFrame, command  
+        );
     }
 
     async updateSequencerChannel(command: UpdateSequencerChannelCommand): Promise<TrackerHubResult<void>> {
-        const result = await this._connection.invoke<TrackerHubResult<void>>(TrackerHubServerFunctions.UpdateSequencerChannel, command)
+        return this.updateRoomState<void, UpdateSequencerChannelCommand>(
+            TrackerHubServerFunctions.UpdateSequencerChannel, command
+        );
+    }
+
+    private async updateRoomState<T, t> (trackerHubServerFunction: string, ...args: t[]): Promise<TrackerHubResult<T>> {
+        const result = await this._connection.invoke<TrackerHubResult<T>>(trackerHubServerFunction, ...args)
             .catch(() => {
-                return this.serverError<void>();
+                return this.serverError<T>();
             });
         return result;
     }
