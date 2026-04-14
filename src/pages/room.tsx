@@ -110,25 +110,12 @@ export const Room = () => {
     }
 
     useEffect(() => {
-        let unsubscribeUserJoinedRoom = (): boolean => {
-            return false;
-        }
-        let unsubscribeUserLeftRoom = (): boolean => {
-            return false;
-        }
-        let unsubscribeAccessExpired = (): boolean => {
-            return false;
-        }
-        let unsubscribeWipNameChanged = (): boolean => {
-            return false;
-        }
-        let unsubscribeBpmUpdated = (): boolean => {
-            return false;
-        }
-        let unsubscribeChannelCountUpdated = (): boolean => {
-            return false;
-        }
-
+        let unsubscribeUserJoinedRoom      = (): boolean => { return false; }
+        let unsubscribeUserLeftRoom        = (): boolean => { return false; }
+        let unsubscribeAccessExpired       = (): boolean => { return false; }
+        let unsubscribeWipNameUpdated      = (): boolean => { return false; }
+        let unsubscribeBpmUpdated          = (): boolean => { return false; }
+        let unsubscribeChannelCountUpdated = (): boolean => { return false; }
         const setupTrackerHubClient = async (): Promise<(void)> => {
             if (trackerHubClientRef.current !== null || !wipId)
                 return;
@@ -171,7 +158,7 @@ export const Room = () => {
             }
             unsubscribeAccessExpired = client.subscribeAccessExpired(accessExpiredCallback);
 
-            const wipNameChangedCallback = (newName: string) => {
+            const wipNameUpdatedCallback = (newName: string) => {
                 setWipInfo(prev => {
                     if (prev === null) 
                         return prev;
@@ -181,7 +168,7 @@ export const Room = () => {
                     };
                 });
             }
-            unsubscribeWipNameChanged = client.subscribeWipNameUpdated(wipNameChangedCallback);
+            unsubscribeWipNameUpdated = client.subscribeWipNameUpdated(wipNameUpdatedCallback);
 
             const bpmUpdatedCallback = (newBpm: number) => {
                 setBpm(newBpm);
@@ -212,7 +199,7 @@ export const Room = () => {
             unsubscribeUserJoinedRoom();
             unsubscribeUserLeftRoom();
             unsubscribeAccessExpired();
-            unsubscribeWipNameChanged();
+            unsubscribeWipNameUpdated();
             unsubscribeBpmUpdated();
             unsubscribeChannelCountUpdated();
         }
