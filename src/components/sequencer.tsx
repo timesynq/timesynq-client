@@ -44,15 +44,13 @@ export const Sequencer = ({client, channelCount}: SequencerProps) => {
     }, [handleSequencerFrameUpdate])
 
     const handleSequencerChannelUpdate = async (command: UpdateSequencerChannelCommand): Promise<void> => {
-        console.log(command);
-
         const result: TrackerHubResult<void> = await client.updateSequencerChannel(command);
         if (!result.isSuccessful){
             Toasts.error(result.errorMessage ?? UNEXPECTED_ERROR_MESSAGE);
         }
     }
     const handleSetChannel = useCallback((line: number) => (channel: number, isOn: boolean) => {
-        handleSequencerChannelUpdate({line: line, channel: channel, isOn: isOn})
+        handleSequencerChannelUpdate({line: line, channel: channel + 1, isOn: isOn})
     }, [handleSequencerChannelUpdate]);
 
     useEffect(() => {
@@ -81,7 +79,7 @@ export const Sequencer = ({client, channelCount}: SequencerProps) => {
             setLineStates(prev => {
                 const currentLineState = prev[command.line];
                 const newChannelStates = [...currentLineState.isChannelOn];
-                newChannelStates[command.channel] = command.isOn;
+                newChannelStates[command.channel - 1] = command.isOn;
 
                 const updated = [...prev];
                 updated[command.line] = {
