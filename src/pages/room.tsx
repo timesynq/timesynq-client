@@ -261,14 +261,14 @@ export const Room = () => {
                         </div>
                         <Separator />
                         <ResizablePanelGroup direction="horizontal" className="flex-1 min-h-0">
-                            <ResizablePanel defaultSize={20} minSize={15} maxSize={25}>
+                            <ResizablePanel defaultSize={20} minSize={15} maxSize={30}>
                                 <Sequencer
                                     client={trackerHubClientRef.current}
                                     channelCount={channelCount}
                                 />
                             </ResizablePanel>
                             <ResizableHandle />
-                            <ResizablePanel defaultSize={60} minSize={50} maxSize={70}>
+                            <ResizablePanel defaultSize={60} minSize={45} maxSize={70}>
                                 <div className="flex-1 flex h-full items-center justify-center">
                                     <FrameEditor/>
                                 </div>
