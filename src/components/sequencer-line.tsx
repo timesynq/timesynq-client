@@ -4,12 +4,12 @@ import { toTwoDigitHex } from "@/utils/hex";
 import { Button } from "./ui/button";
 
 export type LineState = {
-    pattern: number;
+    frame: number;
     channelMuteStates: boolean[];
 }
 
 export const defaultLineState: LineState = {
-    pattern: 0,
+    frame: 0,
     channelMuteStates: new Array(WIP_CONSTANTS.MAX_CHANNELS).fill(true)
 }
 
@@ -17,18 +17,18 @@ export interface SequencerLineProps {
     line: number,
     state: LineState,
     channelCount: number,
-    setPattern: (newPattern: number) => void,
+    setFrame: (newFrame: number) => void,
 } 
 
-export const SequencerLine = ({line, state, channelCount, setPattern}: SequencerLineProps) => {
+export const SequencerLine = ({line, state, channelCount, setFrame}: SequencerLineProps) => {
     return(
         <div className="flex flex-row space-x-4">
             <Counter
                 label={toTwoDigitHex(line)}
-                value={state.pattern}
+                value={state.frame}
                 min={WIP_CONSTANTS.MIN_PATTERN}
                 max={WIP_CONSTANTS.MAX_PATTERN}
-                onChange={setPattern}
+                onChange={setFrame}
                 displayHex
             />
             <div className="flex flex-row space-x-1">
