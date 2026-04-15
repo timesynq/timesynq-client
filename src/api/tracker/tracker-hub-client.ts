@@ -15,7 +15,7 @@ const TrackerHubServerFunctions = {
     UpdateSequencerChannel: "UpdateSequencerChannel",
 }
 
-const TrackerHubClientCallbacks = {
+const TrackerHubEvents = {
     UserJoinedRoom: "UserJoinedRoom",
     UserLeftRoom: "UserLeftRoom",
     MessageAddedToChat: "MessageAddedToChat",
@@ -63,61 +63,61 @@ export class TrackerHubClient{
 
     private registerListeners(): void {
         this._connection.on(
-            TrackerHubClientCallbacks.MessageAddedToChat,
+            TrackerHubEvents.MessageAddedToChat,
             (userId: string, message: string) => {
                 this._chatMessageListeners.forEach(callback => callback(userId, message));
             }
         )
         this._connection.on(
-            TrackerHubClientCallbacks.UserJoinedRoom,
+            TrackerHubEvents.UserJoinedRoom,
             (roomMember: RoomMember) => {
                 this._userJoinedRoomListeners.forEach(callback => callback(roomMember));
             }
         )
         this._connection.on(
-            TrackerHubClientCallbacks.UserLeftRoom,
+            TrackerHubEvents.UserLeftRoom,
             (trackerConnection: TrackerConnection) => {
                 this._userLeftRoomListeners.forEach(callback => callback(trackerConnection));
             }
         )
         this._connection.on(
-            TrackerHubClientCallbacks.AccessExpired,
+            TrackerHubEvents.AccessExpired,
             () => {
                 this._accessExpiredListeners.forEach(callback => callback());
             }
         )
         this._connection.on(
-            TrackerHubClientCallbacks.WipNameUpdated,
+            TrackerHubEvents.WipNameUpdated,
             (newName: string) => {
                 this._wipNameUpdatedListeners.forEach(callback => callback(newName));
             }
         )
         this._connection.on(
-            TrackerHubClientCallbacks.BpmUpdated,
+            TrackerHubEvents.BpmUpdated,
             (newBpm: number) => {
                 this._bpmUpdatedListeners.forEach(callback => callback(newBpm));
             }
         )
         this._connection.on(
-            TrackerHubClientCallbacks.ChannelCountUpdated,
+            TrackerHubEvents.ChannelCountUpdated,
             (newChannelCount: number) => {
                 this._channelCountUpdatedListeners.forEach(callback => callback(newChannelCount));
             }
         )
         this._connection.on(
-            TrackerHubClientCallbacks.SequencerLengthUpdated,
+            TrackerHubEvents.SequencerLengthUpdated,
             (newSequencerLength: number) => {
                 this._sequencerLengthUpdatedListeners.forEach(callback => callback(newSequencerLength));
             }
         )
         this._connection.on(
-            TrackerHubClientCallbacks.SequencerFrameUpdated,
+            TrackerHubEvents.SequencerFrameUpdated,
             (command: UpdateSequencerFrameCommand) => {
                 this._sequencerFrameUpdatedListeners.forEach(callback => callback(command));
             }
         )
         this._connection.on(
-            TrackerHubClientCallbacks.SequencerChannelUpdated,
+            TrackerHubEvents.SequencerChannelUpdated,
             (command: UpdateSequencerChannelCommand) => {
                 this._sequencerChannelUpdatedListeners.forEach(callback => callback(command));
             }
@@ -200,57 +200,41 @@ export class TrackerHubClient{
     }
 
     async joinRoom(roomCode: string): Promise<TrackerHubResult<RoomInitializer>> {
-        return this.updateRoomState<RoomInitializer, string>(
-            TrackerHubServerFunctions.JoinRoom, roomCode
-        );
+        return this.invoke<RoomInitializer, string>(TrackerHubServerFunctions.JoinRoom, roomCode);
     }
 
     async leaveRoom(): Promise<TrackerHubResult<void>> {
-        return this.updateRoomState<void, void>(
-            TrackerHubServerFunctions.LeaveRoom
-        );
+        return this.invoke<void, void>(TrackerHubServerFunctions.LeaveRoom);
     }
 
     async sendChatMessage(message: string): Promise<TrackerHubResult<void>> {
-        return this.updateRoomState<void, string>(
-            TrackerHubServerFunctions.SendChatMessage, message
-        );
+        return this.invoke<void, string>(TrackerHubServerFunctions.SendChatMessage, message);
     }
 
     async updateBpm(newBpm: number): Promise<TrackerHubResult<void>> {
-        return this.updateRoomState<void, number>(
-            TrackerHubServerFunctions.UpdateBpm, newBpm
-        );
+        return this.invoke<void, number>(TrackerHubServerFunctions.UpdateBpm, newBpm);
     }
 
     async updateChannelCount(newChannelCount: number): Promise<TrackerHubResult<void>> {
-        return this.updateRoomState<void, number>(
-            TrackerHubServerFunctions.UpdateChannelCount, newChannelCount
-        );
+        return this.invoke<void, number>(TrackerHubServerFunctions.UpdateChannelCount, newChannelCount);
     }
 
     async updateSequencerLength(newSequencerLength: number): Promise<TrackerHubResult<void>> {
-        return this.updateRoomState<void, number>(
-            TrackerHubServerFunctions.UpdateSequencerLength, newSequencerLength
-        );
+        return this.invoke<void, number>(TrackerHubServerFunctions.UpdateSequencerLength, newSequencerLength);
     }
 
     async updateSequencerFrame(command: UpdateSequencerFrameCommand): Promise<TrackerHubResult<void>> {
-        return this.updateRoomState<void, UpdateSequencerFrameCommand>(
-            TrackerHubServerFunctions.UpdateSequencerFrame, command  
-        );
+        return this.invoke<void, UpdateSequencerFrameCommand>(TrackerHubServerFunctions.UpdateSequencerFrame, command);
     }
 
     async updateSequencerChannel(command: UpdateSequencerChannelCommand): Promise<TrackerHubResult<void>> {
-        return this.updateRoomState<void, UpdateSequencerChannelCommand>(
-            TrackerHubServerFunctions.UpdateSequencerChannel, command
-        );
+        return this.invoke<void, UpdateSequencerChannelCommand>(TrackerHubServerFunctions.UpdateSequencerChannel, command);
     }
 
-    private async updateRoomState<T, t> (trackerHubServerFunction: string, ...args: t[]): Promise<TrackerHubResult<T>> {
-        const result = await this._connection.invoke<TrackerHubResult<T>>(trackerHubServerFunction, ...args)
+    private async invoke<TResult, TArg> (trackerHubServerFunction: string, ...args: TArg[]): Promise<TrackerHubResult<TResult>> {
+        const result = await this._connection.invoke<TrackerHubResult<TResult>>(trackerHubServerFunction, ...args)
             .catch(() => {
-                return this.serverError<T>();
+                return this.serverError<TResult>();
             });
         return result;
     }
