@@ -1,7 +1,7 @@
 import * as signalR from "@microsoft/signalr";
 import { hubs } from "../endpoints";
 import { UNEXPECTED_ERROR_MESSAGE } from "../api-error";
-import { RoomInitializer, RoomMember, TrackerConnection, TrackerHubResult } from "./tracker-hub-models";
+import { ChatMessage, RoomInitializer, RoomMember, TrackerConnection, TrackerHubResult } from "./tracker-hub-models";
 import { UpdateSequencerChannelCommand, UpdateSequencerFrameCommand } from "./tracker-hub-commands";
 
 const TrackerHubServerFunctions = {
@@ -31,7 +31,7 @@ const TrackerHubEvents = {
 export class TrackerHubClient{
 
     private _connection: signalR.HubConnection;
-    private _chatMessageListeners: Set<(userId: string, message: string) => void>;
+    private _chatMessageListeners: Set<(chatMessage: ChatMessage) => void>;
     private _userJoinedRoomListeners: Set<(roomMember: RoomMember) => void>;
     private _userLeftRoomListeners: Set<(trackerConnection: TrackerConnection) => void>;
     private _accessExpiredListeners: Set<() => void>;
@@ -48,7 +48,7 @@ export class TrackerHubClient{
             .withAutomaticReconnect()
             .build();
 
-        this._chatMessageListeners = new Set<(userId: string, message: string) => void>();
+        this._chatMessageListeners = new Set<(chatMessage: ChatMessage) => void>();
         this._userJoinedRoomListeners = new Set<(roomMember: RoomMember) => void>();
         this._userLeftRoomListeners = new Set<(trackerConnection: TrackerConnection) => void>();
         this._accessExpiredListeners = new Set<() => void>();
@@ -62,69 +62,27 @@ export class TrackerHubClient{
     }
 
     private registerListeners(): void {
-        this._connection.on(
-            TrackerHubEvents.MessageAddedToChat,
-            (userId: string, message: string) => {
-                this._chatMessageListeners.forEach(callback => callback(userId, message));
-            }
-        )
-        this._connection.on(
-            TrackerHubEvents.UserJoinedRoom,
-            (roomMember: RoomMember) => {
-                this._userJoinedRoomListeners.forEach(callback => callback(roomMember));
-            }
-        )
-        this._connection.on(
-            TrackerHubEvents.UserLeftRoom,
-            (trackerConnection: TrackerConnection) => {
-                this._userLeftRoomListeners.forEach(callback => callback(trackerConnection));
-            }
-        )
-        this._connection.on(
-            TrackerHubEvents.AccessExpired,
-            () => {
-                this._accessExpiredListeners.forEach(callback => callback());
-            }
-        )
-        this._connection.on(
-            TrackerHubEvents.WipNameUpdated,
-            (newName: string) => {
-                this._wipNameUpdatedListeners.forEach(callback => callback(newName));
-            }
-        )
-        this._connection.on(
-            TrackerHubEvents.BpmUpdated,
-            (newBpm: number) => {
-                this._bpmUpdatedListeners.forEach(callback => callback(newBpm));
-            }
-        )
-        this._connection.on(
-            TrackerHubEvents.ChannelCountUpdated,
-            (newChannelCount: number) => {
-                this._channelCountUpdatedListeners.forEach(callback => callback(newChannelCount));
-            }
-        )
-        this._connection.on(
-            TrackerHubEvents.SequencerLengthUpdated,
-            (newSequencerLength: number) => {
-                this._sequencerLengthUpdatedListeners.forEach(callback => callback(newSequencerLength));
-            }
-        )
-        this._connection.on(
-            TrackerHubEvents.SequencerFrameUpdated,
-            (command: UpdateSequencerFrameCommand) => {
-                this._sequencerFrameUpdatedListeners.forEach(callback => callback(command));
-            }
-        )
-        this._connection.on(
-            TrackerHubEvents.SequencerChannelUpdated,
-            (command: UpdateSequencerChannelCommand) => {
-                this._sequencerChannelUpdatedListeners.forEach(callback => callback(command));
-            }
-        )
+
+        const register = <T>(event: string, listeners: Set<(args: T) => void>): void => {
+            this._connection.on(
+                event,
+                (args: T) => listeners.forEach(cb => cb(args))
+            );
+        }
+
+        register(TrackerHubEvents.MessageAddedToChat, this._chatMessageListeners);
+        register(TrackerHubEvents.UserJoinedRoom, this._userJoinedRoomListeners);
+        register(TrackerHubEvents.UserLeftRoom, this._userLeftRoomListeners);
+        register(TrackerHubEvents.AccessExpired, this._accessExpiredListeners);
+        register(TrackerHubEvents.WipNameUpdated, this._wipNameUpdatedListeners);
+        register(TrackerHubEvents.BpmUpdated, this._bpmUpdatedListeners);
+        register(TrackerHubEvents.ChannelCountUpdated, this._channelCountUpdatedListeners);
+        register(TrackerHubEvents.SequencerLengthUpdated, this._sequencerLengthUpdatedListeners);
+        register(TrackerHubEvents.SequencerFrameUpdated, this._sequencerFrameUpdatedListeners);
+        register(TrackerHubEvents.SequencerChannelUpdated, this._sequencerChannelUpdatedListeners);
     }
 
-    subscribeChatMessageReceived(callback: (userId: string, message: string) => void): () => boolean {
+    subscribeChatMessageReceived(callback: (chatMessage: ChatMessage) => void): () => boolean {
         this._chatMessageListeners.add(callback);
         return () => this._chatMessageListeners.delete(callback);
     }

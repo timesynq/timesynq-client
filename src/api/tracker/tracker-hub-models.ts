@@ -12,6 +12,11 @@ export type RoomMember = {
     connectionId: string,
 }
 
+export type ChatMessage = {
+    userId: string,
+    message: string,
+}
+
 export type RoomInitializer = {
     wip: Wip,
     members: RoomMember[],

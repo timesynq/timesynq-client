@@ -5,7 +5,7 @@ import { Separator } from "./ui/separator";
 import { Input } from "./ui/input";
 import { TrackerHubClient } from "@/api/tracker/tracker-hub-client";
 import { ScrollArea } from "./ui/scroll-area";
-import { TrackerHubResult } from "@/api/tracker/tracker-hub-models";
+import { ChatMessage, TrackerHubResult } from "@/api/tracker/tracker-hub-models";
 import { RoomMemberInfo } from "@/pages/room";
 
 export type Message = {
@@ -36,12 +36,12 @@ export const ChatBox = ({ client, members, messages, setMessages }: ChatBoxProps
     }, [messages])
 
     useEffect(() => {
-        const callback = (userId: string, message: string) => {
-            const info: RoomMemberInfo | undefined = membersRef.current.get(userId);
+        const callback = (chatMessage: ChatMessage) => {
+            const info: RoomMemberInfo | undefined = membersRef.current.get(chatMessage.userId);
             const newMessage: Message = {
                 color: info?.chatColor ?? "text-timesynq-red",
-                username: info?.userName ?? userId,
-                message: message,
+                username: info?.userName ?? chatMessage.userId,
+                message: chatMessage.message,
             }
 
             setMessages(prev => [...prev, newMessage]);
