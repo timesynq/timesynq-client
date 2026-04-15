@@ -63,10 +63,10 @@ export class TrackerHubClient{
 
     private registerListeners(): void {
 
-        const register = <T>(event: string, listeners: Set<(args: T) => void>): void => {
+        const register = <T>(event: string, listeners: Set<(arg: T) => void>): void => {
             this._connection.on(
                 event,
-                (args: T) => listeners.forEach(cb => cb(args))
+                (arg: T) => listeners.forEach(cb => cb(arg))
             );
         }
 
@@ -82,54 +82,52 @@ export class TrackerHubClient{
         register(TrackerHubEvents.SequencerChannelUpdated, this._sequencerChannelUpdatedListeners);
     }
 
+    private subscribe<T>(
+        listeners: Set<(arg: T) => void>,
+        callback: (arg: T) => void
+    ): () => boolean {
+        listeners.add(callback);
+        return () => listeners.delete(callback);        
+    }
+
     subscribeChatMessageReceived(callback: (chatMessage: ChatMessage) => void): () => boolean {
-        this._chatMessageListeners.add(callback);
-        return () => this._chatMessageListeners.delete(callback);
+        return this.subscribe(this._chatMessageListeners, callback);
     }
 
     subscribeUserJoinedRoom(callback: (roomMember: RoomMember) => void): () => boolean {
-        this._userJoinedRoomListeners.add(callback);
-        return () => this._userJoinedRoomListeners.delete(callback);
+        return this.subscribe(this._userJoinedRoomListeners, callback);
     }
 
     subscribeUserLeftRoom(callback: (trackerConnection: TrackerConnection) => void): () => boolean {
-        this._userLeftRoomListeners.add(callback);
-        return () => this._userLeftRoomListeners.delete(callback);
+        return this.subscribe(this._userLeftRoomListeners, callback);
     }
 
     subscribeAccessExpired(callback: () => void): () => boolean {
-        this._accessExpiredListeners.add(callback);
-        return () => this._accessExpiredListeners.delete(callback);
+        return this.subscribe(this._accessExpiredListeners, callback);
     }
 
     subscribeWipNameUpdated(callback: (newName: string) => void): () => boolean {
-        this._wipNameUpdatedListeners.add(callback);
-        return () => this._wipNameUpdatedListeners.delete(callback);
+        return this.subscribe(this._wipNameUpdatedListeners, callback);
     }
 
     subscribeBpmUpdated(callback: (newBpm: number) => void): () => boolean {
-        this._bpmUpdatedListeners.add(callback);
-        return () => this._bpmUpdatedListeners.delete(callback);
+        return this.subscribe(this._bpmUpdatedListeners, callback);
     }
 
     subscribeChannelCountUpdated(callback: (newChannelCount: number) => void): () => boolean {
-        this._channelCountUpdatedListeners.add(callback);
-        return () => this._channelCountUpdatedListeners.delete(callback);
+        return this.subscribe(this._channelCountUpdatedListeners, callback);
     }
 
     subscribeSequencerLengthUpdated(callback: (newSequencerLength: number) => void): () => boolean {
-        this._sequencerLengthUpdatedListeners.add(callback);
-        return () => this._sequencerLengthUpdatedListeners.delete(callback);
+        return this.subscribe(this._sequencerLengthUpdatedListeners, callback);
     }
 
     subscribeSequencerFrameUpdated(callback: (command: UpdateSequencerFrameCommand) => void): () => boolean {
-        this._sequencerFrameUpdatedListeners.add(callback);
-        return () => this._sequencerFrameUpdatedListeners.delete(callback);
+        return this.subscribe(this._sequencerFrameUpdatedListeners, callback);
     }
 
     subscribeSequencerChannelUpdated(callback: (command: UpdateSequencerChannelCommand) => void): () => boolean {
-        this._sequencerChannelUpdatedListeners.add(callback);
-        return () => this._sequencerChannelUpdatedListeners.delete(callback);
+        return this.subscribe(this._sequencerChannelUpdatedListeners, callback);
     }
 
     private serverError<T>(): TrackerHubResult<T> {
