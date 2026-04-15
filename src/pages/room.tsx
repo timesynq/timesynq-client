@@ -188,10 +188,18 @@ export const Room = () => {
                 return;
             }
             setWipInfo(joinRoomResult.value.wip);
-            setMembers(prev => {
-                const existingMembers = initializeMembers(joinRoomResult.value!.members);
-                return new Map([...prev, ...existingMembers]);
+            
+            const existingMembers = initializeMembers(joinRoomResult.value!.members);
+
+            existingMembers.forEach((value, key) => {
+                const memberInfo: RoomMemberInfo | undefined = membersRef.current.get(key);
+                if (memberInfo) 
+                    value.connectionIds.forEach(connectionId => memberInfo.connectionIds.add(connectionId));
+                else
+                    membersRef.current.set(key, value);
             });
+
+            setMembers(new Map<string, RoomMemberInfo>(membersRef.current));
         }
 
         setupTrackerHubClient();
