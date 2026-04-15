@@ -2,6 +2,7 @@ import { WIP_CONSTANTS } from "@/api/wips/wip";
 import { Counter } from "./counter";
 import { toTwoDigitHex } from "@/utils/hex";
 import { Button } from "./ui/button";
+import { useMemo } from "react";
 
 export type LineState = {
     frame: number;
@@ -44,6 +45,42 @@ export const SequencerLine = ({line, state, channelCount, setFrame, setChannel}:
     );
 }
 
+export interface SequencerInfoLineProps {
+    channelCount: number,
+}
+
+export const SequencerInfoLine = ({channelCount}: SequencerInfoLineProps) => {
+
+    const channelNums: string[] = useMemo(() => 
+        Array.from({ length: 16 }, (_, i) => toTwoDigitHex(i)), []
+    );
+
+    return (
+        <div className="flex flex-row space-x-4">
+            <div className="invisible">
+                <Counter
+                    label="00"
+                    value={0}
+                    min={0}
+                    max={0}
+                    onChange={() => {}}
+                />
+            </div>
+            <div className="flex flex-row space-x-1">
+                {
+                    channelNums.map((label, index) => (
+                        <span 
+                            className={`${index >= channelCount ? "text-input" : "text-foreground"} w-8 h-8 flex items-center justify-center`}
+                        >
+                            {label}
+                        </span>
+                    ))
+                }
+            </div>
+        </div>
+    );
+}
+
 interface ChannelToggleButtonProps {
     isOn: boolean;
     disabled: boolean;
@@ -55,8 +92,8 @@ const ChannelToggleButton = ({isOn, disabled, channel, toggle}: ChannelToggleBut
     return (
         <Button
             size="icon"
-            variant={disabled ? "secondary" : isOn ? "positive" : "negative"}
-            className={`${!disabled && "cursor-pointer"} w-8 h-8 rounded-none border ${disabled && "hover:bg-muted"}`}
+            variant={disabled ? "outline" : isOn ? "secondary" : "negative"}
+            className={`${!disabled && "cursor-pointer"} w-8 h-8 rounded-none border ${disabled && "hover:bg-dark"}`}
             onClick={() => {
                 if (disabled) return;
                 toggle(channel, !isOn)

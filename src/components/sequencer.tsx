@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import { TrackerHubResult } from "@/api/tracker/tracker-hub-models";
 import { Toasts } from "@/utils/toasts";
 import { UNEXPECTED_ERROR_MESSAGE } from "@/api/api-error";
-import { LineState, SequencerLine } from "./sequencer-line";
+import { LineState, SequencerInfoLine, SequencerLine } from "./sequencer-line";
 import { ScrollArea, ScrollBar } from "./ui/scroll-area";
 import { UpdateSequencerChannelCommand, UpdateSequencerFrameCommand } from "@/api/tracker/tracker-hub-commands";
 
@@ -110,6 +110,9 @@ export const Sequencer = ({client, channelCount}: SequencerProps) => {
             />
             <ScrollArea className="h-full pb-4 pl-4 pr-4">
                 <div className="flex flex-col justify-start items-start space-y-2 overflow-auto">
+                    <SequencerInfoLine 
+                        channelCount={channelCount}
+                    />
                     { lineStates.map((line, index) => (
                         index < length && 
                         <SequencerLine 
