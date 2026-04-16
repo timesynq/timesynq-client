@@ -15,6 +15,10 @@ export const WIP_CONSTANTS = {
     MAX_SEQUENCER_LENGTH: 256,
     MIN_PATTERN: 0,
     MAX_PATTERN: 63,
+    MIN_LINES: 1,
+    MAX_LINES: 256,
+    MIN_LINES_PER_BEAT: 1,
+    MAX_LINES_PER_BEAT: 64,
 }
 
 export const WipSortField = {

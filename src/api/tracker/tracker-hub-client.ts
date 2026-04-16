@@ -2,7 +2,7 @@ import * as signalR from "@microsoft/signalr";
 import { hubs } from "../endpoints";
 import { UNEXPECTED_ERROR_MESSAGE } from "../api-error";
 import { ChatMessage, RoomInitializer, RoomMember, TrackerConnection, TrackerHubResult } from "./tracker-hub-models";
-import { UpdateSequencerChannelCommand, UpdateSequencerFrameCommand } from "./tracker-hub-commands";
+import { UpdateLineCountCommand, UpdateLinesPerBeatCommand, UpdateSequencerChannelCommand, UpdateSequencerFrameCommand } from "./tracker-hub-commands";
 
 const TrackerHubServerFunctions = {
     JoinRoom: "JoinRoom",
@@ -13,6 +13,8 @@ const TrackerHubServerFunctions = {
     UpdateSequencerLength: "UpdateSequencerLength",
     UpdateSequencerFrame: "UpdateSequencerFrame",
     UpdateSequencerChannel: "UpdateSequencerChannel",
+    UpdateLineCount: "UpdateLineCount",
+    UpdateLinesPerBeat: "UpdateLinesPerBeat",
 }
 
 const TrackerHubEvents = {
@@ -26,6 +28,8 @@ const TrackerHubEvents = {
     SequencerLengthUpdated: "SequencerLengthUpdated",
     SequencerFrameUpdated: "SequencerFrameUpdated",
     SequencerChannelUpdated: "SequencerChannelUpdated",
+    LineCountUpdated: "LineCountUpdated",
+    LinesPerBeatUpdated: "LinesPerBeatUpdated",
 }
 
 export class TrackerHubClient{
@@ -41,6 +45,8 @@ export class TrackerHubClient{
     private _sequencerLengthUpdatedListeners: Set<(newSequencerLength: number) => void>;
     private _sequencerFrameUpdatedListeners: Set<(command: UpdateSequencerFrameCommand) => void>;
     private _sequencerChannelUpdatedListeners: Set<(command: UpdateSequencerChannelCommand) => void>;
+    private _lineCountUpdatedListeners: Set<(command: UpdateLineCountCommand) => void>;
+    private _linesPerBeatUpdatedListeners: Set<(command: UpdateLinesPerBeatCommand) => void>;
 
     constructor(){
         this._connection = new signalR.HubConnectionBuilder()
@@ -57,7 +63,9 @@ export class TrackerHubClient{
         this._channelCountUpdatedListeners = new Set<(newChannelCount: number) => void>();
         this._sequencerLengthUpdatedListeners = new Set<(newSequencerLength: number) => void>();
         this._sequencerFrameUpdatedListeners = new Set<(command: UpdateSequencerFrameCommand) => void>();
-        this._sequencerChannelUpdatedListeners = new Set<(command: UpdateSequencerChannelCommand) => void>(); 
+        this._sequencerChannelUpdatedListeners = new Set<(command: UpdateSequencerChannelCommand) => void>();
+        this._lineCountUpdatedListeners = new Set<(command: UpdateLineCountCommand) => void>();
+        this._linesPerBeatUpdatedListeners = new Set<(command: UpdateLinesPerBeatCommand) => void>();
         this.registerListeners();
     }
 
@@ -80,6 +88,8 @@ export class TrackerHubClient{
         register(TrackerHubEvents.SequencerLengthUpdated, this._sequencerLengthUpdatedListeners);
         register(TrackerHubEvents.SequencerFrameUpdated, this._sequencerFrameUpdatedListeners);
         register(TrackerHubEvents.SequencerChannelUpdated, this._sequencerChannelUpdatedListeners);
+        register(TrackerHubEvents.LineCountUpdated, this._lineCountUpdatedListeners);
+        register(TrackerHubEvents.LinesPerBeatUpdated, this._linesPerBeatUpdatedListeners);
     }
 
     private subscribe<T>(
@@ -128,6 +138,14 @@ export class TrackerHubClient{
 
     subscribeSequencerChannelUpdated(callback: (command: UpdateSequencerChannelCommand) => void): () => boolean {
         return this.subscribe(this._sequencerChannelUpdatedListeners, callback);
+    }
+
+    subscribeLineCountUpdated(callback: (command: UpdateLineCountCommand) => void): () => boolean {
+        return this.subscribe(this._lineCountUpdatedListeners, callback);
+    }
+
+    subscribeLinesPerBeatUpdated(callback: (command: UpdateLinesPerBeatCommand) => void): () => boolean {
+        return this.subscribe(this._linesPerBeatUpdatedListeners, callback);
     }
 
     private serverError<T>(): TrackerHubResult<T> {
@@ -185,6 +203,14 @@ export class TrackerHubClient{
 
     async updateSequencerChannel(command: UpdateSequencerChannelCommand): Promise<TrackerHubResult<void>> {
         return this.invoke<void, UpdateSequencerChannelCommand>(TrackerHubServerFunctions.UpdateSequencerChannel, command);
+    }
+
+    async updateLineCount(command: UpdateLineCountCommand): Promise<TrackerHubResult<void>> {
+        return this.invoke<void, UpdateLineCountCommand>(TrackerHubServerFunctions.UpdateLineCount, command);
+    }
+
+    async updateLinesPerBeat(command: UpdateLinesPerBeatCommand): Promise<TrackerHubResult<void>> {
+        return this.invoke<void, UpdateLinesPerBeatCommand>(TrackerHubServerFunctions.UpdateLinesPerBeat, command);
     }
 
     private async invoke<TResult, TArg> (trackerHubServerFunction: string, ...args: TArg[]): Promise<TrackerHubResult<TResult>> {

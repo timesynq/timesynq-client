@@ -8,3 +8,13 @@ export type UpdateSequencerChannelCommand = {
     channel: number;
     isOn: boolean;
 }
+
+export type UpdateLineCountCommand = {
+    frame: number;
+    newLineCount: number;
+}
+
+export type UpdateLinesPerBeatCommand = {
+    frame: number;
+    newLinesPerBeat: number;
+}

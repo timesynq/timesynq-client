@@ -61,6 +61,8 @@ export const Room = () => {
         }
     }
 
+    const [currentFrame, setCurrentFrame] = useState<number>(0);
+
     if (!user) return null;
 
     const generateRandomChatColor = useCallback((): string => {
@@ -265,7 +267,10 @@ export const Room = () => {
                             <ResizableHandle />
                             <ResizablePanel defaultSize={60} minSize={45} maxSize={70}>
                                 <div className="flex-1 flex h-full items-center justify-center">
-                                    <FrameEditor/>
+                                    <FrameEditor
+                                        client={trackerHubClientRef.current}
+                                        currentFrame={currentFrame}
+                                    />
                                 </div>
                             </ResizablePanel>
                             <ResizableHandle />
