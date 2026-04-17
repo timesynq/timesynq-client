@@ -44,6 +44,8 @@ export const FrameEditor = ({ client, currentFrame }: FrameEditorProps) => {
         [client, currentFrame]
     );
 
+    const [octave, setOctave] = useState<number>(4);
+
     useEffect(() => {
         
         const lineCountUpdatedCallback = (command: UpdateLineCountCommand) => {
@@ -85,6 +87,13 @@ export const FrameEditor = ({ client, currentFrame }: FrameEditorProps) => {
                         min={WIP_CONSTANTS.MIN_LINES_PER_BEAT}
                         max={WIP_CONSTANTS.MAX_LINES_PER_BEAT}
                         onChange={handleSetLinesPerBeat}
+                    />
+                    <Counter
+                        label="Octave"
+                        value={octave}
+                        min={WIP_CONSTANTS.MIN_OCTAVE}
+                        max={WIP_CONSTANTS.MAX_OCTAVE}
+                        onChange={setOctave}
                     />
             </div>
         </div>

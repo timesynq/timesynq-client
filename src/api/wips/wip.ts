@@ -19,6 +19,8 @@ export const WIP_CONSTANTS = {
     MAX_LINES: 256,
     MIN_LINES_PER_BEAT: 1,
     MAX_LINES_PER_BEAT: 64,
+    MIN_OCTAVE: 0,
+    MAX_OCTAVE: 8,
 }
 
 export const WipSortField = {
