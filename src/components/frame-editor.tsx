@@ -6,6 +6,7 @@ import { Counter } from "./counter";
 import { WIP_CONSTANTS } from "@/api/wips/wip";
 import { TrackerHubResult } from "@/api/tracker/tracker-hub-models";
 import { UpdateLineCountCommand, UpdateLinesPerBeatCommand } from "@/api/tracker/tracker-hub-commands";
+import { Channel } from "./channel";
 
 export interface FrameEditorProps {
     client: TrackerHubClient;
@@ -72,7 +73,7 @@ export const FrameEditor = ({ client, currentFrame }: FrameEditorProps) => {
     }, []);
     
     return (
-        <div className="flex flex-col w-full h-full min-h-0 p-4">
+        <div className="flex flex-col w-full h-full min-h-0 p-4 space-y-2">
             <div className="flex flex-row w-full justify-center items-center space-x-12">
                     <Counter
                         label="Lines"
@@ -95,6 +96,23 @@ export const FrameEditor = ({ client, currentFrame }: FrameEditorProps) => {
                         max={WIP_CONSTANTS.MAX_OCTAVE}
                         onChange={setOctave}
                     />
+            </div>
+            <div className="flex flex-row w-full h-full min-h-0">
+                <Channel 
+                    label={0}
+                    isNoted={false}
+                    lineCount={lineCount}
+                />
+                <Channel
+                    label={1}
+                    isNoted
+                    lineCount={lineCount}
+                />
+                <Channel
+                    label={2}
+                    isNoted={false}
+                    lineCount={lineCount}
+                />
             </div>
         </div>
     );

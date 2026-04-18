@@ -5,6 +5,11 @@ import { Input } from "./ui/input";
 import { clamp } from "@/utils/math";
 import { toTwoDigitHex } from "@/utils/hex";
 
+export enum CounterJustify {
+    Center,
+    Between
+}
+
 export interface CounterProps {
     label: string;
     value: number;
@@ -12,18 +17,19 @@ export interface CounterProps {
     max: number;
     onChange: (newValue: number) => void;
     displayHex?: boolean;
+    justify?: CounterJustify
 }
 
-export const Counter = ({ label, value, min, max, onChange, displayHex = false }: CounterProps) => {
+export const Counter = ({ label, value, min, max, onChange, displayHex = false, justify = CounterJustify.Center }: CounterProps) => {
     const DELAY_MS = 250;
     const INTERVAL_MS = 25;
 
-    const [isInputDialogOpen, setIsInputDialogOpen] = useState(false);
-    const [localValue, setLocalValue] = useState(value);
+    const [isInputDialogOpen, setIsInputDialogOpen] = useState<boolean>(false);
+    const [localValue, setLocalValue] = useState<number>(value);
 
     const intervalRef = useRef<number | null>(null);
     const timeoutRef = useRef<number | null>(null);
-    const isHoldingRef = useRef(false);
+    const isHoldingRef = useRef<boolean>(false);
 
     useEffect(() => {
         if (!isHoldingRef.current) {
@@ -87,8 +93,19 @@ export const Counter = ({ label, value, min, max, onChange, displayHex = false }
         setIsInputDialogOpen(false);
     };
 
+    let justifyString: string = "";
+    switch(justify){
+        case CounterJustify.Between:
+            justifyString = "justify-between"
+            break;
+        case CounterJustify.Center:
+        default:
+            justifyString = "justify-center"
+            break;
+    }
+
     return (
-        <div className="flex flex-row justify-center items-center space-x-4">
+        <div className={`flex flex-row ${justifyString} items-center space-x-4`}>
             <span className="min-w-6">{label}</span>
 
             <div className="flex flex-row items-center">

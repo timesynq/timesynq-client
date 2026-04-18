@@ -21,6 +21,10 @@ export const WIP_CONSTANTS = {
     MAX_LINES_PER_BEAT: 64,
     MIN_OCTAVE: 0,
     MAX_OCTAVE: 8,
+    MIN_NOTE_GROUPS: 1,
+    MAX_NOTE_GROUPS: 3,
+    MIN_FX_GROUPS: 1,
+    MAX_FX_GROUPS: 4,
 }
 
 export const WipSortField = {
