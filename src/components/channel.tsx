@@ -47,7 +47,8 @@ export const Channel = ({ label, isNoted }: ChannelProps) => {
                         size="icon"
                         variant="secondary"
                         className={
-                            `w-8 h-8 rounded-none cursor-pointer 
+                            `w-8 h-8 rounded-none cursor-pointer
+                            ${label === 0 && "invisible"} 
                             ${isSolo 
                                 ? 
                                 "bg-positive-background text-positive-foreground hover:bg-positive-background/75 hover:text-positive-foreground/75" :
