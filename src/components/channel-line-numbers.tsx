@@ -1,17 +1,21 @@
 import { toTwoDigitHex } from "@/utils/hex";
 import { LineSpacer } from "./line-spacer";
 
-export interface ChannelLineNumberProps {
-    lineCount: number;
-    linesPerBeat: number;
-    // scroll amount prop
+export const ChannelLineNumbersHeader = () => {
+    return(
+        <div className="min-h-[190px] min-w-[38px] border-b border-r" />
+    );
 }
 
-export const ChannelLineNumbers = ({ lineCount, linesPerBeat }: ChannelLineNumberProps) => {
+export interface ChannelLineNumbersProps {
+    lineCount: number;
+    linesPerBeat: number;
+}
+
+export const ChannelLineNumbers = ({ lineCount, linesPerBeat }: ChannelLineNumbersProps) => {
     return (
-        <div className="flex flex-col h-full min-h-0 border-r bg-background-darker">
-            <div className="min-h-[190px] border-b" />
-            <div className="h-full w-[38px]">
+        <div className="min-w-[38px] flex flex-col">
+            <div className="flex flex-col flex-grow border-r">
                 <LineSpacer />
                 {Array.from({ length: lineCount}, (_, i) => (
                     <LineNumber

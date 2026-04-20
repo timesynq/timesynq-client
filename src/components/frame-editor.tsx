@@ -6,8 +6,8 @@ import { Counter } from "./counter";
 import { WIP_CONSTANTS } from "@/api/wips/wip";
 import { TrackerHubResult } from "@/api/tracker/tracker-hub-models";
 import { UpdateLineCountCommand, UpdateLinesPerBeatCommand } from "@/api/tracker/tracker-hub-commands";
-import { Channel } from "./channel";
-import { ChannelLineNumbers } from "./channel-line-numbers";
+import { ChannelHeader, ChannelLines } from "./channel";
+import { ChannelLineNumbers, ChannelLineNumbersHeader } from "./channel-line-numbers";
 
 export interface FrameEditorProps {
     client: TrackerHubClient;
@@ -98,33 +98,57 @@ export const FrameEditor = ({ client, currentFrame }: FrameEditorProps) => {
                         onChange={setOctave}
                     />
             </div>
-            <div className="flex flex-row w-full h-full min-h-0">
-                <ChannelLineNumbers 
-                    lineCount={lineCount}
-                    linesPerBeat={linesPerBeat}
-                />
-                <Channel 
-                    label={0}
-                    isNoted={false}
-                    lineCount={lineCount}
-                    linesPerBeat={linesPerBeat}
-                />
-                <Channel
-                    label={1}
-                    isNoted
-                    lineCount={lineCount}
-                    linesPerBeat={linesPerBeat}
-                />
-                <Channel
-                    label={2}
-                    isNoted={false}
-                    lineCount={lineCount}
-                    linesPerBeat={linesPerBeat}
-                />
-                <ChannelLineNumbers 
-                    lineCount={lineCount}
-                    linesPerBeat={linesPerBeat}
-                />
+            <div className="flex flex-col h-full min-h-0">
+                <div className="flex flex-row w-full">
+                    <ChannelLineNumbersHeader />
+                    <ChannelHeader
+                        label={0}
+                        isNoted={false}
+                    />
+                    <ChannelHeader
+                        label={1}
+                        isNoted
+                    />
+                    <ChannelHeader
+                        label={2}
+                        isNoted={false}
+                    />
+                    <ChannelLineNumbersHeader />
+                </div>
+                <div className="flex flex-row w-full overflow-y-auto overflow-x-hidden">
+                    <ChannelLineNumbers 
+                        lineCount={lineCount}
+                        linesPerBeat={linesPerBeat}
+                    />
+                    <ChannelLines
+                        label={0}
+                        isNoted={false}
+                        lineCount={lineCount}
+                        linesPerBeat={linesPerBeat}
+                        noteGroupsOpen={1}
+                        fxGroupsOpen={1}
+                    />
+                    <ChannelLines
+                        label={1}
+                        isNoted
+                        lineCount={lineCount}
+                        linesPerBeat={linesPerBeat}
+                        noteGroupsOpen={1}
+                        fxGroupsOpen={1}
+                    />
+                    <ChannelLines
+                        label={2}
+                        isNoted={false}
+                        lineCount={lineCount}
+                        linesPerBeat={linesPerBeat}
+                        noteGroupsOpen={1}
+                        fxGroupsOpen={1}
+                    />
+                    <ChannelLineNumbers 
+                        lineCount={lineCount}
+                        linesPerBeat={linesPerBeat}
+                    />
+                </div>
             </div>
         </div>
     );

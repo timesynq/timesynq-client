@@ -237,7 +237,7 @@ export const Room = () => {
             }
             {!pageError && trackerHubClientRef.current !== null &&
                 <>
-                    <main className="flex-1 min-h-0 flex flex-col items-center justify-center overflow-auto">
+                    <main className="flex-1 min-h-0 flex flex-col items-center justify-center overflow-y-auto overflow-x-hidden">
                         <div className="flex flex-row items-center justify-start w-full h-14 p-2 space-x-2">
                             {user.id === wipInfo?.ownerId && <WipOptionsDialog wip={wipInfo}/>}
                             {user.id === wipInfo?.ownerId && <WipShareDialog wipId={wipId}/>} 
