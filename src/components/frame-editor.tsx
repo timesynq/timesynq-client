@@ -7,6 +7,7 @@ import { WIP_CONSTANTS } from "@/api/wips/wip";
 import { TrackerHubResult } from "@/api/tracker/tracker-hub-models";
 import { UpdateLineCountCommand, UpdateLinesPerBeatCommand } from "@/api/tracker/tracker-hub-commands";
 import { Channel } from "./channel";
+import { ChannelLineNumbers } from "./channel-line-numbers";
 
 export interface FrameEditorProps {
     client: TrackerHubClient;
@@ -73,8 +74,8 @@ export const FrameEditor = ({ client, currentFrame }: FrameEditorProps) => {
     }, []);
     
     return (
-        <div className="flex flex-col w-full h-full min-h-0 p-4 space-y-2">
-            <div className="flex flex-row w-full justify-center items-center space-x-12">
+        <div className="flex flex-col w-full h-full min-h-0 bg-background-darker">
+            <div className="flex flex-row w-full justify-center items-center space-x-12 p-4 border-b">
                     <Counter
                         label="Lines"
                         value={lineCount}
@@ -98,20 +99,31 @@ export const FrameEditor = ({ client, currentFrame }: FrameEditorProps) => {
                     />
             </div>
             <div className="flex flex-row w-full h-full min-h-0">
+                <ChannelLineNumbers 
+                    lineCount={lineCount}
+                    linesPerBeat={linesPerBeat}
+                />
                 <Channel 
                     label={0}
                     isNoted={false}
                     lineCount={lineCount}
+                    linesPerBeat={linesPerBeat}
                 />
                 <Channel
                     label={1}
                     isNoted
                     lineCount={lineCount}
+                    linesPerBeat={linesPerBeat}
                 />
                 <Channel
                     label={2}
                     isNoted={false}
                     lineCount={lineCount}
+                    linesPerBeat={linesPerBeat}
+                />
+                <ChannelLineNumbers 
+                    lineCount={lineCount}
+                    linesPerBeat={linesPerBeat}
                 />
             </div>
         </div>

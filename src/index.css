@@ -12,6 +12,13 @@
   font-style: normal;
 }
 
+@font-face {
+  font-family: 'Quinque Five';
+  src: url('/fonts/QuinqueFive.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 html {
   scrollbar-width: none;
 }
@@ -167,6 +174,10 @@ body {
 }
 
 @layer utilities {
+  .cell {
+    font-family: 'Quinque Five', sans-serif;
+  }
+  
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }

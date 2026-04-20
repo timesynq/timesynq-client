@@ -2,24 +2,29 @@ import { useState } from "react";
 import { WIP_CONSTANTS } from "@/api/wips/wip";
 import { NavigationCounter, NavigationCounterJustify } from "./navigation-counter";
 import { Button } from "./ui/button";
+import { Line } from "./line";
+import { LineSpacer } from "./line-spacer";
 
 export interface ChannelProps {
     label: number;
     isNoted: boolean; 
     lineCount: number;
+    linesPerBeat: number;
     // scroll amount prop
 }
 
-export const Channel = ({ label, isNoted }: ChannelProps) => {
+export const Channel = ({ label, isNoted, lineCount, linesPerBeat }: ChannelProps) => {
 
     const [isMuted, setIsMuted] = useState<boolean>(false);
     const [isSolo, setIsSolo] = useState<boolean>(false);
     const [noteGroupsOpen, setNoteGroupsOpen] = useState<number>(1);
     const [fxGroupsOpen, setFxGroupsOpen] = useState<number>(1);
 
+    const isMaster: boolean = label === 0; 
+
     return (
-        <div className="flex flex-col h-full min-h-0">
-            <div className="min-h-[190px] min-w-[175px] bg-background-darker p-4 flex flex-col space-y-2">
+        <div className={`flex flex-col h-full min-h-0 border-r`}>
+            <div className={`min-h-[190px] ${!isMaster && isNoted && "min-w-[175px]"} bg-background-darker p-4 flex flex-col space-y-2 border-b`}>
                 <p 
                     className={
                         `flex justify-center items-center h-8 select-none
@@ -29,14 +34,14 @@ export const Channel = ({ label, isNoted }: ChannelProps) => {
                     }
                     onClick={() => label !== 0 && setIsMuted(!isMuted)}    
                 >
-                    {label == 0 ? "Master" : `Channel ${label}`}
+                    {isMaster ? "Master" : `Channel ${label}`}
                 </p>
                 <div className="flex flex-row justify-between items-center space-x-2">
                     <Button
                         variant="secondary"
                         className={
                             `h-8 flex-1 rounded-none cursor-pointer 
-                            ${label === 0 && "invisible"} 
+                            ${isMaster && "invisible"} 
                             ${!isNoted && "bg-positive-background text-positive-foreground hover:bg-positive-background/75 hover:text-positive-foreground/75"}
                             `
                         }
@@ -48,7 +53,7 @@ export const Channel = ({ label, isNoted }: ChannelProps) => {
                         variant="secondary"
                         className={
                             `w-8 h-8 rounded-none cursor-pointer
-                            ${label === 0 && "invisible"} 
+                            ${isMaster && "invisible"} 
                             ${isSolo 
                                 ? 
                                 "bg-positive-background text-positive-foreground hover:bg-positive-background/75 hover:text-positive-foreground/75" :
@@ -69,7 +74,7 @@ export const Channel = ({ label, isNoted }: ChannelProps) => {
                     onChange={setFxGroupsOpen}
                     justify={NavigationCounterJustify.Between}
                 />
-                { label !== 0 && isNoted && 
+                { !isMaster && isNoted && 
                     <NavigationCounter 
                         label="Notes"
                         value={noteGroupsOpen}
@@ -80,8 +85,18 @@ export const Channel = ({ label, isNoted }: ChannelProps) => {
                     />
                 }
             </div>
-            <div className="h-full bg-muted">
-
+            <div className="h-full bg-background-darker">
+                <LineSpacer />
+                {Array.from({ length: lineCount }).map((_, i) => (
+                    <Line
+                        label={i}
+                        isNoted={isNoted}
+                        linesPerBeat={linesPerBeat}
+                        noteGroupsOpen={noteGroupsOpen}
+                        fxGroupsOpen={fxGroupsOpen}
+                    />
+                ))}
+                <LineSpacer />
             </div>
         </div>
     );
