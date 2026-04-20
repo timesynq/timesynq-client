@@ -6,31 +6,31 @@ import { Line } from "./line";
 import { LineSpacer } from "./line-spacer";
 
 export interface ChannelHeaderProps {
-    label: number;
+    channel: number;
     isNoted: boolean;
 }
 
-export const ChannelHeader = ({ label, isNoted }: ChannelHeaderProps) => {
+export const ChannelHeader = ({ channel, isNoted }: ChannelHeaderProps) => {
 
     const [isMuted, setIsMuted] = useState<boolean>(false);
     const [isSolo, setIsSolo] = useState<boolean>(false);
     const [noteGroupsOpen, setNoteGroupsOpen] = useState<number>(1);
     const [fxGroupsOpen, setFxGroupsOpen] = useState<number>(1);
 
-    const isMaster: boolean = label === 0; 
+    const isMaster: boolean = channel === 0; 
 
     return (
         <div className={`min-h-[190px] min-w-[200px] bg-background-darker p-4 flex flex-col space-y-2 border-b border-r`}>
             <p 
                 className={
                     `flex justify-center items-center h-8 select-none
-                    ${label !== 0 && "cursor-pointer"} 
+                    ${!isMaster && "cursor-pointer"} 
                     ${isMuted ? "bg-background-darker text-muted-foreground" : "bg-secondary text-foreground"}
                     `
                 }
-                onClick={() => label !== 0 && setIsMuted(!isMuted)}    
+                onClick={() => !isMaster && setIsMuted(!isMuted)}    
             >
-                {isMaster ? "Master" : `Channel ${label}`}
+                {isMaster ? "Master" : `Channel ${channel}`}
             </p>
             <div className="flex flex-row justify-between items-center space-x-2">
                 <Button
@@ -92,7 +92,7 @@ export interface ChannelLinesProps extends ChannelHeaderProps {
     fxGroupsOpen: number;
 }
 
-export const ChannelLines = ({ label, isNoted, lineCount, linesPerBeat, noteGroupsOpen, fxGroupsOpen }: ChannelLinesProps) => {
+export const ChannelLines = ({ channel, isNoted, lineCount, linesPerBeat, noteGroupsOpen, fxGroupsOpen }: ChannelLinesProps) => {
 
     return (
         <div className="min-w-[200px] flex flex-col">
@@ -100,8 +100,8 @@ export const ChannelLines = ({ label, isNoted, lineCount, linesPerBeat, noteGrou
                 <LineSpacer />
                 {Array.from({ length: lineCount }).map((_, i) => (
                     <Line
-                        key={`${label}:${i}`}
-                        label={i}
+                        key={`${channel}:${i}`}
+                        line={i}
                         isNoted={isNoted}
                         linesPerBeat={linesPerBeat}
                         noteGroupsOpen={noteGroupsOpen}

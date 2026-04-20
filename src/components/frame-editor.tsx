@@ -102,15 +102,15 @@ export const FrameEditor = ({ client, currentFrame }: FrameEditorProps) => {
                 <div className="flex flex-row w-full">
                     <ChannelLineNumbersHeader />
                     <ChannelHeader
-                        label={0}
+                        channel={0}
                         isNoted={false}
                     />
                     <ChannelHeader
-                        label={1}
+                        channel={1}
                         isNoted
                     />
                     <ChannelHeader
-                        label={2}
+                        channel={2}
                         isNoted={false}
                     />
                     <ChannelLineNumbersHeader />
@@ -121,7 +121,7 @@ export const FrameEditor = ({ client, currentFrame }: FrameEditorProps) => {
                         linesPerBeat={linesPerBeat}
                     />
                     <ChannelLines
-                        label={0}
+                        channel={0}
                         isNoted={false}
                         lineCount={lineCount}
                         linesPerBeat={linesPerBeat}
@@ -129,7 +129,7 @@ export const FrameEditor = ({ client, currentFrame }: FrameEditorProps) => {
                         fxGroupsOpen={1}
                     />
                     <ChannelLines
-                        label={1}
+                        channel={1}
                         isNoted
                         lineCount={lineCount}
                         linesPerBeat={linesPerBeat}
@@ -137,7 +137,7 @@ export const FrameEditor = ({ client, currentFrame }: FrameEditorProps) => {
                         fxGroupsOpen={1}
                     />
                     <ChannelLines
-                        label={2}
+                        channel={2}
                         isNoted={false}
                         lineCount={lineCount}
                         linesPerBeat={linesPerBeat}

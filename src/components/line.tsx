@@ -1,16 +1,16 @@
 import { Cell } from "./cell";
 
 export interface LineProps {
-    label: number;
+    line: number;
     isNoted: boolean;
     linesPerBeat: number;
     noteGroupsOpen: number;
     fxGroupsOpen: number;
 }
 
-export const Line = ({ label, isNoted, linesPerBeat, noteGroupsOpen, fxGroupsOpen }: LineProps) => {
+export const Line = ({ line, isNoted, linesPerBeat, noteGroupsOpen, fxGroupsOpen }: LineProps) => {
     
-    const isDownbeat: boolean = label % linesPerBeat === 0;
+    const isDownbeat: boolean = line % linesPerBeat === 0;
 
     return (
         <div className={`w-full flex flex-row items-center justify-center space-x-2 h-[32px] ${isDownbeat ? "bg-secondary" : "bg-background-darker"}`}>
