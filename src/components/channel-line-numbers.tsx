@@ -9,9 +9,9 @@ export interface ChannelLineNumberProps {
 
 export const ChannelLineNumbers = ({ lineCount, linesPerBeat }: ChannelLineNumberProps) => {
     return (
-        <div className="border-r bg-background-darker">
+        <div className="flex flex-col h-full min-h-0 border-r bg-background-darker">
             <div className="min-h-[190px] border-b" />
-            <div className="flex flex-col w-[38px]">
+            <div className="h-full w-[38px]">
                 <LineSpacer />
                 {Array.from({ length: lineCount}, (_, i) => (
                     <LineNumber
