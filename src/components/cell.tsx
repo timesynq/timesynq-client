@@ -1,10 +1,14 @@
 export interface CellProps {
-    character: string
+    character: string;
+    onClick?: () => void;
 }
 
-export const Cell = ({ character }: CellProps) => {    
+export const Cell = ({ character, onClick }: CellProps) => {    
     return (
-        <div className={`cell flex w-4 h-4 flex-col items-center justify-center w-full text-[8pt]`}>
+        <div 
+            className={`cell flex h-8 flex-col items-center justify-center text-[8pt] p-0.25 select-none cursor-pointer`}
+            onClick={onClick}        
+        >
             {character}
         </div>
     );

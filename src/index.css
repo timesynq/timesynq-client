@@ -59,6 +59,10 @@ body {
   --color-timesynq-red: var(--timesynq-red);
   --color-timesynq-green: var(--timesynq-green);
   --color-timesynq-blue: var(--timesynq-blue);
+  --color-pitch: var(--pitch);
+  --color-instrument: var(--instrument);
+  --color-fx-symbol: var(--fx-symbol);
+  --color-fx-value: var(--fx-value);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -117,6 +121,10 @@ body {
   --timesynq-red: oklch(0.6834 0.2053 24.36);
   --timesynq-green: oklch(0.8971 0.1953 147.18);
   --timesynq-blue: oklch(0.7292 0.14 261.96);
+  --pitch: oklch(100% 0.00011 271.152);
+  --instrument:oklch(100% 0.00011 271.152);
+  --fx-symbol: oklch(100% 0.00011 271.152);
+  --fx-value: oklch(100% 0.00011 271.152);
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.141 0.005 285.823);
   --sidebar-primary: oklch(0.21 0.006 285.885);
@@ -154,6 +162,10 @@ body {
   --timesynq-red: oklch(0.6834 0.2053 24.36);
   --timesynq-green: oklch(0.8971 0.1953 147.18);
   --timesynq-blue: oklch(0.7292 0.14 261.96);
+  --pitch: oklch(100% 0.00011 271.152);
+  --instrument:oklch(100% 0.00011 271.152);
+  --fx-symbol: oklch(100% 0.00011 271.152);
+  --fx-value: oklch(100% 0.00011 271.152);
   --sidebar: oklch(18.555% 0.04385 287.592);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.48 0.22 275);

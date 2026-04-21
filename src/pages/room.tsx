@@ -269,7 +269,7 @@ export const Room = () => {
                                 <div className="flex-1 flex h-full items-center justify-center">
                                     <FrameEditor
                                         client={trackerHubClientRef.current}
-                                        currentFrame={currentFrame}
+                                        frame={currentFrame}
                                     />
                                 </div>
                             </ResizablePanel>

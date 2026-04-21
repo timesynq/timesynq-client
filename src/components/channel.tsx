@@ -6,11 +6,12 @@ import { Line } from "./line";
 import { LineSpacer } from "./line-spacer";
 
 export interface ChannelHeaderProps {
+    frame: number;
     channel: number;
     isNoted: boolean;
 }
 
-export const ChannelHeader = ({ channel, isNoted }: ChannelHeaderProps) => {
+export const ChannelHeader = ({ frame, channel, isNoted }: ChannelHeaderProps) => {
 
     const [isMuted, setIsMuted] = useState<boolean>(false);
     const [isSolo, setIsSolo] = useState<boolean>(false);
@@ -20,7 +21,7 @@ export const ChannelHeader = ({ channel, isNoted }: ChannelHeaderProps) => {
     const isMaster: boolean = channel === 0; 
 
     return (
-        <div className={`min-h-[190px] min-w-[200px] bg-background-darker p-4 flex flex-col space-y-2 border-b border-r`}>
+        <div className={`min-h-[190px] min-w-[170px] bg-background-darker p-4 flex flex-col space-y-2 border-b border-r`}>
             <p 
                 className={
                     `flex justify-center items-center h-8 select-none
@@ -80,6 +81,7 @@ export const ChannelHeader = ({ channel, isNoted }: ChannelHeaderProps) => {
                     justify={NavigationCounterJustify.Between}
                 />
             }
+            
         </div>
     );
 
@@ -92,15 +94,17 @@ export interface ChannelLinesProps extends ChannelHeaderProps {
     fxGroupsOpen: number;
 }
 
-export const ChannelLines = ({ channel, isNoted, lineCount, linesPerBeat, noteGroupsOpen, fxGroupsOpen }: ChannelLinesProps) => {
+export const ChannelLines = ({ frame, channel, isNoted, lineCount, linesPerBeat, noteGroupsOpen, fxGroupsOpen }: ChannelLinesProps) => {
 
     return (
-        <div className="min-w-[200px] flex flex-col">
+        <div className="min-w-[170px] flex flex-col">
             <div className="flex flex-col flex-grow bg-background-darker border-r">
                 <LineSpacer />
                 {Array.from({ length: lineCount }).map((_, i) => (
                     <Line
                         key={`${channel}:${i}`}
+                        frame={frame}
+                        channel={channel}
                         line={i}
                         isNoted={isNoted}
                         linesPerBeat={linesPerBeat}

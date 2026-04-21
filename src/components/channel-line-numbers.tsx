@@ -40,7 +40,7 @@ const LineNumber = ({ label, isDownbeat }: LineNumberProps) => {
     return(
         <div 
             className={
-                `h-[32px] flex justify-center items-center py-1
+                `h-[32px] flex justify-center items-center py-1 select-none
                 ${isDownbeat ? "bg-secondary text-foreground" : "bg-background-darker text-muted-foreground"}
                 `
             }
