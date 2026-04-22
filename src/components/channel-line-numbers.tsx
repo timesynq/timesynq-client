@@ -11,19 +11,21 @@ export const ChannelLineNumbersHeader = () => {
 export interface ChannelLineNumbersProps {
     lineCount: number;
     linesPerBeat: number;
+    isRightHandSide?: boolean;
 }
 
-export const ChannelLineNumbers = ({ lineCount, linesPerBeat }: ChannelLineNumbersProps) => {
+export const ChannelLineNumbers = ({ lineCount, linesPerBeat, isRightHandSide = false }: ChannelLineNumbersProps) => {
     
     return (
         <div className="min-w-[38px] flex flex-col">
-            <div className="flex flex-col flex-grow border-r">
+            <div className="flex flex-col flex-grow">
                 <LineSpacer />
                 {Array.from({ length: lineCount}, (_, i) => (
                     <LineNumber
                         key={i}
                         line={i}
                         isDownbeat={i % linesPerBeat === 0}
+                        isRightHandSide={isRightHandSide}
                     />
                 ))}
                 <LineSpacer />
@@ -36,17 +38,18 @@ export const ChannelLineNumbers = ({ lineCount, linesPerBeat }: ChannelLineNumbe
 interface LineNumberProps {
     line: number;
     isDownbeat: boolean;
+    isRightHandSide: boolean;
 }
 
-const LineNumber = ({ line, isDownbeat }: LineNumberProps) => {
+const LineNumber = ({ line, isDownbeat, isRightHandSide }: LineNumberProps) => {
 
     const isLineSelected = useSelection((state) => state.selection?.line === line);
 
     return(
         <div 
             className={
-                `h-[32px] flex justify-center items-center py-1 select-none
-                ${isLineSelected ? "bg-negative-background" :
+                `h-[32px] flex justify-center items-center py-1 select-none border-r
+                ${isLineSelected ? !isRightHandSide ? "bg-negative-background border-r-negative-foreground/30" : "bg-negative-background" :
                     isDownbeat ? "bg-secondary text-foreground" : "bg-background-darker text-muted-foreground"}
                 `
             }

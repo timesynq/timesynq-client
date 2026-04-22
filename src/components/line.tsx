@@ -19,8 +19,8 @@ export const Line = ({ frame, channel, line, isNoted, linesPerBeat, noteGroupsOp
     return (
         <div 
             className={
-                `w-full flex flex-row items-center justify-center space-x-2 h-[32px]
-                ${isLineSelected ? "bg-negative-background" : 
+                `w-full flex flex-row items-center justify-center space-x-2 h-[32px] border-r
+                ${isLineSelected ? "bg-negative-background border-r-negative-foreground/30" : 
                     isDownbeat ? "bg-secondary" : "bg-background-darker"}
                 `
             }

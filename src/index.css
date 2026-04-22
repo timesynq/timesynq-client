@@ -162,10 +162,10 @@ body {
   --timesynq-red: oklch(0.6834 0.2053 24.36);
   --timesynq-green: oklch(0.8971 0.1953 147.18);
   --timesynq-blue: oklch(0.7292 0.14 261.96);
-  --pitch: oklch(100% 0.00011 271.152);
-  --instrument:oklch(100% 0.00011 271.152);
-  --fx-symbol: oklch(100% 0.00011 271.152);
-  --fx-value: oklch(100% 0.00011 271.152);
+  --pitch: oklch(98.272% 0.04295 101.503);
+  --instrument:oklch(91.402% 0.1467 153.264);
+  --fx-symbol: oklch(79.34% 0.10494 275.983);
+  --fx-value: oklch(74.223% 0.18174 353.153);
   --sidebar: oklch(18.555% 0.04385 287.592);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.48 0.22 275);

@@ -98,7 +98,7 @@ export const ChannelLines = ({ frame, channel, isNoted, lineCount, linesPerBeat,
 
     return (
         <div className="min-w-[170px] flex flex-col">
-            <div className="flex flex-col flex-grow bg-background-darker border-r">
+            <div className="flex flex-col flex-grow bg-background-darker">
                 <LineSpacer />
                 {Array.from({ length: lineCount }).map((_, i) => (
                     <Line

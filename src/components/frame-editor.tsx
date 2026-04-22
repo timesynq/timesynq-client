@@ -161,6 +161,7 @@ export const FrameEditor = ({ client, frame }: FrameEditorProps) => {
                         <ChannelLineNumbers 
                             lineCount={lineCount}
                             linesPerBeat={linesPerBeat}
+                            isRightHandSide
                         />
                     </div>
                 </div>
