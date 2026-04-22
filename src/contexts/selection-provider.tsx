@@ -1,4 +1,11 @@
-import { create } from 'zustand'; 
+import { createContext, useContext, useRef } from "react";
+import { createStore, StoreApi, useStore } from "zustand";
+
+type SelectionProviderProps = {
+    children: React.ReactNode
+}
+
+const SelectionContext = createContext<StoreApi<SelectionState> | null>(null);
 
 export enum SelectionType {
     Pitch,
@@ -86,7 +93,7 @@ export const SelectionFactory = {
     }
 }
 
-interface SelectionState {
+export interface SelectionState {
     selection: Selection | null;
     select: (newSelection: Selection) => void;
     unselect: () => void;
@@ -94,10 +101,33 @@ interface SelectionState {
     setIsFocused: (newFocus: boolean) => void;
 } 
 
-export const useSelection = create<SelectionState>((set, get) => ({
-    selection: null,
-    select: (newSelection: Selection): void => set({ selection: newSelection }),
-    unselect: (): void => set({ selection: null}),
-    isFocused: false,
-    setIsFocused: (newFocus: boolean): void => set({ isFocused: newFocus }),
-}))
+const createSelectionStore = (): StoreApi<SelectionState> => 
+    createStore<SelectionState>((set) => ({
+        selection: null,
+        select: (newSelection: Selection): void => set({ selection: newSelection }),
+        unselect: (): void => set({ selection: null}),
+        isFocused: false,
+        setIsFocused: (newFocus: boolean): void => set({ isFocused: newFocus }),
+    }))
+
+
+export const SelectionProvider = ({
+    children,
+}: SelectionProviderProps) => {
+    const storeRef = useRef<StoreApi<SelectionState>>(null);
+    if (!storeRef.current)
+        storeRef.current = createSelectionStore();
+
+    return(
+        <SelectionContext.Provider value={storeRef.current}>
+            {children}
+        </SelectionContext.Provider>
+    );
+}
+
+export const useSelection = <T,>(selector: (state: SelectionState) => T): T => {
+    const context = useContext(SelectionContext);
+    if (context === undefined || context === null)
+        throw new Error("useSelection must be used within a SelectionProvider");
+    return useStore(context, selector);
+}

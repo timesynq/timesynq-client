@@ -9,7 +9,7 @@ import { UpdateLineCountCommand, UpdateLinesPerBeatCommand } from "@/api/tracker
 import { ChannelHeader, ChannelLines } from "./channel";
 import { ChannelLineNumbers, ChannelLineNumbersHeader } from "./channel-line-numbers";
 import OutsideClickHandler from 'react-outside-click-handler';
-import { useSelection } from "@/hooks/use-selection";
+import { useSelection } from "@/contexts/selection-provider";
 
 export interface FrameEditorProps {
     client: TrackerHubClient;

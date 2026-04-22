@@ -1,5 +1,5 @@
-import { SelectionFactory, SelectionType, useSelection } from "@/hooks/use-selection";
 import { Cell } from "./cell";
+import { SelectionFactory, SelectionType, useSelection } from "@/contexts/selection-provider";
 
 export interface LineProps {
     frame: number;

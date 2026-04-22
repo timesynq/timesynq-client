@@ -1,6 +1,6 @@
 import { toTwoDigitHex } from "@/utils/hex";
 import { LineSpacer } from "./line-spacer";
-import { useSelection } from "@/hooks/use-selection";
+import { useSelection } from "@/contexts/selection-provider";
 
 export const ChannelLineNumbersHeader = () => {
     return(

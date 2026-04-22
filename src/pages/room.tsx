@@ -14,6 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { WipOptionsDialog } from "@/components/wip-options-dialog";
 import { WipShareDialog } from "@/components/wip-share-dialog";
 import { useAuth } from "@/contexts/auth-provider";
+import { SelectionProvider } from "@/contexts/selection-provider";
 import { Toasts } from "@/utils/toasts";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -222,7 +223,7 @@ export const Room = () => {
     }, []);
 
     return (
-        <>
+        <SelectionProvider>
             {pageError && 
                 <main className="flex flex-col items-center m-4">
                     <Card style={{backgroundColor: "oklch(20.019% 0.04696 287.092)", border: "1px solid oklch(1 0 0 / 10%)"}}>
@@ -309,6 +310,6 @@ export const Room = () => {
                     }
                 </>
             }
-        </>
+        </SelectionProvider>
     );
 }
