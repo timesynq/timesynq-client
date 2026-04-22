@@ -44,13 +44,32 @@ interface LineNumberProps {
 const LineNumber = ({ line, isDownbeat, isRightHandSide }: LineNumberProps) => {
 
     const isLineSelected = useSelection((state) => state.selection?.line === line);
+    const isFocusedAndSelected = useSelection((state) => state.isFocused && isLineSelected);
+
+    let bgColor = "bg-background-darker";
+    let border = "border-r";
+    let textColor = "text-muted-foreground";
+    if (isFocusedAndSelected){
+        bgColor = "bg-negative-background";
+        if (!isRightHandSide)
+            border = "border-r-negative-foreground/30";
+        textColor = "text-negative-foreground";
+    }
+    else if (isLineSelected){
+        bgColor = "bg-input";
+        if (isDownbeat)
+            textColor = "text-foreground";
+    }
+    else if (isDownbeat){
+        bgColor = "bg-secondary";
+        textColor = "text-foreground";
+    }
 
     return(
         <div 
             className={
                 `h-[32px] flex justify-center items-center py-1 select-none border-r
-                ${isLineSelected ? !isRightHandSide ? "bg-negative-background border-r-negative-foreground/30" : "bg-negative-background" :
-                    isDownbeat ? "bg-secondary text-foreground" : "bg-background-darker text-muted-foreground"}
+                ${bgColor} ${border} ${textColor}
                 `
             }
         >

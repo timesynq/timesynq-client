@@ -75,14 +75,14 @@ export const FrameEditor = ({ client, frame }: FrameEditorProps) => {
         }
     }, []);
     
-    const unselect = useSelection((state) => state.unselect);
+    const setIsFocused = useSelection((state) => state.setIsFocused);
 
     return (
         <OutsideClickHandler 
             display="contents"
-            onOutsideClick={unselect}
+            onOutsideClick={() => setIsFocused(false)}
         >
-            <div className="flex flex-col w-full h-full min-h-0 bg-background-darker">
+            <div className="flex flex-col w-full h-full min-h-0 bg-background-darker" onClick={() => setIsFocused(true)}>
                 <div className="flex flex-row w-full justify-center items-center space-x-12 p-4 border-b">
                     <Counter
                         label="Lines"

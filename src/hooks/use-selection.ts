@@ -90,10 +90,14 @@ interface SelectionState {
     selection: Selection | null;
     select: (newSelection: Selection) => void;
     unselect: () => void;
-}
+    isFocused: boolean;
+    setIsFocused: (newFocus: boolean) => void;
+} 
 
 export const useSelection = create<SelectionState>((set, get) => ({
     selection: null,
     select: (newSelection: Selection): void => set({ selection: newSelection }),
     unselect: (): void => set({ selection: null}),
+    isFocused: false,
+    setIsFocused: (newFocus: boolean): void => set({ isFocused: newFocus }),
 }))
