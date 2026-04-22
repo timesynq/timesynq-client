@@ -1,3 +1,4 @@
+import { SelectionFactory, SelectionType, useSelection } from "@/hooks/use-selection";
 import { Cell } from "./cell";
 
 export interface LineProps {
@@ -13,9 +14,17 @@ export interface LineProps {
 export const Line = ({ frame, channel, line, isNoted, linesPerBeat, noteGroupsOpen, fxGroupsOpen }: LineProps) => {
     
     const isDownbeat: boolean = line % linesPerBeat === 0;
+    const isLineSelected: boolean = useSelection((state) => state.selection?.line === line);
 
     return (
-        <div className={`w-full flex flex-row items-center justify-center space-x-2 h-[32px] ${isDownbeat ? "bg-secondary" : "bg-background-darker"}`}>
+        <div 
+            className={
+                `w-full flex flex-row items-center justify-center space-x-2 h-[32px]
+                ${isLineSelected ? "bg-negative-background" : 
+                    isDownbeat ? "bg-secondary" : "bg-background-darker"}
+                `
+            }
+        >
             {
                 <>
                     <Pitch 
@@ -64,10 +73,20 @@ interface PitchProps {
 
 const Pitch = ({ frame, channel, line, group, visible = true }: PitchProps) => {
 
+    const select = useSelection((state) => state.select);
+    const isCellSelected = useSelection((state) =>
+        state.selection?.type === SelectionType.Pitch && 
+        state.selection?.frame === frame &&
+        state.selection?.channel === channel &&
+        state.selection?.line === line && 
+        state.selection?.group === group
+    )
+
     return ( 
+        
         <div 
-            className={`flex flex-row text-pitch ${!visible && "invisible"}`}
-            onClick={() => console.log(`${frame}:${channel}:${line}:${group}:pitch`)}
+            className={`flex flex-row text-pitch ${!visible && "invisible"} ${isCellSelected && "bg-negative-foreground/30"}`}
+            onClick={() => select(SelectionFactory.selectPitch(frame, channel, line, group))}
         >
             <Cell 
                 character="C"
@@ -85,15 +104,36 @@ const Pitch = ({ frame, channel, line, group, visible = true }: PitchProps) => {
 interface InstrumentProps extends PitchProps {}
 
 const Instrument = ({ frame, channel, line, group, visible = true }: InstrumentProps) => {
+
+    const select = useSelection((state) => state.select);
+    const isCell0Selected = useSelection((state) =>
+        state.selection?.type === SelectionType.Instrument && 
+        state.selection?.frame === frame &&
+        state.selection?.channel === channel &&
+        state.selection?.line === line && 
+        state.selection?.group === group &&
+        state.selection?.charPos === 0 
+    )
+    const isCell1Selected = useSelection((state) =>
+        state.selection?.type === SelectionType.Instrument && 
+        state.selection?.frame === frame &&
+        state.selection?.channel === channel &&
+        state.selection?.line === line && 
+        state.selection?.group === group &&
+        state.selection?.charPos === 1
+    )
+
     return (    
         <div className={`flex flex-row text-instrument ${!visible && "invisible"}`}>
             <Cell
                 character="0"
-                onClick={() => console.log(`${frame}:${channel}:${line}:${group}:char0:instrument`)}
+                isSelected={isCell0Selected}
+                onClick={() => select(SelectionFactory.selectInstrumentDigit(frame, channel, line, group, 0))}
             />
             <Cell
                 character="E"
-                onClick={() => console.log(`${frame}:${channel}:${line}:${group}:char1:instrument`)}
+                isSelected={isCell1Selected}
+                onClick={() => select(SelectionFactory.selectInstrumentDigit(frame, channel, line, group, 1))}
             />
         </div>
     ); 
@@ -102,15 +142,36 @@ const Instrument = ({ frame, channel, line, group, visible = true }: InstrumentP
 interface FXSymbolProps extends PitchProps {}
 
 const FXSymbol = ({ frame, channel, line, group }: FXSymbolProps) => {
+
+    const select = useSelection((state) => state.select);
+    const isCell0Selected = useSelection((state) =>
+        state.selection?.type === SelectionType.FXSymbol && 
+        state.selection?.frame === frame &&
+        state.selection?.channel === channel &&
+        state.selection?.line === line && 
+        state.selection?.group === group &&
+        state.selection?.charPos === 0 
+    )
+    const isCell1Selected = useSelection((state) =>
+        state.selection?.type === SelectionType.FXSymbol && 
+        state.selection?.frame === frame &&
+        state.selection?.channel === channel &&
+        state.selection?.line === line && 
+        state.selection?.group === group &&
+        state.selection?.charPos === 1
+    )
+
     return (    
         <div className="flex flex-row text-fx-symbol">
             <Cell
                 character="A"
-                onClick={() => console.log(`${frame}:${channel}:${line}:${group}:char0:fxSymbol`)}
+                isSelected={isCell0Selected}
+                onClick={() => select(SelectionFactory.selectFXSymbolDigit(frame, channel, line, group, 0))}
             />
             <Cell
                 character="A"
-                onClick={() => console.log(`${frame}:${channel}:${line}:${group}:char1:fxSymbol`)}
+                isSelected={isCell1Selected}
+                onClick={() => select(SelectionFactory.selectFXSymbolDigit(frame, channel, line, group, 1))}
             />
         </div>
     ); 
@@ -119,15 +180,37 @@ const FXSymbol = ({ frame, channel, line, group }: FXSymbolProps) => {
 interface FXValueProps extends PitchProps {}
 
 const FXValue = ({ frame, channel, line, group }: FXValueProps) => {
+
+    const select = useSelection((state) => state.select);
+    const isCell0Selected = useSelection((state) =>
+        state.selection?.type === SelectionType.FXValue && 
+        state.selection?.frame === frame &&
+        state.selection?.channel === channel &&
+        state.selection?.line === line && 
+        state.selection?.group === group &&
+        state.selection?.charPos === 0 
+    )
+    const isCell1Selected = useSelection((state) =>
+        state.selection?.type === SelectionType.FXValue && 
+        state.selection?.frame === frame &&
+        state.selection?.channel === channel &&
+        state.selection?.line === line && 
+        state.selection?.group === group &&
+        state.selection?.charPos === 1
+    )
+
+
     return (    
         <div className="flex flex-row text-fx-value">
             <Cell
                 character="1"
-                onClick={() => console.log(`${frame}:${channel}:${line}:${group}:char0:fxValue`)}
+                isSelected={isCell0Selected}
+                onClick={() => select(SelectionFactory.selectFXValueDigit(frame, channel, line, group, 0))}
             />
             <Cell
                 character="6"
-                onClick={() => console.log(`${frame}:${channel}:${line}:${group}:char1:fxValue`)}
+                isSelected={isCell1Selected}
+                onClick={() => select(SelectionFactory.selectFXValueDigit(frame, channel, line, group, 1))}
             />
         </div>
     ); 

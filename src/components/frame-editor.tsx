@@ -8,6 +8,8 @@ import { TrackerHubResult } from "@/api/tracker/tracker-hub-models";
 import { UpdateLineCountCommand, UpdateLinesPerBeatCommand } from "@/api/tracker/tracker-hub-commands";
 import { ChannelHeader, ChannelLines } from "./channel";
 import { ChannelLineNumbers, ChannelLineNumbersHeader } from "./channel-line-numbers";
+import OutsideClickHandler from 'react-outside-click-handler';
+import { useSelection } from "@/hooks/use-selection";
 
 export interface FrameEditorProps {
     client: TrackerHubClient;
@@ -73,9 +75,15 @@ export const FrameEditor = ({ client, frame }: FrameEditorProps) => {
         }
     }, []);
     
+    const unselect = useSelection((state) => state.unselect);
+
     return (
-        <div className="flex flex-col w-full h-full min-h-0 bg-background-darker">
-            <div className="flex flex-row w-full justify-center items-center space-x-12 p-4 border-b">
+        <OutsideClickHandler 
+            display="contents"
+            onOutsideClick={unselect}
+        >
+            <div className="flex flex-col w-full h-full min-h-0 bg-background-darker">
+                <div className="flex flex-row w-full justify-center items-center space-x-12 p-4 border-b">
                     <Counter
                         label="Lines"
                         value={lineCount}
@@ -97,65 +105,66 @@ export const FrameEditor = ({ client, frame }: FrameEditorProps) => {
                         max={WIP_CONSTANTS.MAX_OCTAVE}
                         onChange={setOctave}
                     />
-            </div>
-            <div className="flex flex-col h-full min-h-0">
-                <div className="flex flex-row w-full">
-                    <ChannelLineNumbersHeader />
-                    <ChannelHeader
-                        frame={frame}
-                        channel={0}
-                        isNoted={false}
-                    />
-                    <ChannelHeader
-                        frame={frame}
-                        channel={1}
-                        isNoted
-                    />
-                    <ChannelHeader
-                        frame={frame}
-                        channel={2}
-                        isNoted={false}
-                    />
-                    <ChannelLineNumbersHeader />
                 </div>
-                <div className="flex flex-row w-full overflow-y-auto overflow-x-hidden">
-                    <ChannelLineNumbers 
-                        lineCount={lineCount}
-                        linesPerBeat={linesPerBeat}
-                    />
-                    <ChannelLines
-                        frame={frame}
-                        channel={0}
-                        isNoted={false}
-                        lineCount={lineCount}
-                        linesPerBeat={linesPerBeat}
-                        noteGroupsOpen={1}
-                        fxGroupsOpen={1}
-                    />
-                    <ChannelLines
-                        frame={frame}
-                        channel={1}
-                        isNoted
-                        lineCount={lineCount}
-                        linesPerBeat={linesPerBeat}
-                        noteGroupsOpen={1}
-                        fxGroupsOpen={1}
-                    />
-                    <ChannelLines
-                        frame={frame}
-                        channel={2}
-                        isNoted={false}
-                        lineCount={lineCount}
-                        linesPerBeat={linesPerBeat}
-                        noteGroupsOpen={1}
-                        fxGroupsOpen={1}
-                    />
-                    <ChannelLineNumbers 
-                        lineCount={lineCount}
-                        linesPerBeat={linesPerBeat}
-                    />
+                <div className="flex flex-col h-full min-h-0">
+                    <div className="flex flex-row w-full">
+                        <ChannelLineNumbersHeader />
+                        <ChannelHeader
+                            frame={frame}
+                            channel={0}
+                            isNoted={false}
+                        />
+                        <ChannelHeader
+                            frame={frame}
+                            channel={1}
+                            isNoted
+                        />
+                        <ChannelHeader
+                            frame={frame}
+                            channel={2}
+                            isNoted={false}
+                        />
+                        <ChannelLineNumbersHeader />
+                    </div>
+                    <div className="flex flex-row w-full overflow-y-auto overflow-x-hidden">
+                        <ChannelLineNumbers 
+                            lineCount={lineCount}
+                            linesPerBeat={linesPerBeat}
+                        />
+                        <ChannelLines
+                            frame={frame}
+                            channel={0}
+                            isNoted={false}
+                            lineCount={lineCount}
+                            linesPerBeat={linesPerBeat}
+                            noteGroupsOpen={1}
+                            fxGroupsOpen={1}
+                        />
+                        <ChannelLines
+                            frame={frame}
+                            channel={1}
+                            isNoted
+                            lineCount={lineCount}
+                            linesPerBeat={linesPerBeat}
+                            noteGroupsOpen={1}
+                            fxGroupsOpen={1}
+                        />
+                        <ChannelLines
+                            frame={frame}
+                            channel={2}
+                            isNoted={false}
+                            lineCount={lineCount}
+                            linesPerBeat={linesPerBeat}
+                            noteGroupsOpen={1}
+                            fxGroupsOpen={1}
+                        />
+                        <ChannelLineNumbers 
+                            lineCount={lineCount}
+                            linesPerBeat={linesPerBeat}
+                        />
+                    </div>
                 </div>
             </div>
-        </div>
+        </OutsideClickHandler>
     );
 }
