@@ -4,6 +4,12 @@ import { NavigationCounter, NavigationCounterJustify } from "./navigation-counte
 import { Button } from "./ui/button";
 import { Line } from "./line";
 import { LineSpacer } from "./line-spacer";
+import { toTwoDigitHex } from "@/utils/hex";
+import { useSelection } from "@/contexts/selection-provider";
+
+const MIN_HEADER_H = "min-h-[190px]";
+const MIN_CHANNEL_W = "min-w-[170px]";
+const MIN_NUMBERS_W = "min-w-[38px]";
 
 export interface ChannelHeaderProps {
     frame: number;
@@ -21,7 +27,7 @@ export const ChannelHeader = ({ frame, channel, isNoted }: ChannelHeaderProps) =
     const isMaster: boolean = channel === 0; 
 
     return (
-        <div className={`min-h-[190px] min-w-[170px] bg-background-darker p-4 flex flex-col space-y-2 border-b border-r`}>
+        <div className={`${MIN_HEADER_H} ${MIN_CHANNEL_W} bg-background-darker p-4 flex flex-col space-y-2 border-b border-r`}>
             <p 
                 className={
                     `flex justify-center items-center h-8 select-none
@@ -97,7 +103,7 @@ export interface ChannelLinesProps extends ChannelHeaderProps {
 export const ChannelLines = ({ frame, channel, isNoted, lineCount, linesPerBeat, noteGroupsOpen, fxGroupsOpen }: ChannelLinesProps) => {
 
     return (
-        <div className="min-w-[170px] flex flex-col">
+        <div className={`${MIN_CHANNEL_W} flex flex-col`}>
             <div className="flex flex-col flex-grow bg-background-darker">
                 <LineSpacer />
                 {Array.from({ length: lineCount }).map((_, i) => (
@@ -117,4 +123,80 @@ export const ChannelLines = ({ frame, channel, isNoted, lineCount, linesPerBeat,
         </div>
     );
 
+}
+
+export const ChannelLineNumbersHeader = () => {
+    return(
+        <div className={`${MIN_HEADER_H} ${MIN_NUMBERS_W} border-b border-r`} />
+    );
+}
+
+export interface ChannelLineNumbersProps {
+    lineCount: number;
+    linesPerBeat: number;
+    isRightHandSide?: boolean;
+}
+
+export const ChannelLineNumbers = ({ lineCount, linesPerBeat, isRightHandSide = false }: ChannelLineNumbersProps) => {
+    
+    return (
+        <div className={`${MIN_NUMBERS_W} flex flex-col`}>
+            <div className="flex flex-col flex-grow">
+                <LineSpacer />
+                {Array.from({ length: lineCount}, (_, i) => (
+                    <LineNumber
+                        key={i}
+                        line={i}
+                        isDownbeat={i % linesPerBeat === 0}
+                        isRightHandSide={isRightHandSide}
+                    />
+                ))}
+                <LineSpacer />
+            </div>
+        </div>
+    );
+
+}
+
+interface LineNumberProps {
+    line: number;
+    isDownbeat: boolean;
+    isRightHandSide: boolean;
+}
+
+const LineNumber = ({ line, isDownbeat, isRightHandSide }: LineNumberProps) => {
+
+    const isLineSelected = useSelection((state) => state.selection?.line === line);
+    const isFocusedAndSelected = useSelection((state) => state.isFocused && isLineSelected);
+
+    let bgColor = "bg-background-darker";
+    let border = "border-r";
+    let textColor = "text-muted-foreground";
+    if (isFocusedAndSelected){
+        bgColor = "bg-negative-background";
+        if (!isRightHandSide)
+            border = "border-r-negative-foreground/30";
+        textColor = "text-negative-foreground";
+    }
+    else if (isLineSelected){
+        bgColor = "bg-input";
+        if (isDownbeat)
+            textColor = "text-foreground";
+    }
+    else if (isDownbeat){
+        bgColor = "bg-secondary";
+        textColor = "text-foreground";
+    }
+
+    return(
+        <div 
+            className={
+                `h-[32px] flex justify-center items-center py-1 select-none border-r
+                ${bgColor} ${border} ${textColor}
+                `
+            }
+        >
+            {toTwoDigitHex(line)}
+        </div>
+    )
 }

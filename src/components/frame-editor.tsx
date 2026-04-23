@@ -6,8 +6,7 @@ import { Counter } from "./counter";
 import { WIP_CONSTANTS } from "@/api/wips/wip";
 import { TrackerHubResult } from "@/api/tracker/tracker-hub-models";
 import { UpdateLineCountCommand, UpdateLinesPerBeatCommand } from "@/api/tracker/tracker-hub-commands";
-import { ChannelHeader, ChannelLines } from "./channel";
-import { ChannelLineNumbers, ChannelLineNumbersHeader } from "./channel-line-numbers";
+import { ChannelHeader, ChannelLineNumbers, ChannelLineNumbersHeader, ChannelLines } from "./channel";
 import OutsideClickHandler from 'react-outside-click-handler';
 import { useSelection } from "@/contexts/selection-provider";
 
@@ -127,7 +126,7 @@ export const FrameEditor = ({ client, frame }: FrameEditorProps) => {
                         <ChannelLineNumbersHeader />
                     </div>
                     <div className="flex flex-row w-full overflow-y-auto overflow-x-hidden">
-                        <ChannelLineNumbers 
+                        <ChannelLineNumbers
                             lineCount={lineCount}
                             linesPerBeat={linesPerBeat}
                         />
