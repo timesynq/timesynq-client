@@ -18,6 +18,12 @@ export type RoomMember = {
     connectionId: string,
 }
 
+export type RoomMemberInfo = {
+    userName: string,
+    connectionIds: Set<string>,
+    chatColor: string,
+}
+
 export type ChatMessage = {
     userId: string,
     message: string,

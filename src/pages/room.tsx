@@ -14,6 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { WipOptions } from "@/components/wip-options";
 import { useAuth } from "@/contexts/auth-provider";
 import { SelectionProvider } from "@/contexts/selection-provider";
+import { generateRandomChatColor } from "@/utils/chat-color";
 import { useSetAtom } from "jotai";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -36,16 +37,6 @@ export const Room = () => {
     const [currentFrame, setCurrentFrame] = useState<number>(0);
 
     if (!user) return null;
-
-    const generateRandomChatColor = useCallback((): string => {
-        const possibleColors = [
-            "text-timesynq-red",
-            "text-timesynq-green",
-            "text-timesynq-blue",
-        ]
-        const randomIndex: number = Math.floor(Math.random() * (possibleColors.length));
-        return possibleColors[randomIndex];
-    }, []);
 
     const serverMessage = useCallback((message: string): Message => {
         return {
