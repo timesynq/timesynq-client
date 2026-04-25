@@ -1,19 +1,17 @@
 import { UNEXPECTED_ERROR_MESSAGE } from "@/api/api-error";
 import { TrackerHubClient } from "@/api/tracker/tracker-hub-client";
 import { Message, RoomInitializer, RoomMember, RoomMemberInfo, TrackerConnection, TrackerHubResult } from "@/api/tracker/tracker-hub-models";
-import { Wip } from "@/api/wips/wip";
-import { bpmAtom, channelCountAtom, messagesAtom } from "@/atoms/tracker_atoms";
+import { bpmAtom, channelCountAtom, messagesAtom, wipMetadataAtom } from "@/atoms/tracker_atoms";
 import { ChatBox } from "@/components/chat-box";
 import { FrameEditor } from "@/components/frame-editor";
+import { OwnerOnlyWipOptions } from "@/components/owner-only-wip-options";
 import { Sequencer } from "@/components/sequencer";
 import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { Separator } from "@/components/ui/separator";
-import { WipMetadataOptionsDialog } from "@/components/wip-metadata-options-dialog";
 import { WipOptions } from "@/components/wip-options";
-import { WipShareDialog } from "@/components/wip-share-dialog";
 import { useAuth } from "@/contexts/auth-provider";
 import { SelectionProvider } from "@/contexts/selection-provider";
 import { useSetAtom } from "jotai";
@@ -27,7 +25,6 @@ export const Room = () => {
     const { wipId } = useParams();
     const trackerHubClientRef = useRef<TrackerHubClient | null>(null);
     const [pageError, setPageError] = useState<string | null>(null);
-    const [wipInfo, setWipInfo] = useState<Wip | null>(null);
     const [accessExpired, setAccessExpired] = useState<boolean>(false);
 
     const [members, setMembers] = useState<Map<string, RoomMemberInfo>>(new Map<string, RoomMemberInfo>());
@@ -86,6 +83,7 @@ export const Room = () => {
         await client.leaveRoom();
     }
 
+    const setWipMetadata = useSetAtom(wipMetadataAtom);
     const setMessages = useSetAtom(messagesAtom);
     const setInitialBpm = useSetAtom(bpmAtom);
     const setInitialChannelCount = useSetAtom(channelCountAtom);
@@ -95,8 +93,6 @@ export const Room = () => {
         let unsubscribeUserLeftRoom        = (): boolean => { return false; }
         let unsubscribeAccessExpired       = (): boolean => { return false; }
         let unsubscribeWipNameUpdated      = (): boolean => { return false; }
-        let unsubscribeBpmUpdated          = (): boolean => { return false; }
-        let unsubscribeChannelCountUpdated = (): boolean => { return false; }
         const setupTrackerHubClient = async (): Promise<(void)> => {
             if (trackerHubClientRef.current !== null || !wipId)
                 return;
@@ -140,7 +136,7 @@ export const Room = () => {
             unsubscribeAccessExpired = client.subscribeAccessExpired(accessExpiredCallback);
 
             const wipNameUpdatedCallback = (newName: string) => {
-                setWipInfo(prev => {
+                setWipMetadata(prev => {
                     if (prev === null) 
                         return prev;
                     return {
@@ -158,7 +154,7 @@ export const Room = () => {
                 setPageError(joinRoomResult.errorMessage ?? UNEXPECTED_ERROR_MESSAGE);
                 return;
             }
-            setWipInfo(joinRoomResult.value.wip);
+            setWipMetadata(joinRoomResult.value.wip);
             //setInitialBpm(joinRoomResult.value.bpm);
             //setInitialBpm(joinRoomResult.value.channelCount);
 
@@ -181,8 +177,6 @@ export const Room = () => {
             unsubscribeUserLeftRoom();
             unsubscribeAccessExpired();
             unsubscribeWipNameUpdated();
-            unsubscribeBpmUpdated();
-            unsubscribeChannelCountUpdated();
         }
     }, []);
 
@@ -210,8 +204,7 @@ export const Room = () => {
                 <>
                     <main className="flex-1 min-h-0 flex flex-col items-center justify-center overflow-y-auto overflow-x-hidden">
                         <div className="flex flex-row items-center justify-start w-full h-14 p-2 space-x-2">
-                            {user.id === wipInfo?.ownerId && <WipMetadataOptionsDialog wip={wipInfo}/>}
-                            {user.id === wipInfo?.ownerId && <WipShareDialog wipId={wipId}/>} 
+                            <OwnerOnlyWipOptions userId={user.id} wipId={wipId} />
                             <WipOptions client={trackerHubClientRef.current} />
                         </div>
                         <Separator />
