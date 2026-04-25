@@ -1,8 +1,9 @@
 import { UNEXPECTED_ERROR_MESSAGE } from "@/api/api-error";
 import { TrackerHubClient } from "@/api/tracker/tracker-hub-client";
-import { RoomInitializer, RoomMember, TrackerConnection, TrackerHubResult } from "@/api/tracker/tracker-hub-models";
+import { Message, RoomInitializer, RoomMember, RoomMemberInfo, TrackerConnection, TrackerHubResult } from "@/api/tracker/tracker-hub-models";
 import { Wip } from "@/api/wips/wip";
-import { ChatBox, Message } from "@/components/chat-box";
+import { bpmAtom, channelCountAtom, messagesAtom } from "@/atoms/tracker_atoms";
+import { ChatBox } from "@/components/chat-box";
 import { FrameEditor } from "@/components/frame-editor";
 import { Sequencer } from "@/components/sequencer";
 import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -15,14 +16,9 @@ import { WipOptions } from "@/components/wip-options";
 import { WipShareDialog } from "@/components/wip-share-dialog";
 import { useAuth } from "@/contexts/auth-provider";
 import { SelectionProvider } from "@/contexts/selection-provider";
+import { useSetAtom } from "jotai";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-
-export type RoomMemberInfo = {
-    userName: string,
-    connectionIds: Set<string>,
-    chatColor: string,
-}
 
 export const Room = () => {
 
@@ -32,7 +28,6 @@ export const Room = () => {
     const trackerHubClientRef = useRef<TrackerHubClient | null>(null);
     const [pageError, setPageError] = useState<string | null>(null);
     const [wipInfo, setWipInfo] = useState<Wip | null>(null);
-    const [messages, setMessages] = useState<Message[]>([]);
     const [accessExpired, setAccessExpired] = useState<boolean>(false);
 
     const [members, setMembers] = useState<Map<string, RoomMemberInfo>>(new Map<string, RoomMemberInfo>());
@@ -90,6 +85,10 @@ export const Room = () => {
             return;
         await client.leaveRoom();
     }
+
+    const setMessages = useSetAtom(messagesAtom);
+    const setInitialBpm = useSetAtom(bpmAtom);
+    const setInitialChannelCount = useSetAtom(channelCountAtom);
 
     useEffect(() => {
         let unsubscribeUserJoinedRoom      = (): boolean => { return false; }
@@ -160,7 +159,9 @@ export const Room = () => {
                 return;
             }
             setWipInfo(joinRoomResult.value.wip);
-            
+            //setInitialBpm(joinRoomResult.value.bpm);
+            //setInitialBpm(joinRoomResult.value.channelCount);
+
             const existingMembers = initializeMembers(joinRoomResult.value!.members);
 
             existingMembers.forEach((value, key) => {
@@ -234,8 +235,6 @@ export const Room = () => {
                                 <ChatBox 
                                     client={trackerHubClientRef.current}
                                     members={members}
-                                    messages={messages}
-                                    setMessages={setMessages}
                                 />
                             </ResizablePanel>
                         </ResizablePanelGroup>

@@ -5,24 +5,18 @@ import { Separator } from "./ui/separator";
 import { Input } from "./ui/input";
 import { TrackerHubClient } from "@/api/tracker/tracker-hub-client";
 import { ScrollArea } from "./ui/scroll-area";
-import { ChatMessage, TrackerHubResult } from "@/api/tracker/tracker-hub-models";
-import { RoomMemberInfo } from "@/pages/room";
-
-export type Message = {
-    color: string;
-    username: string;
-    message: string;
-}
+import { ChatMessage, Message, RoomMemberInfo, TrackerHubResult } from "@/api/tracker/tracker-hub-models";
+import { useAtom } from "jotai";
+import { messagesAtom } from "@/atoms/tracker_atoms";
 
 interface ChatBoxProps {
     client: TrackerHubClient;
     members: Map<string, RoomMemberInfo>;
-    messages: Message[];
-    setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
 } 
 
-export const ChatBox = ({ client, members, messages, setMessages }: ChatBoxProps) => {
+export const ChatBox = ({ client, members }: ChatBoxProps) => {
 
+    const [messages, setMessages] = useAtom(messagesAtom);
     const [input, setInput] = useState<string>('');
     const bottomRef = useRef<HTMLDivElement | null>(null);
     const membersRef = useRef<Map<string, RoomMemberInfo>>(members);
@@ -43,7 +37,6 @@ export const ChatBox = ({ client, members, messages, setMessages }: ChatBoxProps
                 username: info?.userName ?? chatMessage.userId,
                 message: chatMessage.message,
             }
-
             setMessages(prev => [...prev, newMessage]);
         }
 

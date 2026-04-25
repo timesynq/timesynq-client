@@ -1,6 +1,6 @@
 import { WIP_CONSTANTS } from "@/api/wips/wip";
 import { Counter } from "./counter";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { TrackerHubClient } from "@/api/tracker/tracker-hub-client";
 import { TrackerHubResult } from "@/api/tracker/tracker-hub-models";
 import { UNEXPECTED_ERROR_MESSAGE } from "@/api/api-error";

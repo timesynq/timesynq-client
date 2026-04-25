@@ -6,6 +6,12 @@ export type TrackerHubResult<T> = {
     value: T | null;
 }
 
+export type Message = {
+    color: string;
+    username: string;
+    message: string;
+}
+
 export type RoomMember = {
     userId: string,
     userName: string,
