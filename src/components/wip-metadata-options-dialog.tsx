@@ -11,12 +11,12 @@ import { Separator } from "./ui/separator";
 import { Toasts } from "@/utils/toasts";
 import { Result } from "@/api/result";
 
-export interface WipOptionsDialogProps {
+export interface WipMetadataOptionsDialogProps {
     wip: Wip
     trigger?: React.ReactNode
 }
 
-export const WipOptionsDialog = ({wip, trigger}: WipOptionsDialogProps) => {
+export const WipMetadataOptionsDialog = ({wip, trigger}: WipMetadataOptionsDialogProps) => {
 
     const isMobile = useIsMobile();
     const [nameChangeInput, setNameChangeInput] = useState<string>(wip.name);

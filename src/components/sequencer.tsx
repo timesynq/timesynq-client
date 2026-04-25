@@ -8,14 +8,17 @@ import { UNEXPECTED_ERROR_MESSAGE } from "@/api/api-error";
 import { LineState, SequencerInfoLine, SequencerLine } from "./sequencer-line";
 import { ScrollArea, ScrollBar } from "./ui/scroll-area";
 import { UpdateSequencerChannelCommand, UpdateSequencerFrameCommand } from "@/api/tracker/tracker-hub-commands";
+import { useAtomValue } from "jotai";
+import { channelCountAtom } from "@/atoms/tracker_atoms";
 
 export interface SequencerProps {
     client: TrackerHubClient;
-    channelCount: number;
 } 
 
-export const Sequencer = ({client, channelCount}: SequencerProps) => {
+export const Sequencer = ({ client }: SequencerProps) => {
     
+    const channelCount = useAtomValue<number>(channelCountAtom);
+
     const [length, setLength] = useState<number>(1 /*temporary, this will be read from the server*/);
     const handleSequencerLengthUpdate = useCallback(async (newSequencerLength: number): Promise<void> => {
         const result: TrackerHubResult<void> = await client.updateSequencerLength(newSequencerLength);

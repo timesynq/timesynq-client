@@ -1,9 +1,8 @@
 import { UNEXPECTED_ERROR_MESSAGE } from "@/api/api-error";
 import { TrackerHubClient } from "@/api/tracker/tracker-hub-client";
 import { RoomInitializer, RoomMember, TrackerConnection, TrackerHubResult } from "@/api/tracker/tracker-hub-models";
-import { Wip, WIP_CONSTANTS } from "@/api/wips/wip";
+import { Wip } from "@/api/wips/wip";
 import { ChatBox, Message } from "@/components/chat-box";
-import { Counter } from "@/components/counter";
 import { FrameEditor } from "@/components/frame-editor";
 import { Sequencer } from "@/components/sequencer";
 import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -11,11 +10,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { Separator } from "@/components/ui/separator";
-import { WipOptionsDialog } from "@/components/wip-options-dialog";
+import { WipMetadataOptionsDialog } from "@/components/wip-metadata-options-dialog";
+import { WipOptions } from "@/components/wip-options";
 import { WipShareDialog } from "@/components/wip-share-dialog";
 import { useAuth } from "@/contexts/auth-provider";
 import { SelectionProvider } from "@/contexts/selection-provider";
-import { Toasts } from "@/utils/toasts";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
@@ -41,26 +40,6 @@ export const Room = () => {
     useEffect(() => {
         membersRef.current = members;
     }, [members]);
-
-    const [bpm, setBpm] = useState<number>(120 /*temporary, this will be read from the server*/);
-    const handleBpmCounterUpdate = async (newBpm: number): Promise<void> => {
-        if (trackerHubClientRef.current === null)
-            return;
-        const result: TrackerHubResult<void> = await trackerHubClientRef.current.updateBpm(newBpm);
-        if (!result.isSuccessful){
-            Toasts.error(result.errorMessage ?? UNEXPECTED_ERROR_MESSAGE);
-        }
-    }
-
-    const [channelCount, setChannelCount] = useState<number>(4 /*temporary, this will be read from the server*/);
-    const handleChannelCounterUpdate = async (newChannelCount: number): Promise<void> => {
-        if (trackerHubClientRef.current === null)
-            return;
-        const result: TrackerHubResult<void> = await trackerHubClientRef.current.updateChannelCount(newChannelCount);
-        if (!result.isSuccessful){
-            Toasts.error(result.errorMessage ?? UNEXPECTED_ERROR_MESSAGE);
-        }
-    }
 
     const [currentFrame, setCurrentFrame] = useState<number>(0);
 
@@ -173,16 +152,6 @@ export const Room = () => {
             }
             unsubscribeWipNameUpdated = client.subscribeWipNameUpdated(wipNameUpdatedCallback);
 
-            const bpmUpdatedCallback = (newBpm: number) => {
-                setBpm(newBpm);
-            }
-            unsubscribeBpmUpdated = client.subscribeBpmUpdated(bpmUpdatedCallback);
-
-            const channelCountUpdatedCallback = (newChannelCount: number) => {
-                setChannelCount(newChannelCount);
-            }
-            unsubscribeChannelCountUpdated = client.subscribeChannelCountUpdated(channelCountUpdatedCallback);
-
             await client.start();
             trackerHubClientRef.current = client;
             const joinRoomResult: TrackerHubResult<RoomInitializer> = await trackerHubClientRef.current.joinRoom(wipId);
@@ -240,29 +209,15 @@ export const Room = () => {
                 <>
                     <main className="flex-1 min-h-0 flex flex-col items-center justify-center overflow-y-auto overflow-x-hidden">
                         <div className="flex flex-row items-center justify-start w-full h-14 p-2 space-x-2">
-                            {user.id === wipInfo?.ownerId && <WipOptionsDialog wip={wipInfo}/>}
+                            {user.id === wipInfo?.ownerId && <WipMetadataOptionsDialog wip={wipInfo}/>}
                             {user.id === wipInfo?.ownerId && <WipShareDialog wipId={wipId}/>} 
-                            <Counter 
-                                label="BPM"
-                                value={bpm}
-                                min={WIP_CONSTANTS.MIN_BPM}
-                                max={WIP_CONSTANTS.MAX_BPM}
-                                onChange={handleBpmCounterUpdate}
-                            />
-                            <Counter 
-                                label="Channels"
-                                value={channelCount}
-                                min={WIP_CONSTANTS.MIN_CHANNELS}
-                                max={WIP_CONSTANTS.MAX_CHANNELS}
-                                onChange={handleChannelCounterUpdate}
-                            />
+                            <WipOptions client={trackerHubClientRef.current} />
                         </div>
                         <Separator />
                         <ResizablePanelGroup direction="horizontal" className="flex-1 min-h-0">
                             <ResizablePanel defaultSize={20} minSize={15} maxSize={30}>
                                 <Sequencer
                                     client={trackerHubClientRef.current}
-                                    channelCount={channelCount}
                                 />
                             </ResizablePanel>
                             <ResizableHandle />
