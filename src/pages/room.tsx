@@ -1,7 +1,7 @@
 import { UNEXPECTED_ERROR_MESSAGE } from "@/api/api-error";
 import { TrackerHubClient } from "@/api/tracker/tracker-hub-client";
 import { Message, RoomInitializer, RoomMember, RoomMemberInfo, TrackerConnection, TrackerHubResult } from "@/api/tracker/tracker-hub-models";
-import { bpmAtom, channelCountAtom, membersAtom, messagesAtom, wipMetadataAtom } from "@/atoms/tracker_atoms";
+import { bpmAtom, channelCountAtom, membersAtom, messagesAtom, setMemberAtom, setRemoveMemberAtom, wipMetadataAtom } from "@/atoms/tracker_atoms";
 import { ChatBox } from "@/components/chat-box";
 import { FrameEditor } from "@/components/frame-editor";
 import { OwnerOnlyWipOptions } from "@/components/owner-only-wip-options";
@@ -68,6 +68,8 @@ export const Room = () => {
     }
 
     const [members, setMembers] = useAtom(membersAtom);
+    const [, setMember] = useAtom(setMemberAtom);
+    const [, setRemoveMember] = useAtom(setRemoveMemberAtom);
     const setWipMetadata = useSetAtom(wipMetadataAtom);
     const setMessages = useSetAtom(messagesAtom);
     const setInitialBpm = useSetAtom(bpmAtom);
@@ -85,33 +87,14 @@ export const Room = () => {
 
             // register TrackerHubClient listeners here
             const userJoinedRoomCallback = (roomMember: RoomMember) => {
-                let roomMemberInfo: RoomMemberInfo | undefined = members.get(roomMember.userId);
-                if (!roomMemberInfo){
-                    const set = new Set<string>();
-                    const color: string = generateRandomChatColor();
-                    roomMemberInfo = {
-                        userName: roomMember.userName,
-                        connectionIds: set,
-                        chatColor: color,
-                    }
-                    members.set(roomMember.userId, roomMemberInfo);
-                    setMessages(prev => [...prev, serverMessage(`${roomMember.userName} has joined the room.`)]);
-                }    
-                roomMemberInfo.connectionIds.add(roomMember.connectionId);
-                setMembers(new Map<string, RoomMemberInfo>(members));
+                const firstJoinServerMessage: Message = serverMessage(`${roomMember.userName} has joined the room.`);
+                setMember({ member: roomMember, firstJoinServerMessage });
             }
             unsubscribeUserJoinedRoom = client.subscribeUserJoinedRoom(userJoinedRoomCallback);
             
             const userLeftRoomCallback = (trackerConnection: TrackerConnection) => {
-                let roomMemberInfo: RoomMemberInfo | undefined = members.get(trackerConnection.userId);
-                if (!roomMemberInfo)
-                    return;
-                roomMemberInfo.connectionIds.delete(trackerConnection.connectionId);
-                if(roomMemberInfo.connectionIds.size === 0){
-                    setMessages(prev => [...prev, serverMessage(`${roomMemberInfo.userName} has left the room.`)]);
-                    members.delete(trackerConnection.userId);
-                }
-                setMembers(new Map<string, RoomMemberInfo>(members));
+                const finalLeaveServerMessageFactory = (userName: string): Message => serverMessage(`${userName} has left the room.`);
+                setRemoveMember({ trackerConnection, finalLeaveServerMessageFactory });
             }
             unsubscribeUserLeftRoom = client.subscribeUserLeftRoom(userLeftRoomCallback);
 
