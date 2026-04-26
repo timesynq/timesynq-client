@@ -9,7 +9,7 @@ export const setMemberAtom = atom(
     (
         get,
         set,
-        { member, firstJoinServerMessage } : { member: RoomMember, firstJoinServerMessage: Message}
+        { member, firstJoinServerMessage } : { member: RoomMember, firstJoinServerMessage: Message }
     ) => {
         let membersCopy = get(membersAtom);
         let roomMemberInfo: RoomMemberInfo | undefined = membersCopy.get(member.userId);
@@ -44,6 +44,25 @@ export const setRemoveMemberAtom = atom(
             set(messagesAtom, ([...get(messagesAtom), finalLeaveServerMessageFactory(roomMemberInfo.userName)]));
             membersCopy.delete(trackerConnection.userId);
         }
+        set(membersAtom, new Map<string, RoomMemberInfo>(membersCopy));
+    }
+)
+
+export const setMembersAtom = atom(
+    null,
+    (
+        get,
+        set,
+        { existingMembers } : { existingMembers: Map<string, RoomMemberInfo> }
+    ) => {
+        let membersCopy = get(membersAtom);
+        existingMembers.forEach((value, key) => {
+            const memberInfo: RoomMemberInfo | undefined = membersCopy.get(key);
+            if (memberInfo)
+                value.connectionIds.forEach(connectionId => memberInfo.connectionIds.add(connectionId));
+            else
+                membersCopy.set(key, value);
+        })
         set(membersAtom, new Map<string, RoomMemberInfo>(membersCopy));
     }
 )
