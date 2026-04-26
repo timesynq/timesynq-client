@@ -27,7 +27,6 @@ export const Room = () => {
     const [client, setClient] = useState<TrackerHubClient | null>(null);
     const [pageError, setPageError] = useState<string | null>(null);
     const [accessExpired, setAccessExpired] = useState<boolean>(false);
-    const [currentFrame, setCurrentFrame] = useState<number>(0);
 
     if (!user) return null;
 
@@ -176,7 +175,6 @@ export const Room = () => {
                                 <div className="flex-1 flex h-full items-center justify-center">
                                     <FrameEditor
                                         client={client}
-                                        frame={currentFrame}
                                     />
                                 </div>
                             </ResizablePanel>

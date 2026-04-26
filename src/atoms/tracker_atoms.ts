@@ -71,3 +71,4 @@ export const wipMetadataAtom = atom<Wip | null>(null);
 export const messagesAtom = atom<Message[]>([]);
 export const bpmAtom = atom<number>(WIP_CONSTANTS.DEFAULT_BPM);
 export const channelCountAtom = atom<number>(WIP_CONSTANTS.DEFAULT_CHANNELS);
+export const currentFrameAtom = atom<number>(0);

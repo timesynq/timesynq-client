@@ -9,14 +9,16 @@ import { UpdateLineCountCommand, UpdateLinesPerBeatCommand } from "@/api/tracker
 import { ChannelHeader, ChannelLineNumbers, ChannelLineNumbersHeader, ChannelLines } from "./channel";
 import OutsideClickHandler from 'react-outside-click-handler';
 import { useSelection } from "@/contexts/selection-provider";
+import { currentFrameAtom } from "@/atoms/tracker_atoms";
+import { useAtomValue } from "jotai";
 
 export interface FrameEditorProps {
     client: TrackerHubClient;
-    frame: number;
 }
 
-export const FrameEditor = ({ client, frame }: FrameEditorProps) => {
+export const FrameEditor = ({ client }: FrameEditorProps) => {
     
+    const frame = useAtomValue(currentFrameAtom);
     const [lineCount, setLineCount] = useState<number>(64 /*temporary, this will be read from the server*/);
     const handleSetLineCount = useCallback(
         async (newLineCount: number) => {
