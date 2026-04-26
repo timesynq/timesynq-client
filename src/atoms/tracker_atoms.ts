@@ -1,6 +1,8 @@
-import { Message } from '@/api/tracker/tracker-hub-models';
+import { Message, RoomMemberInfo } from '@/api/tracker/tracker-hub-models';
 import { Wip, WIP_CONSTANTS } from '@/api/wips/wip';
 import { atom } from 'jotai'
+
+export const membersAtom = atom<Map<string, RoomMemberInfo>>(new Map<string, RoomMemberInfo>());
 
 export const wipMetadataAtom = atom<Wip | null>(null);
 export const messagesAtom = atom<Message[]>([]);

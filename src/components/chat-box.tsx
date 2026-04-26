@@ -6,32 +6,27 @@ import { Input } from "./ui/input";
 import { TrackerHubClient } from "@/api/tracker/tracker-hub-client";
 import { ScrollArea } from "./ui/scroll-area";
 import { ChatMessage, Message, RoomMemberInfo, TrackerHubResult } from "@/api/tracker/tracker-hub-models";
-import { useAtom } from "jotai";
-import { messagesAtom } from "@/atoms/tracker_atoms";
+import { useAtom, useAtomValue } from "jotai";
+import { membersAtom, messagesAtom } from "@/atoms/tracker_atoms";
 
 interface ChatBoxProps {
     client: TrackerHubClient;
-    members: Map<string, RoomMemberInfo>;
 } 
 
-export const ChatBox = ({ client, members }: ChatBoxProps) => {
+export const ChatBox = ({ client }: ChatBoxProps) => {
 
+    const members = useAtomValue(membersAtom);
     const [messages, setMessages] = useAtom(messagesAtom);
     const [input, setInput] = useState<string>('');
     const bottomRef = useRef<HTMLDivElement | null>(null);
-    const membersRef = useRef<Map<string, RoomMemberInfo>>(members);
-
-    useEffect(() => {
-        membersRef.current = members;
-    }, [members]);
 
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages])
 
     useEffect(() => {
-        const callback = (chatMessage: ChatMessage) => {
-            const info: RoomMemberInfo | undefined = membersRef.current.get(chatMessage.userId);
+        const chatMessageReceivedCallback = (chatMessage: ChatMessage) => {
+            const info: RoomMemberInfo | undefined = members.get(chatMessage.userId);
             const newMessage: Message = {
                 color: info?.chatColor ?? "text-timesynq-red",
                 username: info?.userName ?? chatMessage.userId,
@@ -40,10 +35,10 @@ export const ChatBox = ({ client, members }: ChatBoxProps) => {
             setMessages(prev => [...prev, newMessage]);
         }
 
-        const unsubscribeChat = client.subscribeChatMessageReceived(callback);
+        const unsubscribeChatMessageReceived = client.subscribeChatMessageReceived(chatMessageReceivedCallback);
         
         return () => { 
-            unsubscribeChat();
+            unsubscribeChatMessageReceived();
         }; 
     }, [members]);
 
