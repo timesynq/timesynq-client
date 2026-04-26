@@ -15,16 +15,34 @@ import { WipOptions } from "@/components/wip-options";
 import { useAuth } from "@/contexts/auth-provider";
 import { SelectionProvider } from "@/contexts/selection-provider";
 import { generateRandomChatColor } from "@/utils/chat-color";
-import { useAtom, useSetAtom } from "jotai";
-import { useCallback, useEffect, useState } from "react";
+import { createStore, Provider, useAtom, useSetAtom } from "jotai";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import LoadingIndicator from "@/assets/svg/loading-indicator.svg?react";
 
 export const Room = () => {
+    const { wipId } = useParams();
+    const store = useMemo(() => createStore(), [wipId]);
+
+    return (
+        <Provider store={store}>
+            <SelectionProvider>
+                <RoomInner wipId={wipId} />
+            </SelectionProvider>
+        </Provider>
+    );
+}
+
+interface RoomInnerProps {
+    wipId: string | undefined;
+}
+
+const RoomInner = ({ wipId }: RoomInnerProps) => {
 
     const navigate = useNavigate();
     const { user } = useAuth();
-    const { wipId } = useParams();
-    const [client, setClient] = useState<TrackerHubClient | null>(null);
+    const clientRef = useRef<TrackerHubClient | null>(null);
+    const [isReady, setIsReady] = useState<boolean>(false);
     const [pageError, setPageError] = useState<string | null>(null);
     const [accessExpired, setAccessExpired] = useState<boolean>(false);
 
@@ -59,12 +77,6 @@ export const Room = () => {
         return initialMembers;
     }, []);
 
-    const handleLeaveRoom = async () => {
-        if (!client) 
-            return;
-        await client.leaveRoom();
-    }
-
     const [, setMember] = useAtom(setMemberAtom);
     const [, setRemoveMember] = useAtom(setRemoveMemberAtom);
     const [, setMembers] = useAtom(setMembersAtom);
@@ -78,9 +90,10 @@ export const Room = () => {
         let unsubscribeAccessExpired       = (): boolean => { return false; }
         let unsubscribeWipNameUpdated      = (): boolean => { return false; }
         const setupTrackerHubClient = async (): Promise<(void)> => {
-            if (client !== null || !wipId)
+            if (clientRef.current !== null || !wipId)
                 return;
             const newClient = new TrackerHubClient();
+            clientRef.current = newClient;
 
             // register TrackerHubClient listeners here
             const userJoinedRoomCallback = (roomMember: RoomMember) => {
@@ -113,10 +126,10 @@ export const Room = () => {
             unsubscribeWipNameUpdated = newClient.subscribeWipNameUpdated(wipNameUpdatedCallback);
 
             await newClient.start();
-            setClient(newClient);
             const joinRoomResult: TrackerHubResult<RoomInitializer> = await newClient.joinRoom(wipId);
             if (!joinRoomResult.isSuccessful || joinRoomResult.value === null){
                 setPageError(joinRoomResult.errorMessage ?? UNEXPECTED_ERROR_MESSAGE);
+                setIsReady(true);
                 return;
             }
             setWipMetadata(joinRoomResult.value.wip);
@@ -125,6 +138,8 @@ export const Room = () => {
 
             const existingMembers = initializeMembers(joinRoomResult.value.members);
             setMembers({ existingMembers });
+            
+            setIsReady(true);
         }
 
         setupTrackerHubClient();
@@ -133,84 +148,97 @@ export const Room = () => {
             unsubscribeUserLeftRoom();
             unsubscribeAccessExpired();
             unsubscribeWipNameUpdated();
-        }
-    }, []);
-
-    useEffect(() => {
-        return () => {
             handleLeaveRoom();
-        };
-    }, []);
+            clientRef.current?.stop();
+            clientRef.current = null;
+            setIsReady(false);
+        }
+    }, [wipId]);
 
-    return (
-        <SelectionProvider>
-            {pageError && 
-                <main className="flex flex-col items-center m-4">
-                    <Card style={{backgroundColor: "oklch(20.019% 0.04696 287.092)", border: "1px solid oklch(1 0 0 / 10%)"}}>
-                        <CardContent className="flex flex-col items-center justify-center space-y-2 p-8 w-[400px]">
-                            <p>{pageError}</p>
-                            <Link to="/create">
-                                <Button variant="link" className="cursor-pointer">Return to options</Button>
-                            </Link>     
-                        </CardContent>
-                    </Card>
-                </main>
-            }
-            {!pageError && client !== null &&
-                <>
-                    <main className="flex-1 min-h-0 flex flex-col items-center justify-center overflow-y-auto overflow-x-hidden">
-                        <div className="flex flex-row items-center justify-start w-full h-14 p-2 space-x-2">
-                            <OwnerOnlyWipOptions userId={user.id} wipId={wipId} />
-                            <WipOptions client={client} />
-                        </div>
-                        <Separator />
-                        <ResizablePanelGroup direction="horizontal" className="flex-1 min-h-0">
-                            <ResizablePanel defaultSize={20} minSize={15} maxSize={30}>
-                                <Sequencer
-                                    client={client}
-                                />
-                            </ResizablePanel>
-                            <ResizableHandle />
-                            <ResizablePanel defaultSize={60} minSize={45} maxSize={70}>
-                                <div className="flex-1 flex h-full items-center justify-center">
-                                    <FrameEditor
-                                        client={client}
-                                    />
-                                </div>
-                            </ResizablePanel>
-                            <ResizableHandle />
-                            <ResizablePanel defaultSize={20} minSize={15} maxSize={25}>
-                                <ChatBox 
-                                    client={client}
-                                />
-                            </ResizablePanel>
-                        </ResizablePanelGroup>
+    const handleLeaveRoom = async () => {
+        if (!clientRef.current) 
+            return;
+        await clientRef.current.leaveRoom();
+    }
+
+    if (isReady) {
+        return (
+            <>
+                {pageError && 
+                    <main className="flex flex-col items-center m-4">
+                        <Card style={{backgroundColor: "oklch(20.019% 0.04696 287.092)", border: "1px solid oklch(1 0 0 / 10%)"}}>
+                            <CardContent className="flex flex-col items-center justify-center space-y-2 p-8 w-[400px]">
+                                <p>{pageError}</p>
+                                <Link to="/create">
+                                    <Button variant="link" className="cursor-pointer">Return to options</Button>
+                                </Link>     
+                            </CardContent>
+                        </Card>
                     </main>
-                    { accessExpired &&
-                        <AlertDialog open={accessExpired}>
-                            <AlertDialogContent className="max-w-[425px]">
-                                <AlertDialogHeader>
-                                    <AlertDialogTitle>
-                                        Access Expired
-                                    </AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                        Your access to view and edit this wip has expired.
-                                    </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                    <Button 
-                                        variant="negative"
-                                        onClick={() => navigate("/create")} 
-                                        className="cursor-pointer"
-                                    >
-                                        Exit
-                                    </Button>
-                                </AlertDialogFooter>
-                            </AlertDialogContent>
-                        </AlertDialog>
-                    }
-                </>
-            }
-        </SelectionProvider>
-    );
+                }
+                {!pageError && clientRef.current !== null &&
+                    <>
+                        <main className="flex-1 min-h-0 flex flex-col items-center justify-center overflow-y-auto overflow-x-hidden">
+                            <div className="flex flex-row items-center justify-start w-full h-14 p-2 space-x-2">
+                                <OwnerOnlyWipOptions userId={user.id} wipId={wipId} />
+                                <WipOptions client={clientRef.current} />
+                            </div>
+                            <Separator />
+                            <ResizablePanelGroup direction="horizontal" className="flex-1 min-h-0">
+                                <ResizablePanel defaultSize={20} minSize={15} maxSize={30}>
+                                    <Sequencer
+                                        client={clientRef.current}
+                                    />
+                                </ResizablePanel>
+                                <ResizableHandle />
+                                <ResizablePanel defaultSize={60} minSize={45} maxSize={70}>
+                                    <div className="flex-1 flex h-full items-center justify-center">
+                                        <FrameEditor
+                                            client={clientRef.current}
+                                        />
+                                    </div>
+                                </ResizablePanel>
+                                <ResizableHandle />
+                                <ResizablePanel defaultSize={20} minSize={15} maxSize={25}>
+                                    <ChatBox 
+                                        client={clientRef.current}
+                                    />
+                                </ResizablePanel>
+                            </ResizablePanelGroup>
+                        </main>
+                        { accessExpired &&
+                            <AlertDialog open={accessExpired}>
+                                <AlertDialogContent className="max-w-[425px]">
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>
+                                            Access Expired
+                                        </AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            Your access to view and edit this wip has expired.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <Button 
+                                            variant="negative"
+                                            onClick={() => navigate("/create")} 
+                                            className="cursor-pointer"
+                                        >
+                                            Exit
+                                        </Button>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                        }
+                    </>
+                }
+            </>
+        );
+    }
+    else {
+        return (
+            <main className="flex-1 flex flex-col items-center justify-center m-4">
+                <LoadingIndicator className="w-8 text-foreground"/>
+            </main>
+        )
+    }
 }
