@@ -23,8 +23,16 @@ export const setMemberAtom = atom(
             }
             membersCopy.set(member.userId, roomMemberInfo);
             set(messagesAtom, ([...get(messagesAtom), firstJoinServerMessage]));
-        }    
-        roomMemberInfo.connectionIds.add(member.connectionId);
+        }
+
+        const newConnectionIds = new Set(roomMemberInfo.connectionIds);
+        newConnectionIds.add(member.connectionId);
+        const updatedMemberInfo: RoomMemberInfo = {
+            ...roomMemberInfo,
+            connectionIds: newConnectionIds,
+        }
+        membersCopy.set(member.userId, updatedMemberInfo);
+
         set(membersAtom, new Map<string, RoomMemberInfo>(membersCopy));
     }
 )
@@ -39,10 +47,18 @@ export const setRemoveMemberAtom = atom(
         let roomMemberInfo: RoomMemberInfo | undefined = membersCopy.get(trackerConnection.userId);
         if (!roomMemberInfo)
             return;
-        roomMemberInfo.connectionIds.delete(trackerConnection.connectionId);
-        if(roomMemberInfo.connectionIds.size === 0){
+        const newConnectionIds = new Set(roomMemberInfo.connectionIds);
+        newConnectionIds.delete(trackerConnection.connectionId);
+        if(newConnectionIds.size === 0){
             set(messagesAtom, ([...get(messagesAtom), finalLeaveServerMessageFactory(roomMemberInfo.userName)]));
             membersCopy.delete(trackerConnection.userId);
+        }
+        else {
+            const updatedMemberInfo: RoomMemberInfo = {
+                ...roomMemberInfo,
+                connectionIds: newConnectionIds,
+            }
+            membersCopy.set(trackerConnection.userId, updatedMemberInfo);
         }
         set(membersAtom, new Map<string, RoomMemberInfo>(membersCopy));
     }
@@ -58,10 +74,20 @@ export const setMembersAtom = atom(
         let membersCopy = new Map<string, RoomMemberInfo>(get(membersAtom));
         existingMembers.forEach((value, key) => {
             const memberInfo: RoomMemberInfo | undefined = membersCopy.get(key);
-            if (memberInfo)
-                value.connectionIds.forEach(connectionId => memberInfo.connectionIds.add(connectionId));
-            else
-                membersCopy.set(key, value);
+            if (memberInfo){
+                const mergedConnectionIds = new Set(memberInfo.connectionIds);
+                value.connectionIds.forEach(connectionId => mergedConnectionIds.add(connectionId));
+                membersCopy.set(key, {
+                    ...memberInfo,
+                    connectionIds: mergedConnectionIds,
+                });
+            }
+            else {
+                membersCopy.set(key, {
+                    ...value,
+                    connectionIds: new Set(value.connectionIds),
+                });
+            }
         })
         set(membersAtom, new Map<string, RoomMemberInfo>(membersCopy));
     }
