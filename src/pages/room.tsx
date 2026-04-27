@@ -1,7 +1,7 @@
 import { UNEXPECTED_ERROR_MESSAGE } from "@/api/api-error";
 import { TrackerHubClient } from "@/api/tracker/tracker-hub-client";
 import { Message, RoomInitializer, RoomMember, RoomMemberInfo, TrackerConnection, TrackerHubResult } from "@/api/tracker/tracker-hub-models";
-import { bpmAtom, channelCountAtom, setMemberAtom, setMembersAtom, setRemoveMemberAtom, wipMetadataAtom } from "@/atoms/tracker_atoms";
+import { bpmAtom, channelCountAtom, setMemberAtom, setMembersAtom, setRemoveMemberAtom, wipMetadataAtom } from "@/atoms/tracker-atoms";
 import { ChatBox } from "@/components/chat-box";
 import { FrameEditor } from "@/components/frame-editor";
 import { OwnerOnlyWipOptions } from "@/components/owner-only-wip-options";

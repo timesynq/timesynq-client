@@ -9,7 +9,7 @@ import { LineState, SequencerInfoLine, SequencerLine } from "./sequencer-line";
 import { ScrollArea, ScrollBar } from "./ui/scroll-area";
 import { UpdateSequencerChannelCommand, UpdateSequencerFrameCommand } from "@/api/tracker/tracker-hub-commands";
 import { useAtomValue } from "jotai";
-import { channelCountAtom } from "@/atoms/tracker_atoms";
+import { channelCountAtom } from "@/atoms/tracker-atoms";
 
 export interface SequencerProps {
     client: TrackerHubClient;

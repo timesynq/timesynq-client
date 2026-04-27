@@ -1,5 +1,5 @@
 import { Wip } from "@/api/wips/wip";
-import { wipMetadataAtom } from "@/atoms/tracker_atoms";
+import { wipMetadataAtom } from "@/atoms/tracker-atoms";
 import { useAtomValue } from "jotai";
 import { WipMetadataOptionsDialog } from "./wip-metadata-options-dialog";
 import { WipShareDialog } from "./wip-share-dialog";

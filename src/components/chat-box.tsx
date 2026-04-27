@@ -7,7 +7,7 @@ import { TrackerHubClient } from "@/api/tracker/tracker-hub-client";
 import { ScrollArea } from "./ui/scroll-area";
 import { ChatMessage, Message, RoomMemberInfo, TrackerHubResult } from "@/api/tracker/tracker-hub-models";
 import { useAtom, useAtomValue } from "jotai";
-import { membersAtom, messagesAtom } from "@/atoms/tracker_atoms";
+import { membersAtom, messagesAtom } from "@/atoms/tracker-atoms";
 
 interface ChatBoxProps {
     client: TrackerHubClient;

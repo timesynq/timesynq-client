@@ -9,7 +9,7 @@ import { UpdateLineCountCommand, UpdateLinesPerBeatCommand } from "@/api/tracker
 import { ChannelHeader, ChannelLineNumbers, ChannelLineNumbersHeader, ChannelLines } from "./channel";
 import OutsideClickHandler from 'react-outside-click-handler';
 import { useSelection } from "@/contexts/selection-provider";
-import { currentFrameAtom } from "@/atoms/tracker_atoms";
+import { currentFrameAtom } from "@/atoms/tracker-atoms";
 import { useAtomValue } from "jotai";
 
 export interface FrameEditorProps {

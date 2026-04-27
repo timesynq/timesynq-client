@@ -5,7 +5,7 @@ import { TrackerHubClient } from "@/api/tracker/tracker-hub-client";
 import { TrackerHubResult } from "@/api/tracker/tracker-hub-models";
 import { UNEXPECTED_ERROR_MESSAGE } from "@/api/api-error";
 import { Toasts } from "@/utils/toasts";
-import { bpmAtom, channelCountAtom } from "@/atoms/tracker_atoms";
+import { bpmAtom, channelCountAtom } from "@/atoms/tracker-atoms";
 import { useAtom } from "jotai";
 
 export interface WipOptionsProps {
