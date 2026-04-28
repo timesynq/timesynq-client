@@ -2,6 +2,7 @@ import { Message, RoomMember, RoomMemberInfo, SequencerLine, TrackerConnection }
 import { Wip, WIP_CONSTANTS } from '@/api/wips/wip';
 import { generateRandomChatColor } from '@/utils/chat-color';
 import { atom } from 'jotai'
+import { splitAtom } from 'jotai/utils';
 
 export const membersAtom = atom<Map<string, RoomMemberInfo>>(new Map<string, RoomMemberInfo>());
 export const setMemberAtom = atom(
@@ -110,7 +111,7 @@ export const sequencerLinesAtom = atom<SequencerLine[]>((
         }))
     )
 )
-export const setIndividualSequencerLinesAtom = atom(
+export const initSequencerLinesAtom = atom(
     null,
     (
         _,
@@ -128,5 +129,20 @@ export const setIndividualSequencerLinesAtom = atom(
             defaultCopy[line.line] = line;
         })
         set(sequencerLinesAtom, defaultCopy);
+    }
+)
+export const individualSequencerLinesAtom = splitAtom(sequencerLinesAtom);
+export const setIndividualSequencerLineAtom = atom(
+    null,
+    (
+        get, 
+        set,
+        { index, updater } : { index: number, updater: (line: SequencerLine) => SequencerLine }
+    ) => {
+        const currentLines: SequencerLine[] = get(sequencerLinesAtom);
+        const updatedLines: SequencerLine[] = [...currentLines];
+        updatedLines[index] = updater(currentLines[index]);
+
+        set(sequencerLinesAtom, updatedLines);
     }
 )

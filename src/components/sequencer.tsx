@@ -1,25 +1,24 @@
 import { WIP_CONSTANTS } from "@/api/wips/wip";
 import { Counter } from "./counter";
 import { TrackerHubClient } from "@/api/tracker/tracker-hub-client";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { SequencerLine, TrackerHubResult } from "@/api/tracker/tracker-hub-models";
+import { useCallback, useEffect, useRef } from "react";
+import { TrackerHubResult } from "@/api/tracker/tracker-hub-models";
 import { Toasts } from "@/utils/toasts";
 import { UNEXPECTED_ERROR_MESSAGE } from "@/api/api-error";
 import { SequencerInfoLine, SequencerLineControls } from "./sequencer-line-controls";
 import { ScrollArea, ScrollBar } from "./ui/scroll-area";
 import { UpdateSequencerChannelCommand, UpdateSequencerFrameCommand } from "@/api/tracker/tracker-hub-commands";
-import { useAtom, useAtomValue } from "jotai";
-import { channelCountAtom, sequencerLengthAtom, sequencerLinesAtom } from "@/atoms/tracker-atoms";
+import { useAtom } from "jotai";
+import { sequencerLengthAtom, setIndividualSequencerLineAtom } from "@/atoms/tracker-atoms";
 
 export interface SequencerProps {
     client: TrackerHubClient;
 } 
 
 export const Sequencer = ({ client }: SequencerProps) => {
-    
-    const channelCount = useAtomValue<number>(channelCountAtom);
+
     const [sequencerLength, setSequencerLength] = useAtom(sequencerLengthAtom);
-    const [sequencerLines, setSequencerLines] = useAtom(sequencerLinesAtom);
+    const [, setIndividualSequencerLine] = useAtom(setIndividualSequencerLineAtom)
 
     const handleSequencerLengthUpdate = useCallback(async (newSequencerLength: number): Promise<void> => {
         const result: TrackerHubResult<void> = await client.updateSequencerLength(newSequencerLength);
@@ -68,36 +67,19 @@ export const Sequencer = ({ client }: SequencerProps) => {
         const unsubscribeSequencerLengthUpdated = client.subscribeSequencerLengthUpdated(sequencerLengthUpdatedCallback);
 
         const sequencerFrameUpdatedCallback = (command: UpdateSequencerFrameCommand) => {
-            setSequencerLines(prev => {
-                const currentLineState: SequencerLine = prev[command.line];
-
-                const updated: SequencerLine[] = [...prev];
-                updated[command.line] = {
-                    line: currentLineState.line,
-                    frame: command.newFrame,
-                    isChannelOn: currentLineState.isChannelOn
-                };
-
-                return updated;
-            });
+            setIndividualSequencerLine({ index: command.line, updater: (line) => ({...line, frame: command.newFrame })});
         }
         const unsubscribeSequencerFrameUpdated = client.subscribeSequencerFrameUpdated(sequencerFrameUpdatedCallback);
         
         const sequencerChannelUpdatedCallback = (command: UpdateSequencerChannelCommand) => {
-            setSequencerLines(prev => {
-                const currentLineState: SequencerLine = prev[command.line];
-                const newChannelStates: boolean[] = [...currentLineState.isChannelOn];
+            setIndividualSequencerLine({ index: command.line, updater: (line) => {
+                const newChannelStates: boolean[] = [...line.isChannelOn];
                 newChannelStates[command.channel - 1] = command.isOn;
-
-                const updated = [...prev];
-                updated[command.line] = {
-                    line: currentLineState.line,
-                    frame: currentLineState.frame,
+                return {
+                    ...line,
                     isChannelOn: newChannelStates
-                };
-
-                return updated;
-            });
+                }
+            }})
         }
         const unsubscribeSequencerChannelUpdated = client.subscribeSequencerChannelUpdated(sequencerChannelUpdatedCallback);
 
@@ -119,15 +101,11 @@ export const Sequencer = ({ client }: SequencerProps) => {
             />
             <ScrollArea className="h-full pb-4 pl-4 pr-4">
                 <div className="flex flex-col justify-start items-start space-y-2 overflow-auto">
-                    <SequencerInfoLine 
-                        channelCount={channelCount}
-                    />
-                    { sequencerLines.map((line, index) => (
+                    <SequencerInfoLine />
+                    { Array.from({ length: sequencerLength }).map((_, index) => (
                         index < sequencerLength && 
                         <SequencerLineControls 
                             line={index}
-                            state={line}
-                            channelCount={channelCount}
                             setFrame={getFrameHandler(index)}
                             setChannel={getChannelHandler(index)}
                         />

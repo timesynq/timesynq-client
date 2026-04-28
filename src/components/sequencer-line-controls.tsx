@@ -3,23 +3,26 @@ import { Counter } from "./counter";
 import { toTwoDigitHex } from "@/utils/hex";
 import { Button } from "./ui/button";
 import { useMemo } from "react";
-import { SequencerLine } from "@/api/tracker/tracker-hub-models";
+import { channelCountAtom, individualSequencerLinesAtom } from "@/atoms/tracker-atoms";
+import { useAtomValue } from "jotai";
 
 export interface SequencerLineControlsProps {
-    line: number,
-    state: SequencerLine,
-    channelCount: number,
+    line: number;
     setFrame: (newFrame: number) => void,
     setChannel: (channel: number, isOn: boolean) => void,
 } 
 
-export const SequencerLineControls = ({line, state, channelCount, setFrame, setChannel}: SequencerLineControlsProps) => {
+export const SequencerLineControls = ({ line, setFrame, setChannel }: SequencerLineControlsProps) => {
+
+    const channelCount = useAtomValue(channelCountAtom);
+    const lineAtoms = useAtomValue(individualSequencerLinesAtom);
+    const lineState = useAtomValue(lineAtoms[line]);
 
     return(
         <div className="flex flex-row space-x-4">
             <Counter
                 label={toTwoDigitHex(line)}
-                value={state.frame}
+                value={lineState.frame}
                 min={WIP_CONSTANTS.MIN_PATTERN}
                 max={WIP_CONSTANTS.MAX_PATTERN}
                 onChange={setFrame}
@@ -27,7 +30,7 @@ export const SequencerLineControls = ({line, state, channelCount, setFrame, setC
             />
             <div className="flex flex-row space-x-1">
                 { 
-                    state.isChannelOn.map((isOn, index) => (
+                    lineState.isChannelOn.map((isOn, index) => (
                         <ChannelToggleButton
                             isOn={isOn}
                             disabled={index >= channelCount}
@@ -41,11 +44,9 @@ export const SequencerLineControls = ({line, state, channelCount, setFrame, setC
     );
 }
 
-export interface SequencerInfoLineProps {
-    channelCount: number,
-}
+export const SequencerInfoLine = () => {
 
-export const SequencerInfoLine = ({channelCount}: SequencerInfoLineProps) => {
+    const channelCount = useAtomValue(channelCountAtom);
 
     const channelNums: string[] = useMemo(() => 
         Array.from({ length: WIP_CONSTANTS.MAX_CHANNELS }, (_, i) => toTwoDigitHex(i)), []
