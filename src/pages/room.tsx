@@ -1,7 +1,7 @@
 import { UNEXPECTED_ERROR_MESSAGE } from "@/api/api-error";
 import { TrackerHubClient } from "@/api/tracker/tracker-hub-client";
-import { Message, RoomInitializer, RoomMember, RoomMemberInfo, TrackerConnection, TrackerHubResult } from "@/api/tracker/tracker-hub-models";
-import { bpmAtom, channelCountAtom, setMemberAtom, setMembersAtom, setRemoveMemberAtom, wipMetadataAtom } from "@/atoms/tracker-atoms";
+import { EXAMPLE_ROOM_INITIALIZER, Message, RoomInitializer, RoomMember, RoomMemberInfo, TrackerConnection, TrackerHubResult } from "@/api/tracker/tracker-hub-models";
+import { bpmAtom, channelCountAtom, sequencerLengthAtom, setIndividualSequencerLinesAtom, setMemberAtom, setMembersAtom, setRemoveMemberAtom, wipMetadataAtom } from "@/atoms/tracker-atoms";
 import { ChatBox } from "@/components/chat-box";
 import { FrameEditor } from "@/components/frame-editor";
 import { OwnerOnlyWipOptions } from "@/components/owner-only-wip-options";
@@ -83,6 +83,8 @@ const RoomInner = ({ wipId }: RoomInnerProps) => {
     const setWipMetadata = useSetAtom(wipMetadataAtom);
     const setInitialBpm = useSetAtom(bpmAtom);
     const setInitialChannelCount = useSetAtom(channelCountAtom);
+    const setSequencerLength = useSetAtom(sequencerLengthAtom);
+    const [, setIndividualSequencerLines] = useAtom(setIndividualSequencerLinesAtom);
 
     useEffect(() => {
         let unsubscribeUserJoinedRoom      = (): boolean => { return false; }
@@ -132,13 +134,22 @@ const RoomInner = ({ wipId }: RoomInnerProps) => {
                 setIsReady(true);
                 return;
             }
-            setWipMetadata(joinRoomResult.value.wip);
+
+            //setWipMetadata(joinRoomResult.value.wip);
             //setInitialBpm(joinRoomResult.value.bpm);
             //setInitialBpm(joinRoomResult.value.channelCount);
 
-            const existingMembers = initializeMembers(joinRoomResult.value.members);
-            setMembers({ existingMembers });
+            //const existingMembers = initializeMembers(joinRoomResult.value.members);
+            //setMembers({ existingMembers });
             
+            const dummyRoomInitailizer: RoomInitializer = EXAMPLE_ROOM_INITIALIZER;
+            setWipMetadata(dummyRoomInitailizer.wip);
+            setInitialBpm(dummyRoomInitailizer.bpm);
+            setInitialChannelCount(dummyRoomInitailizer.channelCount);
+            setMembers({ existingMembers: new Map<string, RoomMemberInfo>() });
+            setSequencerLength(dummyRoomInitailizer.sequencer.length);
+            setIndividualSequencerLines({ lines: dummyRoomInitailizer.sequencer.lines });
+
             setIsReady(true);
         }
 

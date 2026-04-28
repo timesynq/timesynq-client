@@ -1,4 +1,4 @@
-import { Message, RoomMember, RoomMemberInfo, TrackerConnection } from '@/api/tracker/tracker-hub-models';
+import { Message, RoomMember, RoomMemberInfo, SequencerLine, TrackerConnection } from '@/api/tracker/tracker-hub-models';
 import { Wip, WIP_CONSTANTS } from '@/api/wips/wip';
 import { generateRandomChatColor } from '@/utils/chat-color';
 import { atom } from 'jotai'
@@ -98,3 +98,35 @@ export const messagesAtom = atom<Message[]>([]);
 export const bpmAtom = atom<number>(WIP_CONSTANTS.DEFAULT_BPM);
 export const channelCountAtom = atom<number>(WIP_CONSTANTS.DEFAULT_CHANNELS);
 export const currentFrameAtom = atom<number>(0);
+
+export const sequencerLengthAtom = atom<number>(1);
+export const sequencerLinesAtom = atom<SequencerLine[]>((
+    new Array(WIP_CONSTANTS.MAX_SEQUENCER_LENGTH)
+        .fill(null)
+        .map((_, i) => ({
+            line: i,
+            frame: 0,
+            isChannelOn: new Array(WIP_CONSTANTS.MAX_CHANNELS).fill(true)
+        }))
+    )
+)
+export const setIndividualSequencerLinesAtom = atom(
+    null,
+    (
+        _,
+        set,
+        { lines } : { lines: SequencerLine[] }
+    ) => {
+        const defaultCopy = new Array(WIP_CONSTANTS.MAX_SEQUENCER_LENGTH)
+            .fill(null)
+            .map((_, i) => ({
+                line: i,
+                frame: 0,
+                isChannelOn: new Array(WIP_CONSTANTS.MAX_CHANNELS).fill(true)
+            }));
+        lines.forEach((line) => {
+            defaultCopy[line.line] = line;
+        })
+        set(sequencerLinesAtom, defaultCopy);
+    }
+)

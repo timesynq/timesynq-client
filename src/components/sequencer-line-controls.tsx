@@ -3,21 +3,17 @@ import { Counter } from "./counter";
 import { toTwoDigitHex } from "@/utils/hex";
 import { Button } from "./ui/button";
 import { useMemo } from "react";
+import { SequencerLine } from "@/api/tracker/tracker-hub-models";
 
-export type LineState = {
-    frame: number;
-    isChannelOn: boolean[];
-}
-
-export interface SequencerLineProps {
+export interface SequencerLineControlsProps {
     line: number,
-    state: LineState,
+    state: SequencerLine,
     channelCount: number,
     setFrame: (newFrame: number) => void,
     setChannel: (channel: number, isOn: boolean) => void,
 } 
 
-export const SequencerLine = ({line, state, channelCount, setFrame, setChannel}: SequencerLineProps) => {
+export const SequencerLineControls = ({line, state, channelCount, setFrame, setChannel}: SequencerLineControlsProps) => {
 
     return(
         <div className="flex flex-row space-x-4">
@@ -52,7 +48,7 @@ export interface SequencerInfoLineProps {
 export const SequencerInfoLine = ({channelCount}: SequencerInfoLineProps) => {
 
     const channelNums: string[] = useMemo(() => 
-        Array.from({ length: 16 }, (_, i) => toTwoDigitHex(i)), []
+        Array.from({ length: WIP_CONSTANTS.MAX_CHANNELS }, (_, i) => toTwoDigitHex(i)), []
     );
 
     return (
