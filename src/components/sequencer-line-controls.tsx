@@ -3,8 +3,8 @@ import { Counter } from "./counter";
 import { toTwoDigitHex } from "@/utils/hex";
 import { Button } from "./ui/button";
 import { useMemo } from "react";
-import { channelCountAtom, individualSequencerLinesAtom } from "@/atoms/tracker-atoms";
-import { useAtomValue } from "jotai";
+import { channelCountAtom, currentSequencerLineAtom, individualSequencerLinesAtom, isSequencerLineSelectedAtom } from "@/atoms/tracker-atoms";
+import { useAtomValue, useSetAtom } from "jotai";
 
 export interface SequencerLineControlsProps {
     line: number;
@@ -17,9 +17,13 @@ export const SequencerLineControls = ({ line, setFrame, setChannel }: SequencerL
     const channelCount = useAtomValue(channelCountAtom);
     const lineAtoms = useAtomValue(individualSequencerLinesAtom);
     const lineState = useAtomValue(lineAtoms[line]);
+    const isSelected = useAtomValue(isSequencerLineSelectedAtom(line));
+    const setCurrentSequencerLine = useSetAtom(currentSequencerLineAtom);
 
     return(
-        <div className="flex flex-row space-x-4">
+        <div className={`flex flex-row space-x-4 border-2 border-background ${!isSelected && "hover:border-secondary"} ${isSelected && "border-negative-background"} pl-3 pr-1 py-1`}
+            onClick={() => setCurrentSequencerLine(line)}
+        >
             <Counter
                 label={toTwoDigitHex(line)}
                 value={lineState.frame}
@@ -53,7 +57,7 @@ export const SequencerInfoLine = () => {
     );
 
     return (
-        <div className="flex flex-row space-x-4">
+        <div className="flex flex-row space-x-4 pl-3 pr-1 border-2 border-background">
             <div className="invisible">
                 <Counter
                     label="00"

@@ -106,7 +106,7 @@ export const Counter = ({ label, value, min, max, onChange, displayHex = false, 
 
     return (
         <div className={`flex flex-row ${justifyString} items-center space-x-4`}>
-            <span className="min-w-6">{label}</span>
+            <span className="min-w-6 select-none">{label}</span>
 
             <div className="flex flex-row items-center">
                 <Button

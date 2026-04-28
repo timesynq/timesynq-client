@@ -100,7 +100,7 @@ export const Sequencer = ({ client }: SequencerProps) => {
                 onChange={handleSequencerLengthUpdate}
             />
             <ScrollArea className="h-full pb-4 pl-4 pr-4">
-                <div className="flex flex-col justify-start items-start space-y-2 overflow-auto">
+                <div className="flex flex-col justify-start items-start  overflow-auto">
                     <SequencerInfoLine />
                     { Array.from({ length: sequencerLength }).map((_, index) => (
                         index < sequencerLength && 

@@ -3,6 +3,7 @@ import { Wip, WIP_CONSTANTS } from '@/api/wips/wip';
 import { generateRandomChatColor } from '@/utils/chat-color';
 import { atom } from 'jotai'
 import { splitAtom } from 'jotai/utils';
+import { atomFamily } from 'jotai-family';
 
 export const membersAtom = atom<Map<string, RoomMemberInfo>>(new Map<string, RoomMemberInfo>());
 export const setMemberAtom = atom(
@@ -98,7 +99,6 @@ export const wipMetadataAtom = atom<Wip | null>(null);
 export const messagesAtom = atom<Message[]>([]);
 export const bpmAtom = atom<number>(WIP_CONSTANTS.DEFAULT_BPM);
 export const channelCountAtom = atom<number>(WIP_CONSTANTS.DEFAULT_CHANNELS);
-export const currentFrameAtom = atom<number>(0);
 
 export const sequencerLengthAtom = atom<number>(1);
 export const sequencerLinesAtom = atom<SequencerLine[]>((
@@ -146,3 +146,11 @@ export const setIndividualSequencerLineAtom = atom(
         set(sequencerLinesAtom, updatedLines);
     }
 )
+
+export const currentSequencerLineAtom = atom<number>(0);
+export const isSequencerLineSelectedAtom = atomFamily((sequencerLine: number) => 
+    atom((get) => get(currentSequencerLineAtom) === sequencerLine)
+);
+export const currentFrameAtom = atom((get) => {
+    return get(sequencerLinesAtom)[get(currentSequencerLineAtom)]?.frame ?? 0
+})
