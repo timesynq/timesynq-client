@@ -4,7 +4,7 @@ import { UNEXPECTED_ERROR_MESSAGE } from "@/api/api-error";
 import { Toasts } from "@/utils/toasts";
 import { Counter } from "./counter";
 import { WIP_CONSTANTS } from "@/api/wips/wip";
-import { TrackerHubResult } from "@/api/tracker/tracker-hub-models";
+import { Frame, TrackerHubResult } from "@/api/tracker/tracker-hub-models";
 import { UpdateLineCountCommand, UpdateLinesPerBeatCommand } from "@/api/tracker/tracker-hub-commands";
 import { ChannelHeader, ChannelLineNumbers, ChannelLineNumbersHeader, ChannelLines } from "./channel";
 import OutsideClickHandler from 'react-outside-click-handler';
@@ -20,36 +20,6 @@ export const FrameEditor = ({ client }: FrameEditorProps) => {
     
     const frameNumber = useAtomValue(currentFrameNumberAtom);
     const frame = useAtomValue(frameAtomFamily(frameNumber));
-    const handleSetLineCount = useCallback(
-        async (newLineCount: number) => {
-            const result: TrackerHubResult<void> = await client.updateLineCount({
-                frame: frame.frameNumber,
-                newLineCount
-            });
-
-            if (!result.isSuccessful) {
-                Toasts.error(result.errorMessage ?? UNEXPECTED_ERROR_MESSAGE);
-            }
-        },
-        [client, frame]
-    );
-
-    const handleSetLinesPerBeat = useCallback(
-        async (newLinesPerBeat: number) => {
-            const result: TrackerHubResult<void> = await client.updateLinesPerBeat({
-                frame: frame.frameNumber,
-                newLinesPerBeat
-            });
-
-            if (!result.isSuccessful) {
-                Toasts.error(result.errorMessage ?? UNEXPECTED_ERROR_MESSAGE);
-            }
-        },
-        [client, frame]
-    );
-
-    // todo: don't rerender the whole frame editor when octave changes
-    const [octave, setOctave] = useAtom(octaveAtom);
 
     const [, setIndividualFrame] = useAtom(setIndividualFrameAtom);
 
@@ -74,29 +44,10 @@ export const FrameEditor = ({ client }: FrameEditorProps) => {
 
     return (
         <div className="flex flex-col w-full h-full min-h-0 bg-background-darker">
-            <div className="flex flex-row w-full justify-center items-center space-x-12 p-4 border-b">
-                <Counter
-                    label="Lines"
-                    value={frame.length}
-                    min={WIP_CONSTANTS.MIN_LINES}
-                    max={WIP_CONSTANTS.MAX_LINES}
-                    onChange={handleSetLineCount}
-                />
-                <Counter
-                    label="LPB"
-                    value={frame.linesPerBeat}
-                    min={WIP_CONSTANTS.MIN_LINES_PER_BEAT}
-                    max={WIP_CONSTANTS.MAX_LINES_PER_BEAT}
-                    onChange={handleSetLinesPerBeat}
-                />
-                <Counter
-                    label="Octave"
-                    value={octave}
-                    min={WIP_CONSTANTS.MIN_OCTAVE}
-                    max={WIP_CONSTANTS.MAX_OCTAVE}
-                    onChange={setOctave}
-                />
-            </div>
+            <FrameEditorOptions 
+                client={client}
+                frame={frame}
+            />
             <div className="flex flex-col h-full min-h-0">
                 <div className="flex flex-row w-full">
                     <ChannelLineNumbersHeader />
@@ -161,6 +112,70 @@ export const FrameEditor = ({ client }: FrameEditorProps) => {
                     </div>
                 </OutsideClickHandler>
             </div>
+        </div>
+    );
+}
+
+interface FrameEditorOptionsProps {
+    client: TrackerHubClient;
+    frame: Frame;
+}
+
+const FrameEditorOptions = ({ client, frame }: FrameEditorOptionsProps) => {
+
+    const handleSetLineCount = useCallback(
+        async (newLineCount: number) => {
+            const result: TrackerHubResult<void> = await client.updateLineCount({
+                frame: frame.frameNumber,
+                newLineCount
+            });
+
+            if (!result.isSuccessful) {
+                Toasts.error(result.errorMessage ?? UNEXPECTED_ERROR_MESSAGE);
+            }
+        },
+        [client, frame]
+    );
+
+    const handleSetLinesPerBeat = useCallback(
+        async (newLinesPerBeat: number) => {
+            const result: TrackerHubResult<void> = await client.updateLinesPerBeat({
+                frame: frame.frameNumber,
+                newLinesPerBeat
+            });
+
+            if (!result.isSuccessful) {
+                Toasts.error(result.errorMessage ?? UNEXPECTED_ERROR_MESSAGE);
+            }
+        },
+        [client, frame]
+    );
+
+    const [octave, setOctave] = useAtom(octaveAtom);
+
+    return(
+        <div className="flex flex-row w-full justify-center items-center space-x-12 p-4 border-b">
+            <Counter
+                label="Lines"
+                value={frame.length}
+                min={WIP_CONSTANTS.MIN_LINES}
+                max={WIP_CONSTANTS.MAX_LINES}
+                onChange={handleSetLineCount}
+            />
+            <Counter
+                label="LPB"
+                value={frame.linesPerBeat}
+                min={WIP_CONSTANTS.MIN_LINES_PER_BEAT}
+                max={WIP_CONSTANTS.MAX_LINES_PER_BEAT}
+                onChange={handleSetLinesPerBeat}
+            />
+            <Counter
+                label="Octave"
+                value={octave}
+                min={WIP_CONSTANTS.MIN_OCTAVE}
+                max={WIP_CONSTANTS.MAX_OCTAVE}
+                onChange={setOctave}
+            />
         </div>
     );
 }
