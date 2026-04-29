@@ -180,18 +180,8 @@ const getFrameOrDefault = (map: Map<number, Frame>, frameNumber: number): Frame 
         channels: []
     };
 }
-export const currentFrameAtom = atom((get) => {
-    return getFrameOrDefault(get(framesAtom), get(currentFrameNumberAtom));
-})
 export const frameAtomFamily = atomFamily((frameNumber: number) => 
-    atom(
-        (get) => getFrameOrDefault(get(framesAtom), frameNumber),
-        (get, set, updater: (frameNum: number) => Frame) => {
-            const updatedFrames = new Map(get(framesAtom));
-            updatedFrames.set(frameNumber, updater(frameNumber));
-            set(framesAtom, updatedFrames);
-        } // maybe make this family read only and then have a write only atom???
-    )
+    atom((get) => getFrameOrDefault(get(framesAtom), frameNumber))
 )
 export const setIndividualFrameAtom = atom(
     null,
