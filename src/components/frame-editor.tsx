@@ -73,55 +73,55 @@ export const FrameEditor = ({ client }: FrameEditorProps) => {
     const setIsFocused = useSelection((state) => state.setIsFocused);
 
     return (
-        <OutsideClickHandler 
-            display="contents"
-            onOutsideClick={() => setIsFocused(false)}
-        >
-            <div className="flex flex-col w-full h-full min-h-0 bg-background-darker" onClick={() => setIsFocused(true)}>
-                <div className="flex flex-row w-full justify-center items-center space-x-12 p-4 border-b">
-                    <Counter
-                        label="Lines"
-                        value={frame.length}
-                        min={WIP_CONSTANTS.MIN_LINES}
-                        max={WIP_CONSTANTS.MAX_LINES}
-                        onChange={handleSetLineCount}
+        <div className="flex flex-col w-full h-full min-h-0 bg-background-darker">
+            <div className="flex flex-row w-full justify-center items-center space-x-12 p-4 border-b">
+                <Counter
+                    label="Lines"
+                    value={frame.length}
+                    min={WIP_CONSTANTS.MIN_LINES}
+                    max={WIP_CONSTANTS.MAX_LINES}
+                    onChange={handleSetLineCount}
+                />
+                <Counter
+                    label="LPB"
+                    value={frame.linesPerBeat}
+                    min={WIP_CONSTANTS.MIN_LINES_PER_BEAT}
+                    max={WIP_CONSTANTS.MAX_LINES_PER_BEAT}
+                    onChange={handleSetLinesPerBeat}
+                />
+                <Counter
+                    label="Octave"
+                    value={octave}
+                    min={WIP_CONSTANTS.MIN_OCTAVE}
+                    max={WIP_CONSTANTS.MAX_OCTAVE}
+                    onChange={setOctave}
+                />
+            </div>
+            <div className="flex flex-col h-full min-h-0">
+                <div className="flex flex-row w-full">
+                    <ChannelLineNumbersHeader />
+                    <ChannelHeader
+                        frame={frame.frameNumber}
+                        channel={0}
+                        isNoted={false}
                     />
-                    <Counter
-                        label="LPB"
-                        value={frame.linesPerBeat}
-                        min={WIP_CONSTANTS.MIN_LINES_PER_BEAT}
-                        max={WIP_CONSTANTS.MAX_LINES_PER_BEAT}
-                        onChange={handleSetLinesPerBeat}
+                    <ChannelHeader
+                        frame={frame.frameNumber}
+                        channel={1}
+                        isNoted
                     />
-                    <Counter
-                        label="Octave"
-                        value={octave}
-                        min={WIP_CONSTANTS.MIN_OCTAVE}
-                        max={WIP_CONSTANTS.MAX_OCTAVE}
-                        onChange={setOctave}
+                    <ChannelHeader
+                        frame={frame.frameNumber}
+                        channel={2}
+                        isNoted={false}
                     />
+                    <ChannelLineNumbersHeader />
                 </div>
-                <div className="flex flex-col h-full min-h-0">
-                    <div className="flex flex-row w-full">
-                        <ChannelLineNumbersHeader />
-                        <ChannelHeader
-                            frame={frame.frameNumber}
-                            channel={0}
-                            isNoted={false}
-                        />
-                        <ChannelHeader
-                            frame={frame.frameNumber}
-                            channel={1}
-                            isNoted
-                        />
-                        <ChannelHeader
-                            frame={frame.frameNumber}
-                            channel={2}
-                            isNoted={false}
-                        />
-                        <ChannelLineNumbersHeader />
-                    </div>
-                    <div className="flex flex-row w-full overflow-y-auto overflow-x-hidden">
+                <OutsideClickHandler 
+                    display="contents"
+                    onOutsideClick={() => setIsFocused(false)}
+                >
+                    <div className="flex flex-row w-full overflow-y-auto overflow-x-hidden" onClick={() => setIsFocused(true)}>
                         <ChannelLineNumbers
                             lineCount={frame.length}
                             linesPerBeat={frame.linesPerBeat}
@@ -159,8 +159,8 @@ export const FrameEditor = ({ client }: FrameEditorProps) => {
                             isRightHandSide
                         />
                     </div>
-                </div>
+                </OutsideClickHandler>
             </div>
-        </OutsideClickHandler>
+        </div>
     );
 }
