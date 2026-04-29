@@ -1,4 +1,4 @@
-import { Message, RoomMember, RoomMemberInfo, SequencerLine, TrackerConnection } from '@/api/tracker/tracker-hub-models';
+import { Frame, Message, RoomMember, RoomMemberInfo, SequencerLine, TrackerConnection } from '@/api/tracker/tracker-hub-models';
 import { Wip, WIP_CONSTANTS } from '@/api/wips/wip';
 import { generateRandomChatColor } from '@/utils/chat-color';
 import { atom } from 'jotai'
@@ -105,8 +105,8 @@ export const sequencerLinesAtom = atom<SequencerLine[]>((
     new Array(WIP_CONSTANTS.MAX_SEQUENCER_LENGTH)
         .fill(null)
         .map((_, i) => ({
-            line: i,
-            frame: 0,
+            lineNumber: i,
+            frameNumber: 0,
             isChannelOn: new Array(WIP_CONSTANTS.MAX_CHANNELS).fill(true)
         }))
     )
@@ -121,12 +121,12 @@ export const initSequencerLinesAtom = atom(
         const defaultCopy = new Array(WIP_CONSTANTS.MAX_SEQUENCER_LENGTH)
             .fill(null)
             .map((_, i) => ({
-                line: i,
-                frame: 0,
+                lineNumber: i,
+                frameNumber: 0,
                 isChannelOn: new Array(WIP_CONSTANTS.MAX_CHANNELS).fill(true)
             }));
         lines.forEach((line) => {
-            defaultCopy[line.line] = line;
+            defaultCopy[line.lineNumber] = line;
         })
         set(sequencerLinesAtom, defaultCopy);
     }
@@ -148,9 +148,62 @@ export const setIndividualSequencerLineAtom = atom(
 )
 
 export const currentSequencerLineAtom = atom<number>(0);
-export const isSequencerLineSelectedAtom = atomFamily((sequencerLine: number) => 
-    atom((get) => get(currentSequencerLineAtom) === sequencerLine)
+export const isSequencerLineSelectedAtom = atomFamily((sequencerLineNumber: number) => 
+    atom((get) => get(currentSequencerLineAtom) === sequencerLineNumber)
 );
-export const currentFrameAtom = atom((get) => {
-    return get(sequencerLinesAtom)[get(currentSequencerLineAtom)]?.frame ?? 0
+export const currentFrameNumberAtom = atom((get) => {
+    return get(sequencerLinesAtom)[get(currentSequencerLineAtom)]?.frameNumber ?? 0
 })
+
+export const octaveAtom = atom<number>(4);
+
+export const framesAtom = atom<Map<number, Frame>>(new Map<number, Frame>());
+export const initFramesAtom = atom(
+    null,
+    (
+        get,
+        set,
+        { frames } : { frames: Frame[] }
+    ) => {
+        const newMap = new Map<number, Frame>(get(framesAtom));
+        frames.forEach((frame) => {
+            newMap.set(frame.frameNumber, frame);
+        }); 
+        set(framesAtom, newMap);
+    }
+)
+const getFrameOrDefault = (map: Map<number, Frame>, frameNumber: number): Frame => {
+    return map.get(frameNumber) ?? {
+        frameNumber: frameNumber,
+        length: WIP_CONSTANTS.DEFAULT_LINES,
+        linesPerBeat: WIP_CONSTANTS.DEFAULT_LINES_PER_BEAT,
+        channels: []
+    };
+}
+export const currentFrameAtom = atom((get) => {
+    return getFrameOrDefault(get(framesAtom), get(currentFrameNumberAtom));
+})
+export const frameAtomFamily = atomFamily((frameNumber: number) => 
+    atom(
+        (get) => getFrameOrDefault(get(framesAtom), frameNumber),
+        (get, set, updater: (frameNum: number) => Frame) => {
+            const updatedFrames = new Map(get(framesAtom));
+            updatedFrames.set(frameNumber, updater(frameNumber));
+            set(framesAtom, updatedFrames);
+        } // maybe make this family read only and then have a write only atom???
+    )
+)
+export const setIndividualFrameAtom = atom(
+    null,
+    (
+        get, 
+        set,
+        { index, updater } : { index: number, updater: (frame: Frame) => Frame }
+    ) => {
+        const currentFrames: Map<number, Frame> = get(framesAtom);
+        const updatedFrames: Map<number, Frame> = new Map<number, Frame>(currentFrames);
+        updatedFrames.set(index, updater(getFrameOrDefault(currentFrames, index)));
+
+        set(framesAtom, updatedFrames);
+    }
+)

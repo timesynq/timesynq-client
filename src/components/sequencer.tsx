@@ -18,7 +18,7 @@ export interface SequencerProps {
 export const Sequencer = ({ client }: SequencerProps) => {
 
     const [sequencerLength, setSequencerLength] = useAtom(sequencerLengthAtom);
-    const [, setIndividualSequencerLine] = useAtom(setIndividualSequencerLineAtom)
+    const [, setIndividualSequencerLine] = useAtom(setIndividualSequencerLineAtom);
 
     const handleSequencerLengthUpdate = useCallback(async (newSequencerLength: number): Promise<void> => {
         const result: TrackerHubResult<void> = await client.updateSequencerLength(newSequencerLength);

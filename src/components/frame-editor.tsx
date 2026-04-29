@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect } from "react";
 import { TrackerHubClient } from "@/api/tracker/tracker-hub-client";
 import { UNEXPECTED_ERROR_MESSAGE } from "@/api/api-error";
 import { Toasts } from "@/utils/toasts";
@@ -9,8 +9,8 @@ import { UpdateLineCountCommand, UpdateLinesPerBeatCommand } from "@/api/tracker
 import { ChannelHeader, ChannelLineNumbers, ChannelLineNumbersHeader, ChannelLines } from "./channel";
 import OutsideClickHandler from 'react-outside-click-handler';
 import { useSelection } from "@/contexts/selection-provider";
-import { currentFrameAtom } from "@/atoms/tracker-atoms";
-import { useAtomValue } from "jotai";
+import { currentFrameNumberAtom, frameAtomFamily, octaveAtom, setIndividualFrameAtom } from "@/atoms/tracker-atoms";
+import { useAtom, useAtomValue } from "jotai";
 
 export interface FrameEditorProps {
     client: TrackerHubClient;
@@ -18,12 +18,12 @@ export interface FrameEditorProps {
 
 export const FrameEditor = ({ client }: FrameEditorProps) => {
     
-    const frame = useAtomValue(currentFrameAtom);
-    const [lineCount, setLineCount] = useState<number>(64 /*temporary, this will be read from the server*/);
+    const frameNumber = useAtomValue(currentFrameNumberAtom);
+    const frame = useAtomValue(frameAtomFamily(frameNumber));
     const handleSetLineCount = useCallback(
         async (newLineCount: number) => {
             const result: TrackerHubResult<void> = await client.updateLineCount({
-                frame: frame,
+                frame: frame.frameNumber,
                 newLineCount
             });
 
@@ -34,11 +34,10 @@ export const FrameEditor = ({ client }: FrameEditorProps) => {
         [client, frame]
     );
 
-    const [linesPerBeat, setLinesPerBeat] = useState<number>(4 /*temporary, this will be read from the server*/);
     const handleSetLinesPerBeat = useCallback(
         async (newLinesPerBeat: number) => {
             const result: TrackerHubResult<void> = await client.updateLinesPerBeat({
-                frame: frame,
+                frame: frame.frameNumber,
                 newLinesPerBeat
             });
 
@@ -49,24 +48,19 @@ export const FrameEditor = ({ client }: FrameEditorProps) => {
         [client, frame]
     );
 
-    const [octave, setOctave] = useState<number>(4);
+    // todo: don't rerender the whole frame editor when octave changes
+    const [octave, setOctave] = useAtom(octaveAtom);
+
+    const [, setIndividualFrame] = useAtom(setIndividualFrameAtom);
 
     useEffect(() => {
-        
         const lineCountUpdatedCallback = (command: UpdateLineCountCommand) => {
-            if (command.frame === frame)
-                setLineCount(command.newLineCount);
-            // todo:
-                // this should still store the line count for that frame, so that if user switches to that
-                // frame they will see the updated line count. switching frames will not fetch anything from server
+            setIndividualFrame({ index: command.frame, updater: (frame) => ({...frame, length: command.newLineCount})});
         }
         const unsubscribeLineCountUpdated = client.subscribeLineCountUpdated(lineCountUpdatedCallback);
 
         const linesPerBeatUpdatedCallback = (command: UpdateLinesPerBeatCommand) => {
-            if (command.frame === frame)
-                setLinesPerBeat(command.newLinesPerBeat);
-            // todo:
-                // same as above
+                setIndividualFrame({ index: command.frame, updater: (frame) => ({...frame, linesPerBeat: command.newLinesPerBeat})});
         }
         const unsubscribeLinesPerBeatUpdated = client.subscribeLinesPerBeatUpdated(linesPerBeatUpdatedCallback);
 
@@ -74,7 +68,7 @@ export const FrameEditor = ({ client }: FrameEditorProps) => {
             unsubscribeLineCountUpdated();
             unsubscribeLinesPerBeatUpdated();
         }
-    }, []);
+    }, [frame]);
     
     const setIsFocused = useSelection((state) => state.setIsFocused);
 
@@ -87,14 +81,14 @@ export const FrameEditor = ({ client }: FrameEditorProps) => {
                 <div className="flex flex-row w-full justify-center items-center space-x-12 p-4 border-b">
                     <Counter
                         label="Lines"
-                        value={lineCount}
+                        value={frame.length}
                         min={WIP_CONSTANTS.MIN_LINES}
                         max={WIP_CONSTANTS.MAX_LINES}
                         onChange={handleSetLineCount}
                     />
                     <Counter
                         label="LPB"
-                        value={linesPerBeat}
+                        value={frame.linesPerBeat}
                         min={WIP_CONSTANTS.MIN_LINES_PER_BEAT}
                         max={WIP_CONSTANTS.MAX_LINES_PER_BEAT}
                         onChange={handleSetLinesPerBeat}
@@ -111,17 +105,17 @@ export const FrameEditor = ({ client }: FrameEditorProps) => {
                     <div className="flex flex-row w-full">
                         <ChannelLineNumbersHeader />
                         <ChannelHeader
-                            frame={frame}
+                            frame={frame.frameNumber}
                             channel={0}
                             isNoted={false}
                         />
                         <ChannelHeader
-                            frame={frame}
+                            frame={frame.frameNumber}
                             channel={1}
                             isNoted
                         />
                         <ChannelHeader
-                            frame={frame}
+                            frame={frame.frameNumber}
                             channel={2}
                             isNoted={false}
                         />
@@ -129,39 +123,39 @@ export const FrameEditor = ({ client }: FrameEditorProps) => {
                     </div>
                     <div className="flex flex-row w-full overflow-y-auto overflow-x-hidden">
                         <ChannelLineNumbers
-                            lineCount={lineCount}
-                            linesPerBeat={linesPerBeat}
+                            lineCount={frame.length}
+                            linesPerBeat={frame.linesPerBeat}
                         />
                         <ChannelLines
-                            frame={frame}
+                            frame={frame.frameNumber}
                             channel={0}
                             isNoted={false}
-                            lineCount={lineCount}
-                            linesPerBeat={linesPerBeat}
+                            lineCount={frame.length}
+                            linesPerBeat={frame.linesPerBeat}
                             noteGroupsOpen={1}
                             fxGroupsOpen={1}
                         />
                         <ChannelLines
-                            frame={frame}
+                            frame={frame.frameNumber}
                             channel={1}
                             isNoted
-                            lineCount={lineCount}
-                            linesPerBeat={linesPerBeat}
+                            lineCount={frame.length}
+                            linesPerBeat={frame.linesPerBeat}
                             noteGroupsOpen={1}
                             fxGroupsOpen={1}
                         />
                         <ChannelLines
-                            frame={frame}
+                            frame={frame.frameNumber}
                             channel={2}
                             isNoted={false}
-                            lineCount={lineCount}
-                            linesPerBeat={linesPerBeat}
+                            lineCount={frame.length}
+                            linesPerBeat={frame.linesPerBeat}
                             noteGroupsOpen={1}
                             fxGroupsOpen={1}
                         />
                         <ChannelLineNumbers 
-                            lineCount={lineCount}
-                            linesPerBeat={linesPerBeat}
+                            lineCount={frame.length}
+                            linesPerBeat={frame.linesPerBeat}
                             isRightHandSide
                         />
                     </div>

@@ -21,12 +21,12 @@ export const SequencerLineControls = ({ line, setFrame, setChannel }: SequencerL
     const setCurrentSequencerLine = useSetAtom(currentSequencerLineAtom);
 
     return(
-        <div className={`flex flex-row space-x-4 border-2 border-background ${!isSelected && "hover:border-secondary"} ${isSelected && "border-negative-background"} pl-3 pr-1 py-1`}
+        <div className={`flex flex-row space-x-4 border-2 border-background ${!isSelected && "hover:border-secondary"} ${isSelected && "border-negative-background bg-negative-background/30"} pl-3 pr-1 py-1`}
             onClick={() => setCurrentSequencerLine(line)}
         >
             <Counter
                 label={toTwoDigitHex(line)}
-                value={lineState.frame}
+                value={lineState.frameNumber}
                 min={WIP_CONSTANTS.MIN_PATTERN}
                 max={WIP_CONSTANTS.MAX_PATTERN}
                 onChange={setFrame}
@@ -53,7 +53,7 @@ export const SequencerInfoLine = () => {
     const channelCount = useAtomValue(channelCountAtom);
 
     const channelNums: string[] = useMemo(() => 
-        Array.from({ length: WIP_CONSTANTS.MAX_CHANNELS }, (_, i) => toTwoDigitHex(i)), []
+        Array.from({ length: WIP_CONSTANTS.MAX_CHANNELS }, (_, i) => toTwoDigitHex(i + 1)), []
     );
 
     return (

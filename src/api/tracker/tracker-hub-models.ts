@@ -49,20 +49,20 @@ export type Sequencer = {
 }
 
 export type SequencerLine = {
-    line: number,
-    frame: number,
+    lineNumber: number,
+    frameNumber: number,
     isChannelOn: boolean[],
 }
 
 export type Frame = {
-    frame: number,
+    frameNumber: number,
     length: number,
     linesPerBeat: number,
     channels: Channel[],
 }
 
 export type Channel = {
-    channel: number,
+    channelNumber: number,
     isSend: boolean,
     isOn: boolean,
     isSolo: boolean,
@@ -70,7 +70,7 @@ export type Channel = {
 }
 
 export type Line = {
-    line: number,
+    lineNumber: number,
     pitches: (number | null)[] | null, 
     instruments: (number | null)[] | null,
     fxSymbols: (number | null)[] | null,
@@ -92,43 +92,43 @@ export const EXAMPLE_ROOM_INITIALIZER: RoomInitializer = {
         length: 5,
         lines: [
             {
-                line: 0,
-                frame: 1,
+                lineNumber: 0,
+                frameNumber: 1,
                 isChannelOn: [true, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true]
             },
             {
-                line: 1,
-                frame: 1,
+                lineNumber: 1,
+                frameNumber: 1,
                 isChannelOn: [true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true]
             },
             {
-                line: 3,
-                frame: 2,
+                lineNumber: 3,
+                frameNumber: 2,
                 isChannelOn: [true, true, false, false, true, true, true, true, true, true, true, true, true, true, true, true]
             },
         ]
     },
     frames: [
         {
-            frame: 0,
+            frameNumber: 0,
             length: 64,
             linesPerBeat: 4,
             channels: [
                 {
-                    channel: 0,
+                    channelNumber: 0,
                     isSend: false,
                     isOn: true,
                     isSolo: false,
                     lines: [
                         {
-                            line: 0,
+                            lineNumber: 0,
                             pitches: [36, null, null],
                             instruments: [0, null, null],
                             fxSymbols: null,
                             fxValues: null,
                         },
                         {
-                            line: 1,
+                            lineNumber: 1,
                             pitches: [54, 21, 55],
                             instruments: [1, 1, null],
                             fxSymbols: [0, 0, null, null],
@@ -137,20 +137,20 @@ export const EXAMPLE_ROOM_INITIALIZER: RoomInitializer = {
                     ]
                 },
                 {
-                    channel: 1,
+                    channelNumber: 1,
                     isSend: false,
                     isOn: true,
                     isSolo: false,
                     lines: []
                 },
                 {
-                    channel: 2,
+                    channelNumber: 2,
                     isSend: false,
                     isOn: true,
                     isSolo: false,
                     lines: [
                         {
-                            line: 63,
+                            lineNumber: 63,
                             pitches: [22, 26, 28],
                             instruments: null,
                             fxSymbols: [2, 0, 3, null],
@@ -161,24 +161,24 @@ export const EXAMPLE_ROOM_INITIALIZER: RoomInitializer = {
             ]
         },
         {
-            frame: 1,
+            frameNumber: 1,
             length: 32,
             linesPerBeat: 8,
             channels: []
         },
         {
-            frame: 2,
+            frameNumber: 2,
             length: 16,
             linesPerBeat: 2,
             channels: [
                 {
-                    channel: 0,
+                    channelNumber: 0,
                     isSend: false,
                     isOn: true,
                     isSolo: false,
                     lines: [
                         { // a line like this should never be sent back from the server
-                            line: 5, 
+                            lineNumber: 5, 
                             pitches: null,
                             instruments: null,
                             fxSymbols: null,
@@ -187,7 +187,7 @@ export const EXAMPLE_ROOM_INITIALIZER: RoomInitializer = {
                     ]
                 },
                 {
-                    channel: 2,
+                    channelNumber: 2,
                     isSend: true,
                     isOn: false,
                     isSolo: true,
