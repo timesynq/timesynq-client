@@ -67,7 +67,7 @@ export const Sequencer = ({ client }: SequencerProps) => {
         const unsubscribeSequencerLengthUpdated = client.subscribeSequencerLengthUpdated(sequencerLengthUpdatedCallback);
 
         const sequencerFrameUpdatedCallback = (command: UpdateSequencerFrameCommand) => {
-            setIndividualSequencerLine({ index: command.line, updater: (line) => ({...line, frame: command.newFrame })});
+            setIndividualSequencerLine({ index: command.line, updater: (line) => ({...line, frameNumber: command.newFrame })});
         }
         const unsubscribeSequencerFrameUpdated = client.subscribeSequencerFrameUpdated(sequencerFrameUpdatedCallback);
         
