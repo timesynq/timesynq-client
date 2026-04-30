@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { WIP_CONSTANTS } from "@/api/wips/wip";
 import { NavigationCounter, NavigationCounterJustify } from "./navigation-counter";
 import { Button } from "./ui/button";
@@ -6,25 +6,77 @@ import { Line } from "./line";
 import { LineSpacer } from "./line-spacer";
 import { toTwoDigitHex } from "@/utils/hex";
 import { useSelection } from "@/contexts/selection-provider";
+import { useAtomValue } from "jotai";
+import { channelAtomFamily } from "@/atoms/tracker-atoms";
+import { TrackerHubResult } from "@/api/tracker/tracker-hub-models";
+import { TrackerHubClient } from "@/api/tracker/tracker-hub-client";
+import { Toasts } from "@/utils/toasts";
+import { UNEXPECTED_ERROR_MESSAGE } from "@/api/api-error";
 
 const MIN_HEADER_H = "min-h-[190px]";
 const MIN_CHANNEL_W = "min-w-[170px]";
 const MIN_NUMBERS_W = "min-w-[38px]";
 
 export interface ChannelHeaderProps {
-    frame: number;
-    channel: number;
-    isNoted: boolean;
+    client: TrackerHubClient;
+    frameNumber: number;
+    channelNumber: number;
 }
 
-export const ChannelHeader = ({ frame, channel, isNoted }: ChannelHeaderProps) => {
+export const ChannelHeader = ({ client, frameNumber, channelNumber }: ChannelHeaderProps) => {
 
-    const [isMuted, setIsMuted] = useState<boolean>(false);
-    const [isSolo, setIsSolo] = useState<boolean>(false);
+    const channel = useAtomValue(channelAtomFamily(channelNumber));
+
     const [noteGroupsOpen, setNoteGroupsOpen] = useState<number>(1);
     const [fxGroupsOpen, setFxGroupsOpen] = useState<number>(1);
 
-    const isMaster: boolean = channel === 0; 
+    const isMaster: boolean = channelNumber === 0; 
+    const isNoted: boolean = !isMaster && !channel.isSend;
+
+    const handleSetChannelType = useCallback(
+        async (isSend: boolean) => {
+            const result: TrackerHubResult<void> = await client.updateChannelType({
+                frame: frameNumber,
+                channel: channelNumber,
+                isSend: isSend,
+            });
+
+            if (!result.isSuccessful) {
+                Toasts.error(result.errorMessage ?? UNEXPECTED_ERROR_MESSAGE);
+            }
+        },
+        [client, frameNumber, channelNumber]
+    );
+
+    const handleSetChannelMute = useCallback(
+        async (isOn: boolean) => {
+            const result: TrackerHubResult<void> = await client.updateChannelMute({
+                frame: frameNumber,
+                channel: channelNumber,
+                isOn: isOn,
+            });
+
+            if (!result.isSuccessful) {
+                Toasts.error(result.errorMessage ?? UNEXPECTED_ERROR_MESSAGE);
+            }
+        },
+        [client, frameNumber, channelNumber]
+    );
+
+    const handleSetChannelSolo = useCallback(
+        async (isSolo: boolean) => {
+            const result: TrackerHubResult<void> = await client.updateChannelSolo({
+                frame: frameNumber,
+                channel: channelNumber,
+                isSolo: isSolo,
+            });
+
+            if (!result.isSuccessful) {
+                Toasts.error(result.errorMessage ?? UNEXPECTED_ERROR_MESSAGE);
+            }
+        },
+        [client, frameNumber, channelNumber]
+    );
 
     return (
         <div className={`${MIN_HEADER_H} ${MIN_CHANNEL_W} bg-background-darker p-4 flex flex-col space-y-2 border-b border-r`}>
@@ -32,12 +84,12 @@ export const ChannelHeader = ({ frame, channel, isNoted }: ChannelHeaderProps) =
                 className={
                     `flex justify-center items-center h-8 select-none
                     ${!isMaster && "cursor-pointer"} 
-                    ${isMuted ? "bg-background-darker text-muted-foreground" : "bg-secondary text-foreground"}
+                    ${!channel.isOn ? "bg-background-darker text-muted-foreground" : "bg-secondary text-foreground"}
                     `
                 }
-                onClick={() => !isMaster && setIsMuted(!isMuted)}    
+                onClick={() => !isMaster && handleSetChannelMute(!channel.isOn)}    
             >
-                {isMaster ? "Master" : `Channel ${channel}`}
+                {isMaster ? "Master" : `Channel ${channelNumber}`}
             </p>
             <div className="flex flex-row justify-between items-center space-x-2">
                 <Button
@@ -45,9 +97,10 @@ export const ChannelHeader = ({ frame, channel, isNoted }: ChannelHeaderProps) =
                     className={
                         `h-8 flex-1 rounded-none cursor-pointer 
                         ${isMaster && "invisible"} 
-                        ${!isNoted && "bg-positive-background text-positive-foreground hover:bg-positive-background/75 hover:text-positive-foreground/75"}
+                        ${channel.isSend && "bg-positive-background text-positive-foreground hover:bg-positive-background/75 hover:text-positive-foreground/75"}
                         `
                     }
+                    onClick={() => handleSetChannelType(!channel.isSend)}
                 >
                     Send
                 </Button>
@@ -57,14 +110,14 @@ export const ChannelHeader = ({ frame, channel, isNoted }: ChannelHeaderProps) =
                     className={
                         `w-8 h-8 rounded-none cursor-pointer
                         ${isMaster && "invisible"} 
-                        ${isSolo 
+                        ${channel.isSolo 
                             ? 
                             "bg-positive-background text-positive-foreground hover:bg-positive-background/75 hover:text-positive-foreground/75" :
                             "bg-negative-background text-negative-foreground hover:bg-negative-background/75 hover:text-negative-foreground/75"
                         }
                         `
                     }
-                    onClick={() => setIsSolo(!isSolo)}
+                    onClick={() => handleSetChannelSolo(!channel.isSolo)}
                 >
                     S
                 </Button>
@@ -77,7 +130,7 @@ export const ChannelHeader = ({ frame, channel, isNoted }: ChannelHeaderProps) =
                 onChange={setFxGroupsOpen}
                 justify={NavigationCounterJustify.Between}
             />
-            { !isMaster && isNoted && 
+            { isNoted && 
                 <NavigationCounter 
                     label="Notes"
                     value={noteGroupsOpen}
@@ -96,11 +149,13 @@ export const ChannelHeader = ({ frame, channel, isNoted }: ChannelHeaderProps) =
 export interface ChannelLinesProps extends ChannelHeaderProps {
     lineCount: number;
     linesPerBeat: number;
-    noteGroupsOpen: number;
-    fxGroupsOpen: number;
 }
 
-export const ChannelLines = ({ frame, channel, isNoted, lineCount, linesPerBeat, noteGroupsOpen, fxGroupsOpen }: ChannelLinesProps) => {
+export const ChannelLines = ({ client, frameNumber, channelNumber, lineCount, linesPerBeat }: ChannelLinesProps) => {
+
+    const channel = useAtomValue(channelAtomFamily(channelNumber));
+    const isMaster: boolean = channelNumber === 0; 
+    const isNoted: boolean = !isMaster && !channel.isSend;
 
     return (
         <div className={`${MIN_CHANNEL_W} flex flex-col`}>
@@ -108,14 +163,14 @@ export const ChannelLines = ({ frame, channel, isNoted, lineCount, linesPerBeat,
                 <LineSpacer />
                 {Array.from({ length: lineCount }).map((_, i) => (
                     <Line
-                        key={`${channel}:${i}`}
-                        frame={frame}
-                        channel={channel}
+                        key={`${channelNumber}:${i}`}
+                        frame={frameNumber}
+                        channel={channelNumber}
                         line={i}
                         isNoted={isNoted}
                         linesPerBeat={linesPerBeat}
-                        noteGroupsOpen={noteGroupsOpen}
-                        fxGroupsOpen={fxGroupsOpen}
+                        noteGroupsOpen={1}
+                        fxGroupsOpen={1}
                     />
                 ))}
                 <LineSpacer />
@@ -146,7 +201,7 @@ export const ChannelLineNumbers = ({ lineCount, linesPerBeat, isRightHandSide = 
                 {Array.from({ length: lineCount}, (_, i) => (
                     <LineNumber
                         key={i}
-                        line={i}
+                        lineNumber={i}
                         isDownbeat={i % linesPerBeat === 0}
                         isRightHandSide={isRightHandSide}
                     />
@@ -159,14 +214,14 @@ export const ChannelLineNumbers = ({ lineCount, linesPerBeat, isRightHandSide = 
 }
 
 interface LineNumberProps {
-    line: number;
+    lineNumber: number;
     isDownbeat: boolean;
     isRightHandSide: boolean;
 }
 
-const LineNumber = ({ line, isDownbeat, isRightHandSide }: LineNumberProps) => {
+const LineNumber = ({ lineNumber, isDownbeat, isRightHandSide }: LineNumberProps) => {
 
-    const isLineSelected = useSelection((state) => state.selection?.line === line);
+    const isLineSelected = useSelection((state) => state.selection?.line === lineNumber);
     const isFocusedAndSelected = useSelection((state) => state.isFocused && isLineSelected);
 
     let bgColor = "bg-background-darker";
@@ -196,7 +251,7 @@ const LineNumber = ({ line, isDownbeat, isRightHandSide }: LineNumberProps) => {
                 `
             }
         >
-            {toTwoDigitHex(line)}
+            {toTwoDigitHex(lineNumber)}
         </div>
     )
 }

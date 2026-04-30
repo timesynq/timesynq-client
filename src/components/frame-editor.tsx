@@ -5,11 +5,11 @@ import { Toasts } from "@/utils/toasts";
 import { Counter } from "./counter";
 import { WIP_CONSTANTS } from "@/api/wips/wip";
 import { Frame, TrackerHubResult } from "@/api/tracker/tracker-hub-models";
-import { UpdateLineCountCommand, UpdateLinesPerBeatCommand } from "@/api/tracker/tracker-hub-commands";
+import { UpdateChannelMuteCommand, UpdateChannelSoloCommand, UpdateChannelTypeCommand, UpdateLineCountCommand, UpdateLinesPerBeatCommand } from "@/api/tracker/tracker-hub-commands";
 import { ChannelHeader, ChannelLineNumbers, ChannelLineNumbersHeader, ChannelLines } from "./channel";
 import OutsideClickHandler from 'react-outside-click-handler';
 import { useSelection } from "@/contexts/selection-provider";
-import { currentFrameNumberAtom, frameAtomFamily, octaveAtom, setIndividualFrameAtom } from "@/atoms/tracker-atoms";
+import { channelCountAtom, currentFrameNumberAtom, frameAtomFamily, octaveAtom, setIndividualChannelAtom, setIndividualFrameAtom } from "@/atoms/tracker-atoms";
 import { useAtom, useAtomValue } from "jotai";
 
 export interface FrameEditorProps {
@@ -18,10 +18,12 @@ export interface FrameEditorProps {
 
 export const FrameEditor = ({ client }: FrameEditorProps) => {
     
+    const channelCount = useAtomValue(channelCountAtom);
     const frameNumber = useAtomValue(currentFrameNumberAtom);
     const frame = useAtomValue(frameAtomFamily(frameNumber));
 
     const [, setIndividualFrame] = useAtom(setIndividualFrameAtom);
+    const [, setIndividualChannel] = useAtom(setIndividualChannelAtom);
 
     useEffect(() => {
         const lineCountUpdatedCallback = (command: UpdateLineCountCommand) => {
@@ -34,11 +36,29 @@ export const FrameEditor = ({ client }: FrameEditorProps) => {
         }
         const unsubscribeLinesPerBeatUpdated = client.subscribeLinesPerBeatUpdated(linesPerBeatUpdatedCallback);
 
+        const channelTypeUpdatedCallback = (command: UpdateChannelTypeCommand) => {
+            setIndividualChannel({ frameNumber: command.frame, channelNumber: command.channel, updater: (channel) => ({ ...channel, isSend: command.isSend })}); 
+        }
+        const unsubscribeChannelTypeUpdated = client.subscribeChannelTypeUpdated(channelTypeUpdatedCallback);
+
+        const channelMuteUpdatedCallback = (command: UpdateChannelMuteCommand) => {
+            setIndividualChannel({ frameNumber: command.frame, channelNumber: command.channel, updater: (channel) => ({ ...channel, isOn: command.isOn })});
+        }
+        const unsubscribeChannelMuteUpdated = client.subscribeChannelMuteUpdated(channelMuteUpdatedCallback);
+
+        const channelSoloUpdatedCallback = (command: UpdateChannelSoloCommand) => {
+            setIndividualChannel({ frameNumber: command.frame, channelNumber: command.channel, updater: (channel) => ({ ...channel, isSolo: command.isSolo })});
+        }
+        const unsubscribeChannelSoloUpdated = client.subscribeChannelSoloUpdated(channelSoloUpdatedCallback);
+
         return () => {
             unsubscribeLineCountUpdated();
             unsubscribeLinesPerBeatUpdated();
+            unsubscribeChannelTypeUpdated();
+            unsubscribeChannelMuteUpdated();
+            unsubscribeChannelSoloUpdated();
         }
-    }, [frame]);
+    }, [client, frame]);
     
     const setIsFocused = useSelection((state) => state.setIsFocused);
 
@@ -51,59 +71,33 @@ export const FrameEditor = ({ client }: FrameEditorProps) => {
             <div className="flex flex-col h-full min-h-0">
                 <div className="flex flex-row w-full">
                     <ChannelLineNumbersHeader />
-                    <ChannelHeader
-                        frame={frame.frameNumber}
-                        channel={0}
-                        isNoted={false}
-                    />
-                    <ChannelHeader
-                        frame={frame.frameNumber}
-                        channel={1}
-                        isNoted
-                    />
-                    <ChannelHeader
-                        frame={frame.frameNumber}
-                        channel={2}
-                        isNoted={false}
-                    />
+                    { Array.from({ length: channelCount }).map((_, index) => (
+                        <ChannelHeader
+                            client={client}
+                            frameNumber={frame.frameNumber}
+                            channelNumber={index}
+                        />
+                    ))}
                     <ChannelLineNumbersHeader />
                 </div>
                 <OutsideClickHandler 
                     display="contents"
                     onOutsideClick={() => setIsFocused(false)}
                 >
-                    <div className="flex flex-row w-full overflow-y-auto overflow-x-hidden" onClick={() => setIsFocused(true)}>
+                    <div className="flex flex-row w-full overflow-y-auto" onClick={() => setIsFocused(true)}>
                         <ChannelLineNumbers
                             lineCount={frame.length}
                             linesPerBeat={frame.linesPerBeat}
                         />
-                        <ChannelLines
-                            frame={frame.frameNumber}
-                            channel={0}
-                            isNoted={false}
-                            lineCount={frame.length}
-                            linesPerBeat={frame.linesPerBeat}
-                            noteGroupsOpen={1}
-                            fxGroupsOpen={1}
-                        />
-                        <ChannelLines
-                            frame={frame.frameNumber}
-                            channel={1}
-                            isNoted
-                            lineCount={frame.length}
-                            linesPerBeat={frame.linesPerBeat}
-                            noteGroupsOpen={1}
-                            fxGroupsOpen={1}
-                        />
-                        <ChannelLines
-                            frame={frame.frameNumber}
-                            channel={2}
-                            isNoted={false}
-                            lineCount={frame.length}
-                            linesPerBeat={frame.linesPerBeat}
-                            noteGroupsOpen={1}
-                            fxGroupsOpen={1}
-                        />
+                        { Array.from({ length: channelCount }).map((_, index) => (
+                            <ChannelLines 
+                                client={client}
+                                frameNumber={frame.frameNumber}
+                                channelNumber={index}
+                                lineCount={frame.length}
+                                linesPerBeat={frame.linesPerBeat}
+                            />
+                        ))}
                         <ChannelLineNumbers 
                             lineCount={frame.length}
                             linesPerBeat={frame.linesPerBeat}

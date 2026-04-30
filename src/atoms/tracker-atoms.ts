@@ -1,4 +1,4 @@
-import { Frame, Message, RoomMember, RoomMemberInfo, SequencerLine, TrackerConnection } from '@/api/tracker/tracker-hub-models';
+import { Channel, Frame, Message, RoomMember, RoomMemberInfo, SequencerLine, TrackerConnection } from '@/api/tracker/tracker-hub-models';
 import { Wip, WIP_CONSTANTS } from '@/api/wips/wip';
 import { generateRandomChatColor } from '@/utils/chat-color';
 import { atom } from 'jotai'
@@ -195,5 +195,79 @@ export const setIndividualFrameAtom = atom(
         updatedFrames.set(index, updater(getFrameOrDefault(currentFrames, index)));
 
         set(framesAtom, updatedFrames);
+    }
+)
+
+export const currentChannelsAtom = atom<Map<number, Channel>, [Map<number, Channel>], void>(
+    (get) => {
+        const newMap = new Map<number, Channel>();
+        const frameNumber: number = get(currentFrameNumberAtom);
+        const frame: Frame = get(frameAtomFamily(frameNumber));
+        frame.channels.forEach((channel: Channel) => {
+            newMap.set(channel.channelNumber, channel);
+        });
+        return newMap;
+    },
+    (get, set, newChannelsMap) => {
+        const frameNumber = get(currentFrameNumberAtom);
+        const updatedChannels: Channel[] = Array.from(newChannelsMap.values());
+        set(setIndividualFrameAtom, { index: frameNumber, updater: (frame) => ({...frame, updatedChannels})})
+    }
+)
+const getChannelOrDefaultMap = (map: Map<number, Channel>, channelNumber: number): Channel => {
+    return map.get(channelNumber) ?? {
+        channelNumber: channelNumber,
+        isSend: false,
+        isOn: true,
+        isSolo: false,
+        lines: []
+    }
+}
+const getChannelOrDefaultArr = (arr: Channel[], channelNumber: number): Channel => {
+    let channelExists: boolean = false;
+    let channelIndex: number = -1;
+    arr.forEach((channel, index) => {
+        if (!channelExists && channel.channelNumber === channelNumber){
+            channelExists = true;
+            channelIndex = index;
+        }
+    })
+
+    return channelExists ? arr[channelIndex] : {
+        channelNumber: channelNumber,
+        isSend: false,
+        isOn: true,
+        isSolo: false,
+        lines: []
+    }
+}
+export const channelAtomFamily = atomFamily((channelNumber: number) => 
+    atom((get) => getChannelOrDefaultMap(get(currentChannelsAtom), channelNumber))
+)
+export const setIndividualChannelAtom = atom(
+    null,
+    (
+        _,
+        set,
+        { frameNumber, channelNumber, updater } : { frameNumber: number, channelNumber: number, updater: (channel: Channel) => Channel }
+    ) => {
+        set(setIndividualFrameAtom, { index: frameNumber, updater: (frame) => {
+            const updatedChannel: Channel = updater(getChannelOrDefaultArr(frame.channels, channelNumber));
+            const updatedChannels: Channel[] = Array.from(frame.channels);
+            let placed: boolean = false;
+            updatedChannels.forEach((channel, index) => {
+                if (channel.channelNumber === channelNumber){
+                    updatedChannels[index] = updatedChannel;
+                    placed = true;
+                }
+            })
+            if (!placed){
+                updatedChannels.push(updatedChannel);
+            }
+            return {
+                ...frame,
+                channels: updatedChannels
+            }
+        }})
     }
 )
