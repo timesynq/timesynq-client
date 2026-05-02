@@ -1,4 +1,4 @@
-import { Channel, Frame, Message, RoomMember, RoomMemberInfo, SequencerLine, TrackerConnection } from '@/api/tracker/tracker-hub-models';
+import { ChannelMetadata, Frame, FrameMetadata, Message, RoomMember, RoomMemberInfo, SequencerLine, TrackerConnection } from '@/api/tracker/tracker-hub-models';
 import { Wip, WIP_CONSTANTS } from '@/api/wips/wip';
 import { generateRandomChatColor } from '@/utils/chat-color';
 import { atom } from 'jotai'
@@ -157,117 +157,107 @@ export const currentFrameNumberAtom = atom((get) => {
 
 export const octaveAtom = atom<number>(4);
 
-export const framesAtom = atom<Map<number, Frame>>(new Map<number, Frame>());
-export const initFramesAtom = atom(
+const frameMetadatasAtom = atom<Map<number, FrameMetadata>>(new Map<number, FrameMetadata>());
+export const initFrameMetadatasAtom = atom(
     null,
     (
         get,
         set,
         { frames } : { frames: Frame[] }
     ) => {
-        const newMap = new Map<number, Frame>(get(framesAtom));
+        const newMap = new Map<number, FrameMetadata>(get(frameMetadatasAtom));
         frames.forEach((frame) => {
-            newMap.set(frame.frameNumber, frame);
+            newMap.set(frame.frameNumber, {
+                frameNumber: frame.frameNumber,
+                length: frame.length,
+                linesPerBeat: frame.linesPerBeat,
+            });
         }); 
-        set(framesAtom, newMap);
+        set(frameMetadatasAtom, newMap);
     }
 )
-const getFrameOrDefault = (map: Map<number, Frame>, frameNumber: number): Frame => {
+const getFrameMetadataOrDefault = (map: Map<number, FrameMetadata>, frameNumber: number): FrameMetadata => {
     return map.get(frameNumber) ?? {
         frameNumber: frameNumber,
         length: WIP_CONSTANTS.DEFAULT_LINES,
         linesPerBeat: WIP_CONSTANTS.DEFAULT_LINES_PER_BEAT,
-        channels: []
     };
 }
-export const frameAtomFamily = atomFamily((frameNumber: number) => 
-    atom((get) => getFrameOrDefault(get(framesAtom), frameNumber))
+export const frameMetadataAtomFamily = atomFamily((frameNumber: number) => 
+    atom((get) => getFrameMetadataOrDefault(get(frameMetadatasAtom), frameNumber))
 )
-export const setIndividualFrameAtom = atom(
+export const setIndividualFrameMetadataAtom = atom(
     null,
     (
         get, 
         set,
-        { index, updater } : { index: number, updater: (frame: Frame) => Frame }
+        { index, updater } : { index: number, updater: (frameMetadata: FrameMetadata) => FrameMetadata }
     ) => {
-        const currentFrames: Map<number, Frame> = get(framesAtom);
-        const updatedFrames: Map<number, Frame> = new Map<number, Frame>(currentFrames);
-        updatedFrames.set(index, updater(getFrameOrDefault(currentFrames, index)));
+        const currentFrameMetadatas: Map<number, FrameMetadata> = get(frameMetadatasAtom);
+        const updatedFrameMetadatas: Map<number, FrameMetadata> = new Map<number, FrameMetadata>(currentFrameMetadatas);
+        updatedFrameMetadatas.set(index, updater(getFrameMetadataOrDefault(currentFrameMetadatas, index)));
 
-        set(framesAtom, updatedFrames);
+        set(frameMetadatasAtom, updatedFrameMetadatas);
     }
 )
 
-export const currentChannelsAtom = atom<Map<number, Channel>, [Map<number, Channel>], void>(
-    (get) => {
-        const newMap = new Map<number, Channel>();
-        const frameNumber: number = get(currentFrameNumberAtom);
-        const frame: Frame = get(frameAtomFamily(frameNumber));
-        frame.channels.forEach((channel: Channel) => {
-            newMap.set(channel.channelNumber, channel);
-        });
-        return newMap;
-    },
-    (get, set, newChannelsMap) => {
-        const frameNumber = get(currentFrameNumberAtom);
-        const updatedChannels: Channel[] = Array.from(newChannelsMap.values());
-        set(setIndividualFrameAtom, { index: frameNumber, updater: (frame) => ({...frame, updatedChannels})})
-    }
-)
-const getChannelOrDefaultMap = (map: Map<number, Channel>, channelNumber: number): Channel => {
-    return map.get(channelNumber) ?? {
-        channelNumber: channelNumber,
-        isSend: false,
-        isOn: true,
-        isSolo: false,
-        lines: []
-    }
-}
-const getChannelOrDefaultArr = (arr: Channel[], channelNumber: number): Channel => {
-    let channelExists: boolean = false;
-    let channelIndex: number = -1;
-    arr.forEach((channel, index) => {
-        if (!channelExists && channel.channelNumber === channelNumber){
-            channelExists = true;
-            channelIndex = index;
-        }
-    })
-
-    return channelExists ? arr[channelIndex] : {
-        channelNumber: channelNumber,
-        isSend: false,
-        isOn: true,
-        isSolo: false,
-        lines: []
-    }
-}
-export const channelAtomFamily = atomFamily((channelNumber: number) => 
-    atom((get) => getChannelOrDefaultMap(get(currentChannelsAtom), channelNumber))
-)
-export const setIndividualChannelAtom = atom(
+const channelMetadatasAtom = atom<Map<string, ChannelMetadata>>(new Map<string, ChannelMetadata>());
+const channelKey = (frameNumber: number, channelNumber: number): string => `${frameNumber}:${channelNumber}`;
+export const initChannelMetadatasAtom = atom(
     null,
     (
-        _,
+        get, 
         set,
-        { frameNumber, channelNumber, updater } : { frameNumber: number, channelNumber: number, updater: (channel: Channel) => Channel }
+        { frames } : { frames: Frame[] }
     ) => {
-        set(setIndividualFrameAtom, { index: frameNumber, updater: (frame) => {
-            const updatedChannel: Channel = updater(getChannelOrDefaultArr(frame.channels, channelNumber));
-            const updatedChannels: Channel[] = Array.from(frame.channels);
-            let placed: boolean = false;
-            updatedChannels.forEach((channel, index) => {
-                if (channel.channelNumber === channelNumber){
-                    updatedChannels[index] = updatedChannel;
-                    placed = true;
-                }
+        const newMap = new Map<string, ChannelMetadata>(get(channelMetadatasAtom));
+        frames.forEach((frame) => {
+            frame.channels.forEach((channel) => {
+                newMap.set(
+                    channelKey(frame.frameNumber, channel.channelNumber),
+                    {
+                        channelNumber: channel.channelNumber,
+                        isSend: channel.isSend,
+                        isOn: channel.isOn,
+                        isSolo: channel.isSolo
+                    }
+                )
             })
-            if (!placed){
-                updatedChannels.push(updatedChannel);
-            }
-            return {
-                ...frame,
-                channels: updatedChannels
-            }
-        }})
+        })
+        set(channelMetadatasAtom, newMap);
+    }
+)
+const defaultCache = new Map<string, ChannelMetadata>();
+const getChannelMetadataOrDefault = (map: Map<string, ChannelMetadata>, frameNumber: number, channelNumber: number): ChannelMetadata => {
+    const key: string = channelKey(frameNumber, channelNumber);
+
+    if (map.has(key)) return map.get(key)!;
+
+    if (!defaultCache.has(key)) {
+        defaultCache.set(key, {
+            channelNumber: channelNumber,
+            isSend: false,
+            isOn: true,
+            isSolo: false,
+        });
+    }
+
+    return defaultCache.get(key)!;
+};
+export const channelMetadataAtomFamily = atomFamily(({frameNumber, channelNumber} : {frameNumber: number, channelNumber: number}) => 
+    atom((get) => getChannelMetadataOrDefault(get(channelMetadatasAtom), frameNumber, channelNumber))
+)
+export const setIndividualChannelMetadataAtom = atom(
+    null,
+    (
+        get, 
+        set,
+        { frameNumber, channelNumber, updater } : { frameNumber: number, channelNumber: number, updater: (channelMetadata: ChannelMetadata) => ChannelMetadata }
+    ) => {
+        const currentChannelMetadatas: Map<string, ChannelMetadata> = get(channelMetadatasAtom);
+        const updatedChannelMetadatas: Map<string, ChannelMetadata> = new Map<string, ChannelMetadata>(currentChannelMetadatas);
+        updatedChannelMetadatas.set(channelKey(frameNumber, channelNumber), updater(getChannelMetadataOrDefault(currentChannelMetadatas, frameNumber, channelNumber)));
+
+        set(channelMetadatasAtom, updatedChannelMetadatas);
     }
 )

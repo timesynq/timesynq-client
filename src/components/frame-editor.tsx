@@ -4,12 +4,12 @@ import { UNEXPECTED_ERROR_MESSAGE } from "@/api/api-error";
 import { Toasts } from "@/utils/toasts";
 import { Counter } from "./counter";
 import { WIP_CONSTANTS } from "@/api/wips/wip";
-import { Frame, TrackerHubResult } from "@/api/tracker/tracker-hub-models";
+import { FrameMetadata, TrackerHubResult } from "@/api/tracker/tracker-hub-models";
 import { UpdateChannelMuteCommand, UpdateChannelSoloCommand, UpdateChannelTypeCommand, UpdateLineCountCommand, UpdateLinesPerBeatCommand } from "@/api/tracker/tracker-hub-commands";
 import { ChannelHeader, ChannelLineNumbers, ChannelLineNumbersHeader, ChannelLines } from "./channel";
 import OutsideClickHandler from 'react-outside-click-handler';
 import { useSelection } from "@/contexts/selection-provider";
-import { channelCountAtom, currentFrameNumberAtom, frameAtomFamily, octaveAtom, setIndividualChannelAtom, setIndividualFrameAtom } from "@/atoms/tracker-atoms";
+import { channelCountAtom, currentFrameNumberAtom, frameMetadataAtomFamily, octaveAtom, setIndividualChannelMetadataAtom, setIndividualFrameMetadataAtom } from "@/atoms/tracker-atoms";
 import { useAtom, useAtomValue } from "jotai";
 
 export interface FrameEditorProps {
@@ -20,34 +20,34 @@ export const FrameEditor = ({ client }: FrameEditorProps) => {
     
     const channelCount = useAtomValue(channelCountAtom);
     const frameNumber = useAtomValue(currentFrameNumberAtom);
-    const frame = useAtomValue(frameAtomFamily(frameNumber));
+    const frameMetadata = useAtomValue(frameMetadataAtomFamily(frameNumber));
 
-    const [, setIndividualFrame] = useAtom(setIndividualFrameAtom);
-    const [, setIndividualChannel] = useAtom(setIndividualChannelAtom);
+    const [, setIndividualFrameMetadata] = useAtom(setIndividualFrameMetadataAtom);
+    const [, setIndividualChannelMetadata] = useAtom(setIndividualChannelMetadataAtom);
 
     useEffect(() => {
         const lineCountUpdatedCallback = (command: UpdateLineCountCommand) => {
-            setIndividualFrame({ index: command.frame, updater: (frame) => ({...frame, length: command.newLineCount})});
+            setIndividualFrameMetadata({ index: command.frame, updater: (frameMetadata) => ({...frameMetadata, length: command.newLineCount})});
         }
         const unsubscribeLineCountUpdated = client.subscribeLineCountUpdated(lineCountUpdatedCallback);
 
         const linesPerBeatUpdatedCallback = (command: UpdateLinesPerBeatCommand) => {
-                setIndividualFrame({ index: command.frame, updater: (frame) => ({...frame, linesPerBeat: command.newLinesPerBeat})});
+            setIndividualFrameMetadata({ index: command.frame, updater: (frameMetadata) => ({...frameMetadata, linesPerBeat: command.newLinesPerBeat})});
         }
         const unsubscribeLinesPerBeatUpdated = client.subscribeLinesPerBeatUpdated(linesPerBeatUpdatedCallback);
 
         const channelTypeUpdatedCallback = (command: UpdateChannelTypeCommand) => {
-            setIndividualChannel({ frameNumber: command.frame, channelNumber: command.channel, updater: (channel) => ({ ...channel, isSend: command.isSend })}); 
+            setIndividualChannelMetadata({ frameNumber: command.frame, channelNumber: command.channel, updater: (channelMetadata) => ({ ...channelMetadata, isSend: command.isSend })}); 
         }
         const unsubscribeChannelTypeUpdated = client.subscribeChannelTypeUpdated(channelTypeUpdatedCallback);
 
         const channelMuteUpdatedCallback = (command: UpdateChannelMuteCommand) => {
-            setIndividualChannel({ frameNumber: command.frame, channelNumber: command.channel, updater: (channel) => ({ ...channel, isOn: command.isOn })});
+            setIndividualChannelMetadata({ frameNumber: command.frame, channelNumber: command.channel, updater: (channelMetadata) => ({ ...channelMetadata, isOn: command.isOn })});
         }
         const unsubscribeChannelMuteUpdated = client.subscribeChannelMuteUpdated(channelMuteUpdatedCallback);
 
         const channelSoloUpdatedCallback = (command: UpdateChannelSoloCommand) => {
-            setIndividualChannel({ frameNumber: command.frame, channelNumber: command.channel, updater: (channel) => ({ ...channel, isSolo: command.isSolo })});
+            setIndividualChannelMetadata({ frameNumber: command.frame, channelNumber: command.channel, updater: (channelMetadata) => ({ ...channelMetadata, isSolo: command.isSolo })});
         }
         const unsubscribeChannelSoloUpdated = client.subscribeChannelSoloUpdated(channelSoloUpdatedCallback);
 
@@ -58,7 +58,7 @@ export const FrameEditor = ({ client }: FrameEditorProps) => {
             unsubscribeChannelMuteUpdated();
             unsubscribeChannelSoloUpdated();
         }
-    }, [client, frame]);
+    }, [client, frameMetadata]);
     
     const setIsFocused = useSelection((state) => state.setIsFocused);
 
@@ -66,7 +66,7 @@ export const FrameEditor = ({ client }: FrameEditorProps) => {
         <div className="flex flex-col w-full h-full min-h-0 bg-background-darker">
             <FrameEditorOptions 
                 client={client}
-                frame={frame}
+                frameMetadata={frameMetadata}
             />
             <div className="flex flex-col h-full min-h-0">
                 <div className="flex flex-row w-full">
@@ -74,7 +74,7 @@ export const FrameEditor = ({ client }: FrameEditorProps) => {
                     { Array.from({ length: channelCount }).map((_, index) => (
                         <ChannelHeader
                             client={client}
-                            frameNumber={frame.frameNumber}
+                            frameNumber={frameMetadata.frameNumber}
                             channelNumber={index}
                         />
                     ))}
@@ -86,21 +86,21 @@ export const FrameEditor = ({ client }: FrameEditorProps) => {
                 >
                     <div className="flex flex-row w-full overflow-y-auto" onClick={() => setIsFocused(true)}>
                         <ChannelLineNumbers
-                            lineCount={frame.length}
-                            linesPerBeat={frame.linesPerBeat}
+                            lineCount={frameMetadata.length}
+                            linesPerBeat={frameMetadata.linesPerBeat}
                         />
                         { Array.from({ length: channelCount }).map((_, index) => (
                             <ChannelLines 
                                 client={client}
-                                frameNumber={frame.frameNumber}
+                                frameNumber={frameMetadata.frameNumber}
                                 channelNumber={index}
-                                lineCount={frame.length}
-                                linesPerBeat={frame.linesPerBeat}
+                                lineCount={frameMetadata.length}
+                                linesPerBeat={frameMetadata.linesPerBeat}
                             />
                         ))}
                         <ChannelLineNumbers 
-                            lineCount={frame.length}
-                            linesPerBeat={frame.linesPerBeat}
+                            lineCount={frameMetadata.length}
+                            linesPerBeat={frameMetadata.linesPerBeat}
                             isRightHandSide
                         />
                     </div>
@@ -112,15 +112,15 @@ export const FrameEditor = ({ client }: FrameEditorProps) => {
 
 interface FrameEditorOptionsProps {
     client: TrackerHubClient;
-    frame: Frame;
+    frameMetadata: FrameMetadata;
 }
 
-const FrameEditorOptions = ({ client, frame }: FrameEditorOptionsProps) => {
+const FrameEditorOptions = ({ client, frameMetadata }: FrameEditorOptionsProps) => {
 
     const handleSetLineCount = useCallback(
         async (newLineCount: number) => {
             const result: TrackerHubResult<void> = await client.updateLineCount({
-                frame: frame.frameNumber,
+                frame: frameMetadata.frameNumber,
                 newLineCount
             });
 
@@ -128,13 +128,13 @@ const FrameEditorOptions = ({ client, frame }: FrameEditorOptionsProps) => {
                 Toasts.error(result.errorMessage ?? UNEXPECTED_ERROR_MESSAGE);
             }
         },
-        [client, frame]
+        [client, frameMetadata]
     );
 
     const handleSetLinesPerBeat = useCallback(
         async (newLinesPerBeat: number) => {
             const result: TrackerHubResult<void> = await client.updateLinesPerBeat({
-                frame: frame.frameNumber,
+                frame: frameMetadata.frameNumber,
                 newLinesPerBeat
             });
 
@@ -142,7 +142,7 @@ const FrameEditorOptions = ({ client, frame }: FrameEditorOptionsProps) => {
                 Toasts.error(result.errorMessage ?? UNEXPECTED_ERROR_MESSAGE);
             }
         },
-        [client, frame]
+        [client, frameMetadata]
     );
 
     const [octave, setOctave] = useAtom(octaveAtom);
@@ -151,14 +151,14 @@ const FrameEditorOptions = ({ client, frame }: FrameEditorOptionsProps) => {
         <div className="flex flex-row w-full justify-center items-center space-x-12 p-4 border-b">
             <Counter
                 label="Lines"
-                value={frame.length}
+                value={frameMetadata.length}
                 min={WIP_CONSTANTS.MIN_LINES}
                 max={WIP_CONSTANTS.MAX_LINES}
                 onChange={handleSetLineCount}
             />
             <Counter
                 label="LPB"
-                value={frame.linesPerBeat}
+                value={frameMetadata.linesPerBeat}
                 min={WIP_CONSTANTS.MIN_LINES_PER_BEAT}
                 max={WIP_CONSTANTS.MAX_LINES_PER_BEAT}
                 onChange={handleSetLinesPerBeat}

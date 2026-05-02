@@ -54,18 +54,24 @@ export type SequencerLine = {
     isChannelOn: boolean[],
 }
 
-export type Frame = {
+export type FrameMetadata = {
     frameNumber: number,
     length: number,
     linesPerBeat: number,
+}
+
+export type Frame = FrameMetadata & {
     channels: Channel[],
 }
 
-export type Channel = {
+export type ChannelMetadata = {
     channelNumber: number,
     isSend: boolean,
     isOn: boolean,
     isSolo: boolean,
+}
+
+export type Channel = ChannelMetadata & {
     lines: Line[],
 }
 

@@ -1,7 +1,7 @@
 import { UNEXPECTED_ERROR_MESSAGE } from "@/api/api-error";
 import { TrackerHubClient } from "@/api/tracker/tracker-hub-client";
 import { EXAMPLE_ROOM_INITIALIZER, Message, RoomInitializer, RoomMember, RoomMemberInfo, TrackerConnection, TrackerHubResult } from "@/api/tracker/tracker-hub-models";
-import { bpmAtom, channelCountAtom, initFramesAtom, initSequencerLinesAtom, sequencerLengthAtom, setMemberAtom, setMembersAtom, setRemoveMemberAtom, wipMetadataAtom } from "@/atoms/tracker-atoms";
+import { bpmAtom, channelCountAtom, initChannelMetadatasAtom, initFrameMetadatasAtom, initSequencerLinesAtom, sequencerLengthAtom, setMemberAtom, setMembersAtom, setRemoveMemberAtom, wipMetadataAtom } from "@/atoms/tracker-atoms";
 import { ChatBox } from "@/components/chat-box";
 import { FrameEditor } from "@/components/frame-editor";
 import { OwnerOnlyWipOptions } from "@/components/owner-only-wip-options";
@@ -85,7 +85,8 @@ const RoomInner = ({ wipId }: RoomInnerProps) => {
     const setInitialChannelCount = useSetAtom(channelCountAtom);
     const setSequencerLength = useSetAtom(sequencerLengthAtom);
     const [, initSequencerLines] = useAtom(initSequencerLinesAtom);
-    const [, initFrames] = useAtom(initFramesAtom);
+    const [, initFrameMetadatas] = useAtom(initFrameMetadatasAtom);
+    const [, initChannelMetadatas] = useAtom(initChannelMetadatasAtom);
 
     useEffect(() => {
         let unsubscribeUserJoinedRoom      = (): boolean => { return false; }
@@ -150,7 +151,8 @@ const RoomInner = ({ wipId }: RoomInnerProps) => {
             setMembers({ existingMembers: new Map<string, RoomMemberInfo>() });
             setSequencerLength(dummyRoomInitailizer.sequencer.length);
             initSequencerLines({ lines: dummyRoomInitailizer.sequencer.lines });
-            initFrames({ frames: dummyRoomInitailizer.frames });
+            initFrameMetadatas({ frames: dummyRoomInitailizer.frames });
+            initChannelMetadatas({ frames: dummyRoomInitailizer.frames });
 
             setIsReady(true);
         }

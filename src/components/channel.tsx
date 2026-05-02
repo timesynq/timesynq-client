@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { WIP_CONSTANTS } from "@/api/wips/wip";
 import { NavigationCounter, NavigationCounterJustify } from "./navigation-counter";
 import { Button } from "./ui/button";
@@ -7,7 +7,7 @@ import { LineSpacer } from "./line-spacer";
 import { toTwoDigitHex } from "@/utils/hex";
 import { useSelection } from "@/contexts/selection-provider";
 import { useAtomValue } from "jotai";
-import { channelAtomFamily } from "@/atoms/tracker-atoms";
+import { channelMetadataAtomFamily } from "@/atoms/tracker-atoms";
 import { TrackerHubResult } from "@/api/tracker/tracker-hub-models";
 import { TrackerHubClient } from "@/api/tracker/tracker-hub-client";
 import { Toasts } from "@/utils/toasts";
@@ -25,13 +25,17 @@ export interface ChannelHeaderProps {
 
 export const ChannelHeader = ({ client, frameNumber, channelNumber }: ChannelHeaderProps) => {
 
-    const channel = useAtomValue(channelAtomFamily(channelNumber));
+    const params = useMemo(
+        () => ({ frameNumber, channelNumber }),
+        [frameNumber, channelNumber]
+    )
+    const channelMetadata = useAtomValue(channelMetadataAtomFamily(params));
 
     const [noteGroupsOpen, setNoteGroupsOpen] = useState<number>(1);
     const [fxGroupsOpen, setFxGroupsOpen] = useState<number>(1);
 
     const isMaster: boolean = channelNumber === 0; 
-    const isNoted: boolean = !isMaster && !channel.isSend;
+    const isNoted: boolean = !isMaster && !channelMetadata.isSend;
 
     const handleSetChannelType = useCallback(
         async (isSend: boolean) => {
@@ -84,10 +88,10 @@ export const ChannelHeader = ({ client, frameNumber, channelNumber }: ChannelHea
                 className={
                     `flex justify-center items-center h-8 select-none
                     ${!isMaster && "cursor-pointer"} 
-                    ${!channel.isOn ? "bg-background-darker text-muted-foreground" : "bg-secondary text-foreground"}
+                    ${!channelMetadata.isOn ? "bg-background-darker text-muted-foreground" : "bg-secondary text-foreground"}
                     `
                 }
-                onClick={() => !isMaster && handleSetChannelMute(!channel.isOn)}    
+                onClick={() => !isMaster && handleSetChannelMute(!channelMetadata.isOn)}    
             >
                 {isMaster ? "Master" : `Channel ${channelNumber}`}
             </p>
@@ -97,10 +101,10 @@ export const ChannelHeader = ({ client, frameNumber, channelNumber }: ChannelHea
                     className={
                         `h-8 flex-1 rounded-none cursor-pointer 
                         ${isMaster && "invisible"} 
-                        ${channel.isSend && "bg-positive-background text-positive-foreground hover:bg-positive-background/75 hover:text-positive-foreground/75"}
+                        ${channelMetadata.isSend && "bg-positive-background text-positive-foreground hover:bg-positive-background/75 hover:text-positive-foreground/75"}
                         `
                     }
-                    onClick={() => handleSetChannelType(!channel.isSend)}
+                    onClick={() => handleSetChannelType(!channelMetadata.isSend)}
                 >
                     Send
                 </Button>
@@ -110,14 +114,14 @@ export const ChannelHeader = ({ client, frameNumber, channelNumber }: ChannelHea
                     className={
                         `w-8 h-8 rounded-none cursor-pointer
                         ${isMaster && "invisible"} 
-                        ${channel.isSolo 
+                        ${channelMetadata.isSolo 
                             ? 
                             "bg-positive-background text-positive-foreground hover:bg-positive-background/75 hover:text-positive-foreground/75" :
                             "bg-negative-background text-negative-foreground hover:bg-negative-background/75 hover:text-negative-foreground/75"
                         }
                         `
                     }
-                    onClick={() => handleSetChannelSolo(!channel.isSolo)}
+                    onClick={() => handleSetChannelSolo(!channelMetadata.isSolo)}
                 >
                     S
                 </Button>
@@ -153,7 +157,7 @@ export interface ChannelLinesProps extends ChannelHeaderProps {
 
 export const ChannelLines = ({ client, frameNumber, channelNumber, lineCount, linesPerBeat }: ChannelLinesProps) => {
 
-    const channel = useAtomValue(channelAtomFamily(channelNumber));
+    const channel = useAtomValue(channelMetadataAtomFamily({ frameNumber, channelNumber }));
     const isMaster: boolean = channelNumber === 0; 
     const isNoted: boolean = !isMaster && !channel.isSend;
 
