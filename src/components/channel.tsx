@@ -157,9 +157,13 @@ export interface ChannelLinesProps extends ChannelHeaderProps {
 
 export const ChannelLines = ({ client, frameNumber, channelNumber, lineCount, linesPerBeat }: ChannelLinesProps) => {
 
-    const channel = useAtomValue(channelMetadataAtomFamily({ frameNumber, channelNumber }));
+    const params = useMemo(
+        () => ({ frameNumber, channelNumber }),
+        [frameNumber, channelNumber]
+    )
+    const channelMetadata = useAtomValue(channelMetadataAtomFamily(params));
     const isMaster: boolean = channelNumber === 0; 
-    const isNoted: boolean = !isMaster && !channel.isSend;
+    const isNoted: boolean = !isMaster && !channelMetadata.isSend;
 
     return (
         <div className={`${MIN_CHANNEL_W} flex flex-col`}>
