@@ -15,9 +15,9 @@ export enum SelectionType {
 }
 
 export type Selection = {
-    frame: number;
-    channel: number;
-    line: number;
+    frameNumber: number;
+    channelNumber: number;
+    lineNumber: number;
     group: number;
     type: SelectionType;
     charPos: number | null;
@@ -26,15 +26,15 @@ export type Selection = {
 // this should validate by reading wip information, possibly via jotai atoms? remember to make these return Selection | null and swap select() in useSelection to accept Selection | null
 export const SelectionFactory = {
     selectPitch: (
-        frame: number,
-        channel: number,
-        line: number,
+        frameNumber: number,
+        channelNumber: number,
+        lineNumber: number,
         group: number
     ): Selection => {
         return {
-            frame: frame,
-            channel: channel,
-            line: line,
+            frameNumber: frameNumber,
+            channelNumber: channelNumber,
+            lineNumber: lineNumber,
             group: group,
             type: SelectionType.Pitch,
             charPos: null
@@ -42,16 +42,16 @@ export const SelectionFactory = {
     },
 
     selectInstrumentDigit: (
-        frame: number,
-        channel: number,
-        line: number,
+        frameNumber: number,
+        channelNumber: number,
+        lineNumber: number,
         group: number,
         charPos: number,
     ): Selection => {
         return {
-            frame: frame,
-            channel: channel,
-            line: line,
+            frameNumber: frameNumber,
+            channelNumber: channelNumber,
+            lineNumber: lineNumber,
             group: group,
             type: SelectionType.Instrument,
             charPos: charPos
@@ -59,16 +59,16 @@ export const SelectionFactory = {
     },
 
     selectFXSymbolDigit: (
-        frame: number,
-        channel: number,
-        line: number,
+        frameNumber: number,
+        channelNumber: number,
+        lineNumber: number,
         group: number,
         charPos: number,
     ): Selection => {
         return {
-            frame: frame,
-            channel: channel,
-            line: line,
+            frameNumber: frameNumber,
+            channelNumber: channelNumber,
+            lineNumber: lineNumber,
             group: group,
             type: SelectionType.FXSymbol,
             charPos: charPos
@@ -76,16 +76,16 @@ export const SelectionFactory = {
     },
 
     selectFXValueDigit: (
-        frame: number,
-        channel: number,
-        line: number,
+        frameNumber: number,
+        channelNumber: number,
+        lineNumber: number,
         group: number,
         charPos: number,
     ): Selection => {
         return {
-            frame: frame,
-            channel: channel,
-            line: line,
+            frameNumber: frameNumber,
+            channelNumber: channelNumber,
+            lineNumber: lineNumber,
             group: group,
             type: SelectionType.FXValue,
             charPos: charPos

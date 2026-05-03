@@ -1,4 +1,4 @@
-import { ChannelMetadata, Frame, FrameMetadata, Message, RoomMember, RoomMemberInfo, SequencerLine, TrackerConnection } from '@/api/tracker/tracker-hub-models';
+import { ChannelMetadata, Frame, FrameMetadata, Line, Message, RoomMember, RoomMemberInfo, SequencerLine, TrackerConnection } from '@/api/tracker/tracker-hub-models';
 import { Wip, WIP_CONSTANTS } from '@/api/wips/wip';
 import { generateRandomChatColor } from '@/utils/chat-color';
 import { atom } from 'jotai'
@@ -227,14 +227,15 @@ export const initChannelMetadatasAtom = atom(
         set(channelMetadatasAtom, newMap);
     }
 )
-const defaultCache = new Map<string, ChannelMetadata>();
+const defaultChannelMetadataCache = new Map<string, ChannelMetadata>();
 const getChannelMetadataOrDefault = (map: Map<string, ChannelMetadata>, frameNumber: number, channelNumber: number): ChannelMetadata => {
     const key: string = channelKey(frameNumber, channelNumber);
 
-    if (map.has(key)) return map.get(key)!;
+    if (map.has(key)) 
+        return map.get(key)!;
 
-    if (!defaultCache.has(key)) {
-        defaultCache.set(key, {
+    if (!defaultChannelMetadataCache.has(key)) {
+        defaultChannelMetadataCache.set(key, {
             channelNumber: channelNumber,
             isSend: false,
             isOn: true,
@@ -242,9 +243,9 @@ const getChannelMetadataOrDefault = (map: Map<string, ChannelMetadata>, frameNum
         });
     }
 
-    return defaultCache.get(key)!;
+    return defaultChannelMetadataCache.get(key)!;
 };
-export const channelMetadataAtomFamily = atomFamily(({frameNumber, channelNumber} : {frameNumber: number, channelNumber: number}) => 
+export const channelMetadataAtomFamily = atomFamily(({ frameNumber, channelNumber } : { frameNumber: number, channelNumber: number }) => 
     atom((get) => getChannelMetadataOrDefault(get(channelMetadatasAtom), frameNumber, channelNumber))
 )
 export const setIndividualChannelMetadataAtom = atom(
@@ -259,5 +260,66 @@ export const setIndividualChannelMetadataAtom = atom(
         updatedChannelMetadatas.set(channelKey(frameNumber, channelNumber), updater(getChannelMetadataOrDefault(currentChannelMetadatas, frameNumber, channelNumber)));
 
         set(channelMetadatasAtom, updatedChannelMetadatas);
+    }
+)
+
+const linesAtom = atom<Map<string, Line>>(new Map<string, Line>());
+const lineKey = (frameNumber: number, channelNumber: number, lineNumber: number): string => 
+    `${channelKey(frameNumber, channelNumber)}:${lineNumber}`;
+export const initLinesAtom = atom(
+    null,
+    (
+        get,
+        set,
+        { frames } : { frames: Frame[] }
+    ) => {
+        const newMap = new Map<string, Line>(get(linesAtom));
+        frames.forEach((frame) => {
+            frame.channels.forEach((channel) => {
+                channel.lines.forEach((line) => {
+                    newMap.set(
+                        lineKey(frame.frameNumber, channel.channelNumber, line.lineNumber),
+                        line
+                    )
+                })
+            })
+        })
+        set(linesAtom, newMap);
+    }
+)
+const defaultLineCache = new Map<string, Line>();
+const getLineOrDefault = (map: Map<string, Line>, frameNumber: number, channelNumber: number, lineNumber: number): Line => {
+    const key: string = lineKey(frameNumber, channelNumber, lineNumber);
+
+    if (map.has(key)) 
+        return map.get(key)!;
+
+    if (!defaultLineCache.has(key)) {
+        defaultLineCache.set(key, {
+            lineNumber: lineNumber,
+            pitches: null,
+            instruments: null,
+            fxSymbols: null,
+            fxValues: null
+        });
+    }
+
+    return defaultLineCache.get(key)!;
+}
+export const lineAtomFamily = atomFamily(({ frameNumber, channelNumber, lineNumber } : { frameNumber: number, channelNumber: number, lineNumber: number }) =>
+    atom((get) => getLineOrDefault(get(linesAtom), frameNumber, channelNumber, lineNumber))
+)
+export const setIndividualLineAtom = atom(
+    null,
+    (
+        get,
+        set,
+        { frameNumber, channelNumber, lineNumber, updater } : { frameNumber: number, channelNumber: number, lineNumber: number, updater: (line: Line) => Line } 
+    ) => {
+        const currentLines: Map<string, Line> = get(linesAtom);
+        const updatedLines: Map<string, Line> = new Map<string, Line>(currentLines);
+        updatedLines.set(lineKey(frameNumber, channelNumber, lineNumber), updater(getLineOrDefault(currentLines, frameNumber, channelNumber, lineNumber)));
+
+        set(linesAtom, updatedLines);
     }
 )

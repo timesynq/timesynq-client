@@ -1,7 +1,7 @@
 import { UNEXPECTED_ERROR_MESSAGE } from "@/api/api-error";
 import { TrackerHubClient } from "@/api/tracker/tracker-hub-client";
 import { EXAMPLE_ROOM_INITIALIZER, Message, RoomInitializer, RoomMember, RoomMemberInfo, TrackerConnection, TrackerHubResult } from "@/api/tracker/tracker-hub-models";
-import { bpmAtom, channelCountAtom, initChannelMetadatasAtom, initFrameMetadatasAtom, initSequencerLinesAtom, sequencerLengthAtom, setMemberAtom, setMembersAtom, setRemoveMemberAtom, wipMetadataAtom } from "@/atoms/tracker-atoms";
+import { bpmAtom, channelCountAtom, initChannelMetadatasAtom, initFrameMetadatasAtom, initLinesAtom, initSequencerLinesAtom, sequencerLengthAtom, setMemberAtom, setMembersAtom, setRemoveMemberAtom, wipMetadataAtom } from "@/atoms/tracker-atoms";
 import { ChatBox } from "@/components/chat-box";
 import { FrameEditor } from "@/components/frame-editor";
 import { OwnerOnlyWipOptions } from "@/components/owner-only-wip-options";
@@ -87,6 +87,7 @@ const RoomInner = ({ wipId }: RoomInnerProps) => {
     const [, initSequencerLines] = useAtom(initSequencerLinesAtom);
     const [, initFrameMetadatas] = useAtom(initFrameMetadatasAtom);
     const [, initChannelMetadatas] = useAtom(initChannelMetadatasAtom);
+    const [, initLines] = useAtom(initLinesAtom);
 
     useEffect(() => {
         let unsubscribeUserJoinedRoom      = (): boolean => { return false; }
@@ -153,6 +154,7 @@ const RoomInner = ({ wipId }: RoomInnerProps) => {
             initSequencerLines({ lines: dummyRoomInitailizer.sequencer.lines });
             initFrameMetadatas({ frames: dummyRoomInitailizer.frames });
             initChannelMetadatas({ frames: dummyRoomInitailizer.frames });
+            initLines({ frames: dummyRoomInitailizer.frames });
 
             setIsReady(true);
         }

@@ -1,20 +1,31 @@
+import { useMemo } from "react";
 import { Cell } from "./cell";
 import { SelectionFactory, SelectionType, useSelection } from "@/contexts/selection-provider";
+import { useAtomValue } from "jotai";
+import { lineAtomFamily } from "@/atoms/tracker-atoms";
+import { toTwoDigitHex } from "@/utils/hex";
+import { PitchUtility } from "@/utils/pitch";
 
 export interface LineProps {
-    frame: number;
-    channel: number;
-    line: number;
+    frameNumber: number;
+    channelNumber: number;
+    lineNumber: number;
     isNoted: boolean;
     linesPerBeat: number;
     noteGroupsOpen: number;
     fxGroupsOpen: number;
 }
 
-export const Line = ({ frame, channel, line, isNoted, linesPerBeat, noteGroupsOpen, fxGroupsOpen }: LineProps) => {
+export const Line = ({ frameNumber, channelNumber, lineNumber, isNoted, linesPerBeat, noteGroupsOpen, fxGroupsOpen }: LineProps) => {
     
-    const isDownbeat: boolean = line % linesPerBeat === 0;
-    const isLineSelected: boolean = useSelection((state) => state.selection?.line === line);
+    const params = useMemo(
+        () => ({ frameNumber, channelNumber, lineNumber }),
+        [frameNumber, channelNumber, lineNumber]
+    )
+    const line = useAtomValue(lineAtomFamily(params));
+
+    const isDownbeat: boolean = lineNumber % linesPerBeat === 0;
+    const isLineSelected: boolean = useSelection((state) => state.selection?.lineNumber === lineNumber);
     const isFocusedAndSelected: boolean = useSelection((state) => state.isFocused && isLineSelected);
 
     let bgColor = "bg-background-darker";
@@ -41,34 +52,38 @@ export const Line = ({ frame, channel, line, isNoted, linesPerBeat, noteGroupsOp
             {
                 <>
                     <Pitch 
-                        frame={frame}
-                        channel={channel}
-                        line={line}
+                        frameNumber={frameNumber}
+                        channelNumber={channelNumber}
+                        lineNumber={lineNumber}
                         group={0}
                         visible={isNoted}
+                        pitch={line.pitches ? line.pitches[0] : null}
                     />
                     <Instrument 
-                        frame={frame}
-                        channel={channel}
-                        line={line}
+                        frameNumber={frameNumber}
+                        channelNumber={channelNumber}
+                        lineNumber={lineNumber}
                         group={0}
                         visible={isNoted}
+                        instrument={line.instruments ? line.instruments[0] : null}
                     />
                 </>
             }
             {
                 <>
                     <FXSymbol 
-                        frame={frame}
-                        channel={channel}
-                        line={line}
+                        frameNumber={frameNumber}
+                        channelNumber={channelNumber}
+                        lineNumber={lineNumber}
                         group={0}
+                        fxSymbol={line.fxSymbols ? line.fxSymbols[0] : null}
                     />
                     <FXValue
-                        frame={frame}
-                        channel={channel}
-                        line={line}
+                        frameNumber={frameNumber}
+                        channelNumber={channelNumber}
+                        lineNumber={lineNumber}
                         group={0}
+                        fxValue={line.fxValues ? line.fxValues[0] : null}
                     />
                 </>
             }
@@ -76,44 +91,50 @@ export const Line = ({ frame, channel, line, isNoted, linesPerBeat, noteGroupsOp
     );
 }
 
-interface PitchProps {
-    frame: number;
-    channel: number;
-    line: number;
+interface CellProps {
+    frameNumber: number;
+    channelNumber: number;
+    lineNumber: number;
     group: number;
     visible?: boolean;
 }
 
-const Pitch = ({ frame, channel, line, group, visible = true }: PitchProps) => {
+interface PitchProps extends CellProps {
+    pitch: number | null;
+}
+
+const Pitch = ({ frameNumber, channelNumber, lineNumber, group, visible = true, pitch }: PitchProps) => {
 
     const select = useSelection((state) => state.select);
     const isCellSelected = useSelection((state) =>
         state.selection?.type === SelectionType.Pitch && 
-        state.selection?.frame === frame &&
-        state.selection?.channel === channel &&
-        state.selection?.line === line && 
+        state.selection?.frameNumber === frameNumber &&
+        state.selection?.channelNumber === channelNumber &&
+        state.selection?.lineNumber === lineNumber && 
         state.selection?.group === group
     )
     const isSelectedAndFocused = useSelection((state) => state.isFocused && isCellSelected);
+
+    const pitchString: string = pitch !== null ?  PitchUtility.pitchStringFromNumber(pitch) : "---";
 
     return ( 
         
         <div 
             className={`flex flex-row text-pitch ${!visible && "invisible"}`}
-            onClick={() => select(SelectionFactory.selectPitch(frame, channel, line, group))}
+            onClick={() => select(SelectionFactory.selectPitch(frameNumber, channelNumber, lineNumber, group))}
         >
             <Cell 
-                character="C"
+                character={pitchString[0]}
                 isSelectedAndFocused={isSelectedAndFocused}
                 isSelected={isCellSelected}
             />
             <Cell 
-                character="#"
+                character={pitchString[1]}
                 isSelectedAndFocused={isSelectedAndFocused}
                 isSelected={isCellSelected}
             />
             <Cell 
-                character="4"
+                character={pitchString[2]}
                 isSelectedAndFocused={isSelectedAndFocused}
                 isSelected={isCellSelected}
             />
@@ -121,128 +142,139 @@ const Pitch = ({ frame, channel, line, group, visible = true }: PitchProps) => {
     ); 
 }
 
-interface InstrumentProps extends PitchProps {}
+interface InstrumentProps extends CellProps {
+    instrument: number | null;
+}
 
-const Instrument = ({ frame, channel, line, group, visible = true }: InstrumentProps) => {
+const Instrument = ({ frameNumber, channelNumber, lineNumber, group, visible = true, instrument }: InstrumentProps) => {
 
     const select = useSelection((state) => state.select);
     const isCell0Selected = useSelection((state) =>
         state.selection?.type === SelectionType.Instrument && 
-        state.selection?.frame === frame &&
-        state.selection?.channel === channel &&
-        state.selection?.line === line && 
+        state.selection?.frameNumber === frameNumber &&
+        state.selection?.channelNumber === channelNumber &&
+        state.selection?.lineNumber === lineNumber && 
         state.selection?.group === group &&
         state.selection?.charPos === 0 
     )
     const isCell1Selected = useSelection((state) =>
         state.selection?.type === SelectionType.Instrument && 
-        state.selection?.frame === frame &&
-        state.selection?.channel === channel &&
-        state.selection?.line === line && 
+        state.selection?.frameNumber === frameNumber &&
+        state.selection?.channelNumber === channelNumber &&
+        state.selection?.lineNumber === lineNumber && 
         state.selection?.group === group &&
         state.selection?.charPos === 1
     )
     const isCell0SelectedAndFocused = useSelection((state) => state.isFocused && isCell0Selected);
     const isCell1SelectedAndFocused = useSelection((state) => state.isFocused && isCell1Selected);
+
+    const instrumentHexString: string = instrument !== null ? toTwoDigitHex(instrument) : "--";
 
     return (    
         <div className={`flex flex-row text-instrument ${!visible && "invisible"}`}>
             <Cell
-                character="0"
+                character={instrumentHexString[0]}
                 isSelectedAndFocused={isCell0SelectedAndFocused}
                 isSelected={isCell0Selected}
-                onClick={() => select(SelectionFactory.selectInstrumentDigit(frame, channel, line, group, 0))}
+                onClick={() => select(SelectionFactory.selectInstrumentDigit(frameNumber, channelNumber, lineNumber, group, 0))}
             />
             <Cell
-                character="E"
+                character={instrumentHexString[1]}
                 isSelectedAndFocused={isCell1SelectedAndFocused}
                 isSelected={isCell1Selected}
-                onClick={() => select(SelectionFactory.selectInstrumentDigit(frame, channel, line, group, 1))}
+                onClick={() => select(SelectionFactory.selectInstrumentDigit(frameNumber, channelNumber, lineNumber, group, 1))}
             />
         </div>
     ); 
 }
 
-interface FXSymbolProps extends PitchProps {}
+interface FXSymbolProps extends CellProps {
+    fxSymbol: number | null;
+}
 
-const FXSymbol = ({ frame, channel, line, group }: FXSymbolProps) => {
+const FXSymbol = ({ frameNumber, channelNumber, lineNumber, group, fxSymbol }: FXSymbolProps) => {
 
     const select = useSelection((state) => state.select);
     const isCell0Selected = useSelection((state) =>
         state.selection?.type === SelectionType.FXSymbol && 
-        state.selection?.frame === frame &&
-        state.selection?.channel === channel &&
-        state.selection?.line === line && 
+        state.selection?.frameNumber === frameNumber &&
+        state.selection?.channelNumber === channelNumber &&
+        state.selection?.lineNumber === lineNumber && 
         state.selection?.group === group &&
         state.selection?.charPos === 0 
     )
     const isCell1Selected = useSelection((state) =>
         state.selection?.type === SelectionType.FXSymbol && 
-        state.selection?.frame === frame &&
-        state.selection?.channel === channel &&
-        state.selection?.line === line && 
+        state.selection?.frameNumber === frameNumber &&
+        state.selection?.channelNumber === channelNumber &&
+        state.selection?.lineNumber === lineNumber && 
         state.selection?.group === group &&
         state.selection?.charPos === 1
     )
     const isCell0SelectedAndFocused = useSelection((state) => state.isFocused && isCell0Selected);
     const isCell1SelectedAndFocused = useSelection((state) => state.isFocused && isCell1Selected);
+
+    const fxSymbolHexString: string = fxSymbol !== null ? toTwoDigitHex(fxSymbol) : "--";
 
     return (    
         <div className="flex flex-row text-fx-symbol">
             <Cell
-                character="A"
+                character={fxSymbolHexString[0]}
                 isSelectedAndFocused={isCell0SelectedAndFocused}
                 isSelected={isCell0Selected}
-                onClick={() => select(SelectionFactory.selectFXSymbolDigit(frame, channel, line, group, 0))}
+                onClick={() => select(SelectionFactory.selectFXSymbolDigit(frameNumber, channelNumber, lineNumber, group, 0))}
             />
             <Cell
-                character="A"
+                character={fxSymbolHexString[1]}
                 isSelectedAndFocused={isCell1SelectedAndFocused}
                 isSelected={isCell1Selected}
-                onClick={() => select(SelectionFactory.selectFXSymbolDigit(frame, channel, line, group, 1))}
+                onClick={() => select(SelectionFactory.selectFXSymbolDigit(frameNumber, channelNumber, lineNumber, group, 1))}
             />
         </div>
     ); 
 }
 
-interface FXValueProps extends PitchProps {}
+interface FXValueProps extends CellProps {
+    fxValue: number | null;
+}
 
-const FXValue = ({ frame, channel, line, group }: FXValueProps) => {
+const FXValue = ({ frameNumber, channelNumber, lineNumber, group, fxValue }: FXValueProps) => {
 
     const select = useSelection((state) => state.select);
     const isCell0Selected = useSelection((state) =>
         state.selection?.type === SelectionType.FXValue && 
-        state.selection?.frame === frame &&
-        state.selection?.channel === channel &&
-        state.selection?.line === line && 
+        state.selection?.frameNumber === frameNumber &&
+        state.selection?.channelNumber === channelNumber &&
+        state.selection?.lineNumber === lineNumber && 
         state.selection?.group === group &&
         state.selection?.charPos === 0 
     )
     const isCell1Selected = useSelection((state) =>
         state.selection?.type === SelectionType.FXValue && 
-        state.selection?.frame === frame &&
-        state.selection?.channel === channel &&
-        state.selection?.line === line && 
+        state.selection?.frameNumber === frameNumber &&
+        state.selection?.channelNumber === channelNumber &&
+        state.selection?.lineNumber === lineNumber && 
         state.selection?.group === group &&
         state.selection?.charPos === 1
     )
     const isCell0SelectedAndFocused = useSelection((state) => state.isFocused && isCell0Selected);
     const isCell1SelectedAndFocused = useSelection((state) => state.isFocused && isCell1Selected);
 
+    const fxValueHexString: string = fxValue !== null ? toTwoDigitHex(fxValue) : "--";
 
     return (    
         <div className="flex flex-row text-fx-value">
             <Cell
-                character="1"
+                character={fxValueHexString[0]}
                 isSelectedAndFocused={isCell0SelectedAndFocused}
                 isSelected={isCell0Selected}
-                onClick={() => select(SelectionFactory.selectFXValueDigit(frame, channel, line, group, 0))}
+                onClick={() => select(SelectionFactory.selectFXValueDigit(frameNumber, channelNumber, lineNumber, group, 0))}
             />
             <Cell
-                character="6"
+                character={fxValueHexString[1]}
                 isSelectedAndFocused={isCell1SelectedAndFocused}
                 isSelected={isCell1Selected}
-                onClick={() => select(SelectionFactory.selectFXValueDigit(frame, channel, line, group, 1))}
+                onClick={() => select(SelectionFactory.selectFXValueDigit(frameNumber, channelNumber, lineNumber, group, 1))}
             />
         </div>
     ); 

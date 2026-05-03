@@ -167,10 +167,10 @@ export const ChannelLines = ({ client, frameNumber, channelNumber, lineCount, li
                 <LineSpacer />
                 {Array.from({ length: lineCount }).map((_, i) => (
                     <Line
-                        key={`${channelNumber}:${i}`}
-                        frame={frameNumber}
-                        channel={channelNumber}
-                        line={i}
+                        key={`${frameNumber}:${channelNumber}:${i}`}
+                        frameNumber={frameNumber}
+                        channelNumber={channelNumber}
+                        lineNumber={i}
                         isNoted={isNoted}
                         linesPerBeat={linesPerBeat}
                         noteGroupsOpen={1}
@@ -225,7 +225,7 @@ interface LineNumberProps {
 
 const LineNumber = ({ lineNumber, isDownbeat, isRightHandSide }: LineNumberProps) => {
 
-    const isLineSelected = useSelection((state) => state.selection?.line === lineNumber);
+    const isLineSelected = useSelection((state) => state.selection?.lineNumber === lineNumber);
     const isFocusedAndSelected = useSelection((state) => state.isFocused && isLineSelected);
 
     let bgColor = "bg-background-darker";
