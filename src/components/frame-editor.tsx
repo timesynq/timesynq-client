@@ -68,43 +68,45 @@ export const FrameEditor = ({ client }: FrameEditorProps) => {
                 client={client}
                 frameMetadata={frameMetadata}
             />
-            <div className="flex flex-col h-full min-h-0">
-                <div className="flex flex-row w-full">
-                    <ChannelLineNumbersHeader />
-                    { Array.from({ length: channelCount }).map((_, index) => (
-                        <ChannelHeader
-                            client={client}
-                            frameNumber={frameMetadata.frameNumber}
-                            channelNumber={index}
-                        />
-                    ))}
-                    <ChannelLineNumbersHeader />
-                </div>
-                <OutsideClickHandler 
-                    display="contents"
-                    onOutsideClick={() => setIsFocused(false)}
-                >
-                    <div className="flex flex-row w-full overflow-y-auto" onClick={() => setIsFocused(true)}>
-                        <ChannelLineNumbers
-                            lineCount={frameMetadata.length}
-                            linesPerBeat={frameMetadata.linesPerBeat}
-                        />
+            <div className="flex flex-col h-full min-h-0 overflow-x-auto">
+                <div className="min-w-max flex flex-col h-full">
+                    <div className="flex flex-row w-full">
+                        <ChannelLineNumbersHeader />
                         { Array.from({ length: channelCount }).map((_, index) => (
-                            <ChannelLines 
+                            <ChannelHeader
                                 client={client}
                                 frameNumber={frameMetadata.frameNumber}
                                 channelNumber={index}
+                            />
+                        ))}
+                        <ChannelLineNumbersHeader />
+                    </div>
+                    <OutsideClickHandler 
+                        display="contents"
+                        onOutsideClick={() => setIsFocused(false)}
+                    >
+                        <div className="flex flex-row w-max min-w-full flex-1 overflow-y-auto" onClick={() => setIsFocused(true)}>
+                            <ChannelLineNumbers
                                 lineCount={frameMetadata.length}
                                 linesPerBeat={frameMetadata.linesPerBeat}
                             />
-                        ))}
-                        <ChannelLineNumbers 
-                            lineCount={frameMetadata.length}
-                            linesPerBeat={frameMetadata.linesPerBeat}
-                            isRightHandSide
-                        />
-                    </div>
-                </OutsideClickHandler>
+                            { Array.from({ length: channelCount }).map((_, index) => (
+                                <ChannelLines 
+                                    client={client}
+                                    frameNumber={frameMetadata.frameNumber}
+                                    channelNumber={index}
+                                    lineCount={frameMetadata.length}
+                                    linesPerBeat={frameMetadata.linesPerBeat}
+                                />
+                            ))}
+                            <ChannelLineNumbers 
+                                lineCount={frameMetadata.length}
+                                linesPerBeat={frameMetadata.linesPerBeat}
+                                isRightHandSide
+                            />
+                        </div>
+                    </OutsideClickHandler>
+                </div>
             </div>
         </div>
     );
