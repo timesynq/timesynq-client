@@ -1,5 +1,9 @@
-export const LineSpacer = () => {
+export interface LineSpacerProps {
+    isBottom?: boolean;
+}
+
+export const LineSpacer = ({ isBottom = false }: LineSpacerProps ) => {
     return (
-        <div className="h-[320px] border-r" />
+        <div className={`min-h-[320px] ${isBottom && "h-full"} border-r`} />
     );
 }

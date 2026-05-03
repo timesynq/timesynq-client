@@ -181,7 +181,7 @@ export const ChannelLines = ({ client, frameNumber, channelNumber, lineCount, li
                         fxGroupsOpen={1}
                     />
                 ))}
-                <LineSpacer />
+                <LineSpacer isBottom/>
             </div>
         </div>
     );
@@ -214,7 +214,7 @@ export const ChannelLineNumbers = ({ lineCount, linesPerBeat, isRightHandSide = 
                         isRightHandSide={isRightHandSide}
                     />
                 ))}
-                <LineSpacer />
+                <LineSpacer isBottom/>
             </div>
         </div>
     );
