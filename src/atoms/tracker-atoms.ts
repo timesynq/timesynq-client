@@ -5,7 +5,14 @@ import { atom } from 'jotai'
 import { splitAtom } from 'jotai/utils';
 import { atomFamily } from 'jotai-family';
 
+/*
+ * ========================================================
+ *                     MEMBERS
+ * ========================================================
+ */
+
 export const membersAtom = atom<Map<string, RoomMemberInfo>>(new Map<string, RoomMemberInfo>());
+
 export const setMemberAtom = atom(
     null,
     (
@@ -38,6 +45,7 @@ export const setMemberAtom = atom(
         set(membersAtom, new Map<string, RoomMemberInfo>(membersCopy));
     }
 )
+
 export const setRemoveMemberAtom = atom(
     null,
     (
@@ -95,12 +103,25 @@ export const setMembersAtom = atom(
     }
 )
 
+/*
+ * ========================================================
+ *                     MISC
+ * ========================================================
+ */
 export const wipMetadataAtom = atom<Wip | null>(null);
 export const messagesAtom = atom<Message[]>([]);
 export const bpmAtom = atom<number>(WIP_CONSTANTS.DEFAULT_BPM);
 export const channelCountAtom = atom<number>(WIP_CONSTANTS.DEFAULT_CHANNELS);
+export const octaveAtom = atom<number>(4);
 
+
+/*
+ * ========================================================
+ *                     SEQUENCER
+ * ========================================================
+ */
 export const sequencerLengthAtom = atom<number>(1);
+
 export const sequencerLinesAtom = atom<SequencerLine[]>((
     new Array(WIP_CONSTANTS.MAX_SEQUENCER_LENGTH)
         .fill(null)
@@ -111,6 +132,7 @@ export const sequencerLinesAtom = atom<SequencerLine[]>((
         }))
     )
 )
+
 export const initSequencerLinesAtom = atom(
     null,
     (
@@ -131,7 +153,9 @@ export const initSequencerLinesAtom = atom(
         set(sequencerLinesAtom, defaultCopy);
     }
 )
+
 export const individualSequencerLinesAtom = splitAtom(sequencerLinesAtom);
+
 export const setIndividualSequencerLineAtom = atom(
     null,
     (
@@ -148,14 +172,19 @@ export const setIndividualSequencerLineAtom = atom(
 )
 
 export const currentSequencerLineAtom = atom<number>(0);
+
 export const isSequencerLineSelectedAtom = atomFamily((sequencerLineNumber: number) => 
     atom((get) => get(currentSequencerLineAtom) === sequencerLineNumber)
 );
+
+/*
+ * ========================================================
+ *                     FRAMES
+ * ========================================================
+ */
 export const currentFrameNumberAtom = atom((get) => {
     return get(sequencerLinesAtom)[get(currentSequencerLineAtom)]?.frameNumber ?? 0
 })
-
-export const octaveAtom = atom<number>(4);
 
 const frameMetadatasAtom = atom<Map<number, FrameMetadata>>(new Map<number, FrameMetadata>());
 export const initFrameMetadatasAtom = atom(
@@ -176,6 +205,7 @@ export const initFrameMetadatasAtom = atom(
         set(frameMetadatasAtom, newMap);
     }
 )
+
 const getFrameMetadataOrDefault = (map: Map<number, FrameMetadata>, frameNumber: number): FrameMetadata => {
     return map.get(frameNumber) ?? {
         frameNumber: frameNumber,
@@ -183,9 +213,11 @@ const getFrameMetadataOrDefault = (map: Map<number, FrameMetadata>, frameNumber:
         linesPerBeat: WIP_CONSTANTS.DEFAULT_LINES_PER_BEAT,
     };
 }
+
 export const frameMetadataAtomFamily = atomFamily((frameNumber: number) => 
     atom((get) => getFrameMetadataOrDefault(get(frameMetadatasAtom), frameNumber))
 )
+
 export const setIndividualFrameMetadataAtom = atom(
     null,
     (
@@ -201,8 +233,16 @@ export const setIndividualFrameMetadataAtom = atom(
     }
 )
 
+/*
+ * ========================================================
+ *                     CHANNELS
+ * ========================================================
+ */
+
 const channelMetadatasAtom = atom<Map<string, ChannelMetadata>>(new Map<string, ChannelMetadata>());
+
 const channelKey = (frameNumber: number, channelNumber: number): string => `${frameNumber}:${channelNumber}`;
+
 export const initChannelMetadatasAtom = atom(
     null,
     (
@@ -227,7 +267,9 @@ export const initChannelMetadatasAtom = atom(
         set(channelMetadatasAtom, newMap);
     }
 )
+
 const defaultChannelMetadataCache = new Map<string, ChannelMetadata>();
+
 const getChannelMetadataOrDefault = (map: Map<string, ChannelMetadata>, frameNumber: number, channelNumber: number): ChannelMetadata => {
     const key: string = channelKey(frameNumber, channelNumber);
 
@@ -245,9 +287,11 @@ const getChannelMetadataOrDefault = (map: Map<string, ChannelMetadata>, frameNum
 
     return defaultChannelMetadataCache.get(key)!;
 };
+
 export const channelMetadataAtomFamily = atomFamily(({ frameNumber, channelNumber } : { frameNumber: number, channelNumber: number }) => 
     atom((get) => getChannelMetadataOrDefault(get(channelMetadatasAtom), frameNumber, channelNumber))
 )
+
 export const setIndividualChannelMetadataAtom = atom(
     null,
     (
@@ -263,9 +307,17 @@ export const setIndividualChannelMetadataAtom = atom(
     }
 )
 
+/*
+ * ========================================================
+ *                     LINES
+ * ========================================================
+ */
+
 const linesAtom = atom<Map<string, Line>>(new Map<string, Line>());
+
 const lineKey = (frameNumber: number, channelNumber: number, lineNumber: number): string => 
     `${channelKey(frameNumber, channelNumber)}:${lineNumber}`;
+
 export const initLinesAtom = atom(
     null,
     (
@@ -287,7 +339,9 @@ export const initLinesAtom = atom(
         set(linesAtom, newMap);
     }
 )
+
 const defaultLineCache = new Map<string, Line>();
+
 const getLineOrDefault = (map: Map<string, Line>, frameNumber: number, channelNumber: number, lineNumber: number): Line => {
     const key: string = lineKey(frameNumber, channelNumber, lineNumber);
 
@@ -306,9 +360,11 @@ const getLineOrDefault = (map: Map<string, Line>, frameNumber: number, channelNu
 
     return defaultLineCache.get(key)!;
 }
+
 export const lineAtomFamily = atomFamily(({ frameNumber, channelNumber, lineNumber } : { frameNumber: number, channelNumber: number, lineNumber: number }) =>
     atom((get) => getLineOrDefault(get(linesAtom), frameNumber, channelNumber, lineNumber))
 )
+
 export const setIndividualLineAtom = atom(
     null,
     (
