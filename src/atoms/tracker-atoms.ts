@@ -178,7 +178,7 @@ export const isSequencerLineSelectedAtom = atomFamily((sequencerLineNumber: numb
 );
 
 export const isChannelEnabledInSequencerAtom = atomFamily((channelNumber: number) => 
-    atom((get) => get(sequencerLinesAtom)[get(currentSequencerLineAtom)].isChannelOn[channelNumber])
+    atom((get) => channelNumber === 0 ? true : get(sequencerLinesAtom)[get(currentSequencerLineAtom)].isChannelOn[channelNumber - 1])
 )
 
 /*

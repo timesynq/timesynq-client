@@ -72,7 +72,7 @@ export const FrameEditor = ({ client }: FrameEditorProps) => {
                 <div className="min-w-max flex flex-col h-full">
                     <div className="flex flex-row w-full">
                         <ChannelLineNumbersHeader />
-                        { Array.from({ length: channelCount }).map((_, index) => (
+                        { Array.from({ length: channelCount + 1 }).map((_, index) => (
                             <ChannelHeader
                                 client={client}
                                 frameNumber={frameMetadata.frameNumber}
@@ -90,7 +90,7 @@ export const FrameEditor = ({ client }: FrameEditorProps) => {
                                 lineCount={frameMetadata.length}
                                 linesPerBeat={frameMetadata.linesPerBeat}
                             />
-                            { Array.from({ length: channelCount }).map((_, index) => (
+                            { Array.from({ length: channelCount + 1 }).map((_, index) => (
                                 <ChannelLines 
                                     client={client}
                                     frameNumber={frameMetadata.frameNumber}
