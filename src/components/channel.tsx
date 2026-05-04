@@ -5,9 +5,8 @@ import { Button } from "./ui/button";
 import { Line } from "./line";
 import { LineSpacer } from "./line-spacer";
 import { toTwoDigitHex } from "@/utils/hex";
-import { useSelection } from "@/contexts/selection-provider";
 import { useAtomValue } from "jotai";
-import { channelMetadataAtomFamily, isAChannelSoloedAtom, isChannelEnabledInSequencerAtom } from "@/atoms/tracker-atoms";
+import { channelMetadataAtomFamily, isAChannelSoloedAtom, isChannelEnabledInSequencerAtom, lineSelectionAtom, SelectionType } from "@/atoms/tracker-atoms";
 import { TrackerHubResult } from "@/api/tracker/tracker-hub-models";
 import { TrackerHubClient } from "@/api/tracker/tracker-hub-client";
 import { Toasts } from "@/utils/toasts";
@@ -234,19 +233,18 @@ interface LineNumberProps {
 
 const LineNumber = ({ lineNumber, isDownbeat, isRightHandSide }: LineNumberProps) => {
 
-    const isLineSelected = useSelection((state) => state.selection?.lineNumber === lineNumber);
-    const isFocusedAndSelected = useSelection((state) => state.isFocused && isLineSelected);
+    const selectionType: SelectionType = useAtomValue(lineSelectionAtom(lineNumber));
 
     let bgColor = "bg-background-darker";
     let border = "border-r";
     let textColor = "text-muted-foreground";
-    if (isFocusedAndSelected){
+    if (selectionType === SelectionType.SelectedAndFocused){
         bgColor = "bg-negative-background";
         if (!isRightHandSide)
             border = "border-r-negative-foreground/30";
         textColor = "text-negative-foreground";
     }
-    else if (isLineSelected){
+    else if (selectionType === SelectionType.SelectedAndUnfocused){
         bgColor = "bg-input";
         if (isDownbeat)
             textColor = "text-foreground";

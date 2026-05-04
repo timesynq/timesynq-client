@@ -8,8 +8,7 @@ import { FrameMetadata, TrackerHubResult } from "@/api/tracker/tracker-hub-model
 import { UpdateChannelMuteCommand, UpdateChannelSoloCommand, UpdateChannelTypeCommand, UpdateLineCountCommand, UpdateLinesPerBeatCommand } from "@/api/tracker/tracker-hub-commands";
 import { ChannelHeader, ChannelLineNumbers, ChannelLineNumbersHeader, ChannelLines } from "./channel";
 import OutsideClickHandler from 'react-outside-click-handler';
-import { useSelection } from "@/contexts/selection-provider";
-import { channelCountAtom, currentFrameNumberAtom, frameMetadataAtomFamily, octaveAtom, setIndividualChannelMetadataAtom, setIndividualFrameMetadataAtom } from "@/atoms/tracker-atoms";
+import { channelCountAtom, currentFrameNumberAtom, frameMetadataAtomFamily, octaveAtom, setIndividualChannelMetadataAtom, setIndividualFrameMetadataAtom, setIsFocusedAtom } from "@/atoms/tracker-atoms";
 import { useAtom, useAtomValue } from "jotai";
 
 export interface FrameEditorProps {
@@ -60,7 +59,7 @@ export const FrameEditor = ({ client }: FrameEditorProps) => {
         }
     }, [client, frameMetadata]);
     
-    const setIsFocused = useSelection((state) => state.setIsFocused);
+    const [, setIsFocused] = useAtom(setIsFocusedAtom);
 
     return (
         <div className="flex flex-col w-full h-full min-h-0 bg-background-darker">
@@ -83,9 +82,9 @@ export const FrameEditor = ({ client }: FrameEditorProps) => {
                     </div>
                     <OutsideClickHandler 
                         display="contents"
-                        onOutsideClick={() => setIsFocused(false)}
+                        onOutsideClick={() => setIsFocused({ isFocused: false })}
                     >
-                        <div className="flex flex-row w-max min-w-full flex-1 overflow-y-auto" onClick={() => setIsFocused(true)}>
+                        <div className="flex flex-row w-max min-w-full flex-1 overflow-y-auto" onClick={() => setIsFocused({ isFocused: true })}>
                             <ChannelLineNumbers
                                 lineCount={frameMetadata.length}
                                 linesPerBeat={frameMetadata.linesPerBeat}

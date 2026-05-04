@@ -13,7 +13,6 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/componen
 import { Separator } from "@/components/ui/separator";
 import { WipOptions } from "@/components/wip-options";
 import { useAuth } from "@/contexts/auth-provider";
-import { SelectionProvider } from "@/contexts/selection-provider";
 import { generateRandomChatColor } from "@/utils/chat-color";
 import { createStore, Provider, useAtom, useSetAtom } from "jotai";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -26,9 +25,7 @@ export const Room = () => {
 
     return (
         <Provider store={store}>
-            <SelectionProvider>
-                <RoomInner wipId={wipId} />
-            </SelectionProvider>
+            <RoomInner wipId={wipId} />
         </Provider>
     );
 }

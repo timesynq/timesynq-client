@@ -397,3 +397,156 @@ export const setIndividualLineAtom = atom(
         set(linesAtom, updatedLines);
     }
 )
+
+/*
+ * ========================================================
+ *                    LINE SELECTION
+ * ========================================================
+ */
+
+export enum CellSelectionType {
+    Pitch,
+    Instrument,
+    FXSymbol,
+    FXValue,
+}
+
+export type Selection = {
+    frameNumber: number;
+    channelNumber: number;
+    lineNumber: number;
+    group: number;
+    type: CellSelectionType;
+    charPos: number | null;
+}
+
+export enum SelectionType { 
+    Unselected,
+    SelectedAndFocused,
+    SelectedAndUnfocused,
+}
+
+// this should validate by reading wip information, possibly via jotai atoms? remember to make these return Selection | null and swap select() in useSelection to accept Selection | null
+export const SelectionFactory = {
+    selectPitch: (
+        frameNumber: number,
+        channelNumber: number,
+        lineNumber: number,
+        group: number
+    ): Selection => {
+        return {
+            frameNumber: frameNumber,
+            channelNumber: channelNumber,
+            lineNumber: lineNumber,
+            group: group,
+            type: CellSelectionType.Pitch,
+            charPos: null
+        }
+    },
+
+    selectInstrumentDigit: (
+        frameNumber: number,
+        channelNumber: number,
+        lineNumber: number,
+        group: number,
+        charPos: number,
+    ): Selection => {
+        return {
+            frameNumber: frameNumber,
+            channelNumber: channelNumber,
+            lineNumber: lineNumber,
+            group: group,
+            type: CellSelectionType.Instrument,
+            charPos: charPos
+        }
+    },
+
+    selectFXSymbolDigit: (
+        frameNumber: number,
+        channelNumber: number,
+        lineNumber: number,
+        group: number,
+        charPos: number,
+    ): Selection => {
+        return {
+            frameNumber: frameNumber,
+            channelNumber: channelNumber,
+            lineNumber: lineNumber,
+            group: group,
+            type: CellSelectionType.FXSymbol,
+            charPos: charPos
+        }
+    },
+
+    selectFXValueDigit: (
+        frameNumber: number,
+        channelNumber: number,
+        lineNumber: number,
+        group: number,
+        charPos: number,
+    ): Selection => {
+        return {
+            frameNumber: frameNumber,
+            channelNumber: channelNumber,
+            lineNumber: lineNumber,
+            group: group,
+            type: CellSelectionType.FXValue,
+            charPos: charPos
+        }
+    }
+}
+
+const selectionAtom = atom<Selection | null>(null);
+export const setSelectionAtom = atom(null, (_, set, { selection } : { selection: Selection | null }) => 
+    set(selectionAtom, selection)
+)
+
+const isFocusedAtom = atom<boolean>(false);
+export const setIsFocusedAtom = atom(null, (_, set, { isFocused } : { isFocused: boolean }) => 
+    set(isFocusedAtom, isFocused)
+)
+
+export const lineSelectionAtom = atomFamily((lineNumber: number) => 
+    atom((get) => {
+        const selection: Selection | null = get(selectionAtom);
+        const isFocused: boolean = get(isFocusedAtom);
+        if (selection === null || selection.lineNumber !== lineNumber)
+            return SelectionType.Unselected;
+        return isFocused ? SelectionType.SelectedAndFocused : SelectionType.SelectedAndUnfocused;
+    })
+)
+
+export const cellSelectionAtom = atomFamily((
+    { 
+        frameNumber,
+        channelNumber, 
+        lineNumber, 
+        group, 
+        type, 
+        charPos 
+    } : 
+    { 
+        frameNumber: number,
+        channelNumber: number,
+        lineNumber: number, 
+        group: number, 
+        type: CellSelectionType, 
+        charPos: number | null 
+    }
+) => 
+    atom((get) => {
+        const selection: Selection | null = get(selectionAtom);
+        const isCellSelected: boolean = ( 
+            selection !== null && 
+            frameNumber === selection.frameNumber && 
+            channelNumber === selection.channelNumber &&
+            lineNumber === selection.lineNumber &&
+            group === selection.group && 
+            type === selection.type &&
+            charPos === selection.charPos
+        );
+        if (!isCellSelected)
+            return SelectionType.Unselected;
+        return get(isFocusedAtom) ? SelectionType.SelectedAndFocused : SelectionType.SelectedAndUnfocused;
+    })
+)

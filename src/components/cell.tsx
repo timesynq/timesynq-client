@@ -1,15 +1,16 @@
+import { SelectionType } from "@/atoms/tracker-atoms";
+
 export interface CellProps {
     character: string;
-    isSelectedAndFocused: boolean;
-    isSelected: boolean;
+    selectionType: SelectionType;
     onClick?: () => void;
 }
 
-export const Cell = ({ character, isSelectedAndFocused, isSelected, onClick }: CellProps) => {    
+export const Cell = ({ character, selectionType, onClick }: CellProps) => {    
     let highlightColor = "";
-    if (isSelectedAndFocused)
+    if (selectionType === SelectionType.SelectedAndFocused)
         highlightColor = "bg-negative-foreground/30";
-    else if (isSelected)
+    else if (selectionType === SelectionType.SelectedAndUnfocused)
         highlightColor = "bg-ring/60";
 
     return (
