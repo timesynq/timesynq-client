@@ -177,6 +177,10 @@ export const isSequencerLineSelectedAtom = atomFamily((sequencerLineNumber: numb
     atom((get) => get(currentSequencerLineAtom) === sequencerLineNumber)
 );
 
+export const isChannelEnabledInSequencerAtom = atomFamily((channelNumber: number) => 
+    atom((get) => get(sequencerLinesAtom)[get(currentSequencerLineAtom)].isChannelOn[channelNumber])
+)
+
 /*
  * ========================================================
  *                     FRAMES
@@ -305,6 +309,20 @@ export const setIndividualChannelMetadataAtom = atom(
 
         set(channelMetadatasAtom, updatedChannelMetadatas);
     }
+)
+
+export const isAChannelSoloedAtom = atomFamily((frameNumber: number) => 
+    atom((get) => { 
+        let result: boolean = false;
+        const channelMetadatasMap = get(channelMetadatasAtom); 
+        for(const [key, value] of channelMetadatasMap) {
+            if (key.startsWith(`${frameNumber}`) && value.isSolo){
+                result = true; 
+                break;
+            }
+        }
+        return result;
+    })
 )
 
 /*

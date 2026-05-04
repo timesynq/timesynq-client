@@ -7,7 +7,7 @@ import { LineSpacer } from "./line-spacer";
 import { toTwoDigitHex } from "@/utils/hex";
 import { useSelection } from "@/contexts/selection-provider";
 import { useAtomValue } from "jotai";
-import { channelMetadataAtomFamily } from "@/atoms/tracker-atoms";
+import { channelMetadataAtomFamily, isAChannelSoloedAtom, isChannelEnabledInSequencerAtom } from "@/atoms/tracker-atoms";
 import { TrackerHubResult } from "@/api/tracker/tracker-hub-models";
 import { TrackerHubClient } from "@/api/tracker/tracker-hub-client";
 import { Toasts } from "@/utils/toasts";
@@ -165,6 +165,10 @@ export const ChannelLines = ({ client, frameNumber, channelNumber, lineCount, li
     const isMaster: boolean = channelNumber === 0; 
     const isNoted: boolean = !isMaster && !channelMetadata.isSend;
 
+    const isChannelEnabledInSequencer = useAtomValue(isChannelEnabledInSequencerAtom(channelNumber));
+    const isAChannelSoloed = useAtomValue(isAChannelSoloedAtom(frameNumber));
+    const isDisabled: boolean = !channelMetadata.isOn || !isChannelEnabledInSequencer || (isAChannelSoloed && !channelMetadata.isSolo && channelNumber !== 0);
+
     return (
         <div className={`${MIN_CHANNEL_W} flex flex-col`}>
             <div className="flex flex-col flex-grow bg-background-darker">
@@ -179,6 +183,7 @@ export const ChannelLines = ({ client, frameNumber, channelNumber, lineCount, li
                         linesPerBeat={linesPerBeat}
                         noteGroupsOpen={1}
                         fxGroupsOpen={1}
+                        isDisabled={isDisabled}
                     />
                 ))}
                 <LineSpacer isBottom/>

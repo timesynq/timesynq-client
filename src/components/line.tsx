@@ -14,9 +14,10 @@ export interface LineProps {
     linesPerBeat: number;
     noteGroupsOpen: number;
     fxGroupsOpen: number;
+    isDisabled: boolean;
 }
 
-export const Line = ({ frameNumber, channelNumber, lineNumber, isNoted, linesPerBeat, noteGroupsOpen, fxGroupsOpen }: LineProps) => {
+export const Line = ({ frameNumber, channelNumber, lineNumber, isNoted, linesPerBeat, noteGroupsOpen, fxGroupsOpen, isDisabled }: LineProps) => {
     
     const params = useMemo(
         () => ({ frameNumber, channelNumber, lineNumber }),
@@ -58,6 +59,7 @@ export const Line = ({ frameNumber, channelNumber, lineNumber, isNoted, linesPer
                         group={0}
                         visible={isNoted}
                         pitch={line.pitches ? line.pitches[0] : null}
+                        isDisabled={isDisabled}
                     />
                     <Instrument 
                         frameNumber={frameNumber}
@@ -66,6 +68,7 @@ export const Line = ({ frameNumber, channelNumber, lineNumber, isNoted, linesPer
                         group={0}
                         visible={isNoted}
                         instrument={line.instruments ? line.instruments[0] : null}
+                        isDisabled={isDisabled}
                     />
                 </>
             }
@@ -77,6 +80,7 @@ export const Line = ({ frameNumber, channelNumber, lineNumber, isNoted, linesPer
                         lineNumber={lineNumber}
                         group={0}
                         fxSymbol={line.fxSymbols ? line.fxSymbols[0] : null}
+                        isDisabled={isDisabled}
                     />
                     <FXValue
                         frameNumber={frameNumber}
@@ -84,6 +88,7 @@ export const Line = ({ frameNumber, channelNumber, lineNumber, isNoted, linesPer
                         lineNumber={lineNumber}
                         group={0}
                         fxValue={line.fxValues ? line.fxValues[0] : null}
+                        isDisabled={isDisabled}
                     />
                 </>
             }
@@ -97,13 +102,14 @@ interface CellProps {
     lineNumber: number;
     group: number;
     visible?: boolean;
+    isDisabled: boolean;
 }
 
 interface PitchProps extends CellProps {
     pitch: number | null;
 }
 
-const Pitch = ({ frameNumber, channelNumber, lineNumber, group, visible = true, pitch }: PitchProps) => {
+const Pitch = ({ frameNumber, channelNumber, lineNumber, group, visible = true, pitch, isDisabled }: PitchProps) => {
 
     const select = useSelection((state) => state.select);
     const isCellSelected = useSelection((state) =>
@@ -120,7 +126,7 @@ const Pitch = ({ frameNumber, channelNumber, lineNumber, group, visible = true, 
     return ( 
         
         <div 
-            className={`flex flex-row text-pitch ${!visible && "invisible"}`}
+            className={`flex flex-row text-pitch ${!visible && "invisible"} ${isDisabled && "opacity-25"}`}
             onClick={() => select(SelectionFactory.selectPitch(frameNumber, channelNumber, lineNumber, group))}
         >
             <Cell 
@@ -146,7 +152,7 @@ interface InstrumentProps extends CellProps {
     instrument: number | null;
 }
 
-const Instrument = ({ frameNumber, channelNumber, lineNumber, group, visible = true, instrument }: InstrumentProps) => {
+const Instrument = ({ frameNumber, channelNumber, lineNumber, group, visible = true, instrument, isDisabled }: InstrumentProps) => {
 
     const select = useSelection((state) => state.select);
     const isCell0Selected = useSelection((state) =>
@@ -171,7 +177,7 @@ const Instrument = ({ frameNumber, channelNumber, lineNumber, group, visible = t
     const instrumentHexString: string = instrument !== null ? toTwoDigitHex(instrument) : "--";
 
     return (    
-        <div className={`flex flex-row text-instrument ${!visible && "invisible"}`}>
+        <div className={`flex flex-row text-instrument ${!visible && "invisible"} ${isDisabled && "opacity-25"}`}>
             <Cell
                 character={instrumentHexString[0]}
                 isSelectedAndFocused={isCell0SelectedAndFocused}
@@ -192,7 +198,7 @@ interface FXSymbolProps extends CellProps {
     fxSymbol: number | null;
 }
 
-const FXSymbol = ({ frameNumber, channelNumber, lineNumber, group, fxSymbol }: FXSymbolProps) => {
+const FXSymbol = ({ frameNumber, channelNumber, lineNumber, group, fxSymbol, isDisabled }: FXSymbolProps) => {
 
     const select = useSelection((state) => state.select);
     const isCell0Selected = useSelection((state) =>
@@ -217,7 +223,7 @@ const FXSymbol = ({ frameNumber, channelNumber, lineNumber, group, fxSymbol }: F
     const fxSymbolHexString: string = fxSymbol !== null ? toTwoDigitHex(fxSymbol) : "--";
 
     return (    
-        <div className="flex flex-row text-fx-symbol">
+        <div className={`flex flex-row text-fx-symbol ${isDisabled && "opacity-25"}`}>
             <Cell
                 character={fxSymbolHexString[0]}
                 isSelectedAndFocused={isCell0SelectedAndFocused}
@@ -238,7 +244,7 @@ interface FXValueProps extends CellProps {
     fxValue: number | null;
 }
 
-const FXValue = ({ frameNumber, channelNumber, lineNumber, group, fxValue }: FXValueProps) => {
+const FXValue = ({ frameNumber, channelNumber, lineNumber, group, fxValue, isDisabled }: FXValueProps) => {
 
     const select = useSelection((state) => state.select);
     const isCell0Selected = useSelection((state) =>
@@ -263,7 +269,7 @@ const FXValue = ({ frameNumber, channelNumber, lineNumber, group, fxValue }: FXV
     const fxValueHexString: string = fxValue !== null ? toTwoDigitHex(fxValue) : "--";
 
     return (    
-        <div className="flex flex-row text-fx-value">
+        <div className={`flex flex-row text-fx-value ${isDisabled && "opacity-25"}`}>
             <Cell
                 character={fxValueHexString[0]}
                 isSelectedAndFocused={isCell0SelectedAndFocused}
