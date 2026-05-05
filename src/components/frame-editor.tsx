@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { TrackerHubClient } from "@/api/tracker/tracker-hub-client";
 import { UNEXPECTED_ERROR_MESSAGE } from "@/api/api-error";
 import { Toasts } from "@/utils/toasts";
@@ -7,7 +7,6 @@ import { WIP_CONSTANTS } from "@/api/wips/wip";
 import { FrameMetadata, TrackerHubResult } from "@/api/tracker/tracker-hub-models";
 import { UpdateChannelMuteCommand, UpdateChannelSoloCommand, UpdateChannelTypeCommand, UpdateLineCountCommand, UpdateLinesPerBeatCommand } from "@/api/tracker/tracker-hub-commands";
 import { ChannelHeader, ChannelLineNumbers, ChannelLineNumbersHeader, ChannelLines } from "./channel";
-import OutsideClickHandler from 'react-outside-click-handler';
 import { channelCountAtom, currentFrameNumberAtom, frameMetadataAtomFamily, octaveAtom, setIndividualChannelMetadataAtom, setIndividualFrameMetadataAtom, setIsFocusedAtom } from "@/atoms/tracker-atoms";
 import { useAtom, useAtomValue } from "jotai";
 
@@ -17,10 +16,12 @@ export interface FrameEditorProps {
 
 export const FrameEditor = ({ client }: FrameEditorProps) => {
     
+    const containerRef = useRef<HTMLDivElement | null>(null);
     const channelCount = useAtomValue(channelCountAtom);
     const frameNumber = useAtomValue(currentFrameNumberAtom);
     const frameMetadata = useAtomValue(frameMetadataAtomFamily(frameNumber));
 
+    const [, setIsFocused] = useAtom(setIsFocusedAtom);
     const [, setIndividualFrameMetadata] = useAtom(setIndividualFrameMetadataAtom);
     const [, setIndividualChannelMetadata] = useAtom(setIndividualChannelMetadataAtom);
 
@@ -59,7 +60,28 @@ export const FrameEditor = ({ client }: FrameEditorProps) => {
         }
     }, [client, frameMetadata]);
     
-    const [, setIsFocused] = useAtom(setIsFocusedAtom);
+
+    useEffect(() => {
+        const handleFocusIn = (event: FocusEvent) => {
+            if (!containerRef.current?.contains(event.target as Node)) {
+                setIsFocused({ isFocused: false });
+            }
+        };
+
+        const handleMouseDown = (event: MouseEvent) => {
+            if (!containerRef.current?.contains(event.target as Node)) {
+                setIsFocused({ isFocused: false });
+            }
+        };
+
+        window.addEventListener("focusin", handleFocusIn);
+        window.addEventListener("mousedown", handleMouseDown);
+
+        return () => {
+            window.removeEventListener("focusin", handleFocusIn);
+            window.removeEventListener("mousedown", handleMouseDown);
+        };
+    }, [setIsFocused]);
 
     return (
         <div className="flex flex-col w-full h-full min-h-0 bg-background-darker">
@@ -80,31 +102,30 @@ export const FrameEditor = ({ client }: FrameEditorProps) => {
                         ))}
                         <ChannelLineNumbersHeader />
                     </div>
-                    <OutsideClickHandler 
-                        display="contents"
-                        onOutsideClick={() => setIsFocused({ isFocused: false })}
+                    <div 
+                        ref={containerRef}
+                        className="flex flex-row w-max min-w-full flex-1 overflow-y-auto" 
+                        onClick={() => setIsFocused({ isFocused: true })}
                     >
-                        <div className="flex flex-row w-max min-w-full flex-1 overflow-y-auto" onClick={() => setIsFocused({ isFocused: true })}>
-                            <ChannelLineNumbers
+                        <ChannelLineNumbers
+                            lineCount={frameMetadata.length}
+                            linesPerBeat={frameMetadata.linesPerBeat}
+                        />
+                        { Array.from({ length: channelCount + 1 }).map((_, index) => (
+                            <ChannelLines 
+                                client={client}
+                                frameNumber={frameMetadata.frameNumber}
+                                channelNumber={index}
                                 lineCount={frameMetadata.length}
                                 linesPerBeat={frameMetadata.linesPerBeat}
                             />
-                            { Array.from({ length: channelCount + 1 }).map((_, index) => (
-                                <ChannelLines 
-                                    client={client}
-                                    frameNumber={frameMetadata.frameNumber}
-                                    channelNumber={index}
-                                    lineCount={frameMetadata.length}
-                                    linesPerBeat={frameMetadata.linesPerBeat}
-                                />
-                            ))}
-                            <ChannelLineNumbers 
-                                lineCount={frameMetadata.length}
-                                linesPerBeat={frameMetadata.linesPerBeat}
-                                isRightHandSide
-                            />
-                        </div>
-                    </OutsideClickHandler>
+                        ))}
+                        <ChannelLineNumbers 
+                            lineCount={frameMetadata.length}
+                            linesPerBeat={frameMetadata.linesPerBeat}
+                            isRightHandSide
+                        />
+                    </div>
                 </div>
             </div>
         </div>
