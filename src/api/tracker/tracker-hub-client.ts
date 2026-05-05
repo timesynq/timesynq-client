@@ -2,7 +2,7 @@ import * as signalR from "@microsoft/signalr";
 import { hubs } from "../endpoints";
 import { UNEXPECTED_ERROR_MESSAGE } from "../api-error";
 import { ChatMessage, RoomInitializer, RoomMember, TrackerConnection, TrackerHubResult } from "./tracker-hub-models";
-import { UpdateChannelMuteCommand, UpdateChannelSoloCommand, UpdateChannelTypeCommand, UpdateLineCountCommand, UpdateLinesPerBeatCommand, UpdateSequencerChannelCommand, UpdateSequencerFrameCommand } from "./tracker-hub-commands";
+import { UpdateChannelMuteCommand, UpdateChannelSoloCommand, UpdateChannelTypeCommand, UpdateFXSymbolCommand, UpdateFXValueCommand, UpdateInstrumentCommand, UpdateLineCountCommand, UpdateLinesPerBeatCommand, UpdatePitchCommand, UpdateSequencerChannelCommand, UpdateSequencerFrameCommand } from "./tracker-hub-commands";
 
 const TrackerHubServerFunctions = {
     JoinRoom: "JoinRoom",
@@ -18,6 +18,10 @@ const TrackerHubServerFunctions = {
     UpdateChannelType: "UpdateChannelType",
     UpdateChannelMute: "UpdateChannelMute",
     UpdateChannelSolo: "UpdateChannelSolo",
+    UpdatePitch: "UpdatePitch",
+    UpdateInstrument: "UpdateInstrument",
+    UpdateFXSymbol: "UpdateFXSymbol",
+    UpdateFXValue: "UpdateFXValue",
 }
 
 const TrackerHubEvents = {
@@ -36,6 +40,10 @@ const TrackerHubEvents = {
     ChannelTypeUpdated: "ChannelTypeUpdated",
     ChannelMuteUpdated: "ChannelMuteUpdated",
     ChannelSoloUpdated: "ChannelSoloUpdated",
+    PitchUpdated: "PitchUpdated",
+    InstrumentUpdated: "InstrumentUpdated",
+    FXSymbolUpdated: "FXSymbolUpdated",
+    FXValueUpdated: "FXValueUpdated",
 }
 
 export class TrackerHubClient{
@@ -56,6 +64,10 @@ export class TrackerHubClient{
     private _channelTypeUpdatedListeners: Set<(comamnd: UpdateChannelTypeCommand) => void>;
     private _channelMuteUpdatedListeners: Set<(command: UpdateChannelMuteCommand) => void>;
     private _channelSoloUpdatedListeners: Set<(command: UpdateChannelSoloCommand) => void>;
+    private _pitchUpdatedListeners: Set<(command: UpdatePitchCommand) => void>;
+    private _instrumentUpdatedListeners: Set<(command: UpdateInstrumentCommand) => void>;
+    private _fxSymbolUpdatedListeners: Set<(command: UpdateFXSymbolCommand) => void>;
+    private _fxValueUpdatedListeners: Set<(command: UpdateFXValueCommand) => void>;
 
     constructor(){
         this._connection = new signalR.HubConnectionBuilder()
@@ -78,6 +90,10 @@ export class TrackerHubClient{
         this._channelTypeUpdatedListeners = new Set<(command: UpdateChannelTypeCommand) => void>();
         this._channelMuteUpdatedListeners = new Set<(command: UpdateChannelMuteCommand) => void>();
         this._channelSoloUpdatedListeners = new Set<(command: UpdateChannelSoloCommand) => void>();
+        this._pitchUpdatedListeners = new Set<(command: UpdatePitchCommand) => void>();
+        this._instrumentUpdatedListeners = new Set<(command: UpdateInstrumentCommand) => void>();
+        this._fxSymbolUpdatedListeners = new Set<(command: UpdateFXSymbolCommand) => void>();
+        this._fxValueUpdatedListeners = new Set<(command: UpdateFXValueCommand) => void>();
         this.registerListeners();
     }
 
@@ -105,6 +121,10 @@ export class TrackerHubClient{
         register(TrackerHubEvents.ChannelTypeUpdated, this._channelTypeUpdatedListeners);
         register(TrackerHubEvents.ChannelMuteUpdated, this._channelMuteUpdatedListeners);
         register(TrackerHubEvents.ChannelSoloUpdated, this._channelSoloUpdatedListeners);
+        register(TrackerHubEvents.PitchUpdated, this._pitchUpdatedListeners);
+        register(TrackerHubEvents.InstrumentUpdated, this._instrumentUpdatedListeners);
+        register(TrackerHubEvents.FXSymbolUpdated, this._fxSymbolUpdatedListeners);
+        register(TrackerHubEvents.FXValueUpdated, this._fxValueUpdatedListeners);
     }
 
     private subscribe<T>(
@@ -173,6 +193,22 @@ export class TrackerHubClient{
 
     subscribeChannelSoloUpdated(callback: (command: UpdateChannelSoloCommand) => void): () => boolean {
         return this.subscribe(this._channelSoloUpdatedListeners, callback);
+    }
+
+    subscribePitchUpdated(callback: (command: UpdatePitchCommand) => void): () => boolean {
+        return this.subscribe(this._pitchUpdatedListeners, callback);
+    }
+
+    subscribeInstrumentUpdated(callback: (command: UpdateInstrumentCommand) => void): () => boolean {
+        return this.subscribe(this._instrumentUpdatedListeners, callback);
+    }
+
+    subscribeFXSymbolUpdated(callback: (command: UpdateFXSymbolCommand) => void): () => boolean {
+        return this.subscribe(this._fxSymbolUpdatedListeners, callback);
+    }
+
+    subscribeFXValueUpdated(callback: (command: UpdateFXValueCommand) => void): () => boolean {
+        return this.subscribe(this._fxValueUpdatedListeners, callback);
     }
 
     private serverError<T>(): TrackerHubResult<T> {
@@ -250,6 +286,22 @@ export class TrackerHubClient{
 
     async updateChannelSolo(command: UpdateChannelSoloCommand): Promise<TrackerHubResult<void>> {
         return this.invoke<void, UpdateChannelSoloCommand>(TrackerHubServerFunctions.UpdateChannelSolo, command);
+    }
+
+    async updatePitch(command: UpdatePitchCommand): Promise<TrackerHubResult<void>> {
+        return this.invoke<void, UpdatePitchCommand>(TrackerHubServerFunctions.UpdatePitch, command);
+    }
+
+    async updateInstrument(command: UpdateInstrumentCommand): Promise<TrackerHubResult<void>> {
+        return this.invoke<void, UpdateInstrumentCommand>(TrackerHubServerFunctions.UpdateInstrument, command);
+    }
+
+    async updateFXSymbol(command: UpdateFXSymbolCommand): Promise<TrackerHubResult<void>> {
+        return this.invoke<void, UpdateFXSymbolCommand>(TrackerHubServerFunctions.UpdateFXSymbol, command);
+    }
+
+    async updateFXValue(command: UpdateFXValueCommand): Promise<TrackerHubResult<void>> {
+        return this.invoke<void, UpdateFXValueCommand>(TrackerHubServerFunctions.UpdateFXValue, command);
     }
 
     private async invoke<TResult, TArg> (trackerHubServerFunction: string, ...args: TArg[]): Promise<TrackerHubResult<TResult>> {

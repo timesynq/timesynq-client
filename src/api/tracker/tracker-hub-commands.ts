@@ -36,3 +36,35 @@ export type UpdateChannelSoloCommand = {
     channel: number;
     isSolo: boolean;
 }
+
+export type UpdatePitchCommand = {
+    frame: number;
+    channel: number;
+    line: number;
+    noteGroup: number;
+    newPitch: number | null;
+}
+
+export type UpdateInstrumentCommand = {
+    frame: number;
+    channel: number;
+    line: number;
+    noteGroup: number;
+    newInstrument: number | null;
+}
+
+export type UpdateFXSymbolCommand = {
+    frame: number;
+    channel: number;
+    line: number;
+    fxGroup: number;
+    newFXSymbol: number | null;
+}
+
+export type UpdateFXValueCommand = {
+    frame: number;
+    channel: number;
+    line: number;
+    fxGroup: number;
+    newFXValue: number | null;
+}
