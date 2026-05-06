@@ -1,9 +1,10 @@
 import { useMemo } from "react";
 import { Cell } from "./cell";
 import { useAtom, useAtomValue } from "jotai";
-import { cellSelectionAtom, CellSelectionType, lineAtomFamily, lineSelectionAtom, Selection, SelectionFactory, SelectionType, setSelectionAtom } from "@/atoms/tracker-atoms";
+import { cellSelectionAtom, CellSelectionType, lineAtomFamily, lineSelectionAtom, Selection, SelectionType, setSelectionAtom } from "@/atoms/tracker-atoms";
 import { toTwoDigitHex } from "@/utils/hex";
 import { PitchUtility } from "@/utils/pitch";
+import { SelectionFactory } from "@/factory/selection-factory";
 
 export interface LineProps {
     frameNumber: number;

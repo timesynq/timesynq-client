@@ -5,9 +5,9 @@ import { Toasts } from "@/utils/toasts";
 import { Counter } from "./counter";
 import { WIP_CONSTANTS } from "@/api/wips/wip";
 import { FrameMetadata, TrackerHubResult } from "@/api/tracker/tracker-hub-models";
-import { UpdateChannelMuteCommand, UpdateChannelSoloCommand, UpdateChannelTypeCommand, UpdateLineCountCommand, UpdateLinesPerBeatCommand } from "@/api/tracker/tracker-hub-commands";
+import { LineUpdateCommand, UpdateChannelMuteCommand, UpdateChannelSoloCommand, UpdateChannelTypeCommand, UpdateFXSymbolCommand, UpdateFXValueCommand, UpdateInstrumentCommand, UpdateLineCountCommand, UpdateLinesPerBeatCommand, UpdatePitchCommand } from "@/api/tracker/tracker-hub-commands";
 import { ChannelHeader, ChannelLineNumbers, ChannelLineNumbersHeader, ChannelLines } from "./channel";
-import { channelCountAtom, currentFrameNumberAtom, frameMetadataAtomFamily, octaveAtom, setIndividualChannelMetadataAtom, setIndividualFrameMetadataAtom, setIsFocusedAtom } from "@/atoms/tracker-atoms";
+import { channelCountAtom, currentFrameNumberAtom, frameEditorKeypressAtom, frameMetadataAtomFamily, octaveAtom, setIndividualChannelMetadataAtom, setIndividualFrameMetadataAtom, setIndividualLineAtom, setIsFocusedAtom } from "@/atoms/tracker-atoms";
 import { useAtom, useAtomValue } from "jotai";
 
 export interface FrameEditorProps {
@@ -22,8 +22,10 @@ export const FrameEditor = ({ client }: FrameEditorProps) => {
     const frameMetadata = useAtomValue(frameMetadataAtomFamily(frameNumber));
 
     const [, setIsFocused] = useAtom(setIsFocusedAtom);
+    const [, createCommand] = useAtom(frameEditorKeypressAtom);
     const [, setIndividualFrameMetadata] = useAtom(setIndividualFrameMetadataAtom);
     const [, setIndividualChannelMetadata] = useAtom(setIndividualChannelMetadataAtom);
+    const [, setIndividualLine] = useAtom(setIndividualLineAtom);    
 
     useEffect(() => {
         const lineCountUpdatedCallback = (command: UpdateLineCountCommand) => {
@@ -51,16 +53,87 @@ export const FrameEditor = ({ client }: FrameEditorProps) => {
         }
         const unsubscribeChannelSoloUpdated = client.subscribeChannelSoloUpdated(channelSoloUpdatedCallback);
 
+        const pitchUpdatedCallback = (command: UpdatePitchCommand) => {
+            setIndividualLine({ 
+                frameNumber: command.frame, 
+                channelNumber: command.channel, 
+                lineNumber: command.line,
+                updater: (line) => {
+                    const newPitches: (number | null)[] = line.pitches ?? new Array<number | null>(WIP_CONSTANTS.MAX_NOTE_GROUPS).fill(null);
+                    newPitches[command.noteGroup] = command.newPitch;
+                    return {
+                        ...line,
+                        pitches: newPitches,
+                    }
+                }
+            })
+        }
+        const unsubscribePitchUpdated = client.subscribePitchUpdated(pitchUpdatedCallback);
+
+        const instrumentUpdatedCallback = (command: UpdateInstrumentCommand) => {
+            setIndividualLine({ 
+                frameNumber: command.frame, 
+                channelNumber: command.channel, 
+                lineNumber: command.line,
+                updater: (line) => {
+                    const newInstruments: (number | null)[] = line.instruments ?? new Array<number | null>(WIP_CONSTANTS.MAX_NOTE_GROUPS).fill(null);
+                    newInstruments[command.noteGroup] = command.newInstrument;
+                    return {
+                        ...line,
+                        instruments: newInstruments,
+                    }
+                }
+            })
+        }
+        const unsubscribeInstrumentUpdated = client.subscribeInstrumentUpdated(instrumentUpdatedCallback);
+
+        const fxSymbolUpdatedCallback = (command: UpdateFXSymbolCommand) => {
+            setIndividualLine({ 
+                frameNumber: command.frame, 
+                channelNumber: command.channel, 
+                lineNumber: command.line,
+                updater: (line) => {
+                    const newFXSymbols: (number | null)[] = line.fxSymbols ?? new Array<number | null>(WIP_CONSTANTS.MAX_FX_GROUPS).fill(null);
+                    newFXSymbols[command.fxGroup] = command.newFXSymbol;
+                    return {
+                        ...line,
+                        fxSymbols: newFXSymbols,
+                    }
+                }
+            })
+        }
+        const unsubscribeFXSymbolUpdated = client.subscribeFXSymbolUpdated(fxSymbolUpdatedCallback);
+
+        const fxValueUpdatedCallback = (command: UpdateFXValueCommand) => {
+            setIndividualLine({ 
+                frameNumber: command.frame, 
+                channelNumber: command.channel, 
+                lineNumber: command.line,
+                updater: (line) => {
+                    const newFXValues: (number | null)[] = line.fxValues ?? new Array<number | null>(WIP_CONSTANTS.MAX_FX_GROUPS).fill(null);
+                    newFXValues[command.fxGroup] = command.newFXValue;
+                    return {
+                        ...line,
+                        fxValues: newFXValues,
+                    }
+                }
+            })
+        }
+        const unsubscribeFXValueUpdated = client.subscribeFXValueUpdated(fxValueUpdatedCallback);
+
         return () => {
             unsubscribeLineCountUpdated();
             unsubscribeLinesPerBeatUpdated();
             unsubscribeChannelTypeUpdated();
             unsubscribeChannelMuteUpdated();
             unsubscribeChannelSoloUpdated();
+            unsubscribePitchUpdated();
+            unsubscribeInstrumentUpdated();
+            unsubscribeFXSymbolUpdated();
+            unsubscribeFXValueUpdated();
         }
     }, [client, frameMetadata]);
     
-
     useEffect(() => {
         const handleFocusIn = (event: FocusEvent) => {
             if (!containerRef.current?.contains(event.target as Node)) {
@@ -82,6 +155,36 @@ export const FrameEditor = ({ client }: FrameEditorProps) => {
             window.removeEventListener("mousedown", handleMouseDown);
         };
     }, [setIsFocused]);
+
+    useEffect(() => {
+        const handleKeypress = async (e: KeyboardEvent) => {
+            const command: LineUpdateCommand | null = createCommand({ keyboardEvent: e });
+            console.log(command);
+            if (command === null)
+                return;
+            let result: TrackerHubResult<void>;
+            switch (command.type) {
+                case "pitch":
+                    result = await client.updatePitch(command);
+                    break;
+                case "instrument":
+                    result = await client.updateInstrument(command);
+                    break;
+                case "fxSymbol":
+                    result = await client.updateFXSymbol(command);
+                    break;
+                case "fxValue":
+                default:
+                    result = await client.updateFXValue(command);
+                    break;
+            }
+            if (!result.isSuccessful) {
+                Toasts.error(result.errorMessage ?? UNEXPECTED_ERROR_MESSAGE);    
+            }
+        }
+        window.addEventListener("keypress", handleKeypress);
+        return () => window.removeEventListener("keypress", handleKeypress);
+    }, [createCommand]);
 
     return (
         <div className="flex flex-col w-full h-full min-h-0 bg-background-darker">

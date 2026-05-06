@@ -10,14 +10,14 @@ export const PitchUtility = {
                 case 1: result = "C#"; break;
                 case 2: result = "D-"; break;
                 case 3: result = "D#"; break;
-                case 4: result = "E"; break;
-                case 5: result = "F"; break;
+                case 4: result = "E-"; break;
+                case 5: result = "F-"; break;
                 case 6: result = "F#"; break;
-                case 7: result = "G"; break;
+                case 7: result = "G-"; break;
                 case 8: result = "G#"; break;
-                case 9: result = "A"; break;
+                case 9: result = "A-"; break;
                 case 10: result = "A#"; break;
-                default: result = "B";
+                default: result = "B-";
             }
             return result;
         })();

@@ -37,7 +37,9 @@ export type UpdateChannelSoloCommand = {
     isSolo: boolean;
 }
 
+// "type" fields are used as discriminants
 export type UpdatePitchCommand = {
+    type: "pitch";
     frame: number;
     channel: number;
     line: number;
@@ -46,6 +48,7 @@ export type UpdatePitchCommand = {
 }
 
 export type UpdateInstrumentCommand = {
+    type: "instrument";
     frame: number;
     channel: number;
     line: number;
@@ -54,6 +57,7 @@ export type UpdateInstrumentCommand = {
 }
 
 export type UpdateFXSymbolCommand = {
+    type: "fxSymbol";
     frame: number;
     channel: number;
     line: number;
@@ -62,9 +66,12 @@ export type UpdateFXSymbolCommand = {
 }
 
 export type UpdateFXValueCommand = {
+    type: "fxValue";
     frame: number;
     channel: number;
     line: number;
     fxGroup: number;
     newFXValue: number | null;
 }
+
+export type LineUpdateCommand = UpdatePitchCommand | UpdateInstrumentCommand | UpdateFXSymbolCommand | UpdateFXValueCommand;

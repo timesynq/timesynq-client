@@ -4,6 +4,7 @@ import { generateRandomChatColor } from '@/utils/chat-color';
 import { atom } from 'jotai'
 import { splitAtom } from 'jotai/utils';
 import { atomFamily } from 'jotai-family';
+import { LineUpdateCommandFactory } from '@/factory/line-update-command-factory';
 
 /*
  * ========================================================
@@ -426,76 +427,6 @@ export enum SelectionType {
     SelectedAndUnfocused,
 }
 
-// this should validate by reading wip information, possibly via jotai atoms? remember to make these return Selection | null and swap select() in useSelection to accept Selection | null
-export const SelectionFactory = {
-    selectPitch: (
-        frameNumber: number,
-        channelNumber: number,
-        lineNumber: number,
-        group: number
-    ): Selection => {
-        return {
-            frameNumber: frameNumber,
-            channelNumber: channelNumber,
-            lineNumber: lineNumber,
-            group: group,
-            type: CellSelectionType.Pitch,
-            charPos: null
-        }
-    },
-
-    selectInstrumentDigit: (
-        frameNumber: number,
-        channelNumber: number,
-        lineNumber: number,
-        group: number,
-        charPos: number,
-    ): Selection => {
-        return {
-            frameNumber: frameNumber,
-            channelNumber: channelNumber,
-            lineNumber: lineNumber,
-            group: group,
-            type: CellSelectionType.Instrument,
-            charPos: charPos
-        }
-    },
-
-    selectFXSymbolDigit: (
-        frameNumber: number,
-        channelNumber: number,
-        lineNumber: number,
-        group: number,
-        charPos: number,
-    ): Selection => {
-        return {
-            frameNumber: frameNumber,
-            channelNumber: channelNumber,
-            lineNumber: lineNumber,
-            group: group,
-            type: CellSelectionType.FXSymbol,
-            charPos: charPos
-        }
-    },
-
-    selectFXValueDigit: (
-        frameNumber: number,
-        channelNumber: number,
-        lineNumber: number,
-        group: number,
-        charPos: number,
-    ): Selection => {
-        return {
-            frameNumber: frameNumber,
-            channelNumber: channelNumber,
-            lineNumber: lineNumber,
-            group: group,
-            type: CellSelectionType.FXValue,
-            charPos: charPos
-        }
-    }
-}
-
 const selectionAtom = atom<Selection | null>(null);
 export const setSelectionAtom = atom(null, (_, set, { selection } : { selection: Selection | null }) => 
     set(selectionAtom, selection)
@@ -550,3 +481,26 @@ export const cellSelectionAtom = atomFamily((
         return get(isFocusedAtom) ? SelectionType.SelectedAndFocused : SelectionType.SelectedAndUnfocused;
     })
 )
+
+/*
+ * ========================================================
+ *                   KEYPRESS EVENTS
+ * ========================================================
+ */
+
+export const frameEditorKeypressAtom = atom(null, (get, _, { keyboardEvent }: { keyboardEvent: KeyboardEvent }) => {
+    const isFocused: boolean = get(isFocusedAtom);
+    const selection: Selection | null = get(selectionAtom);
+    const octave: number = get(octaveAtom);
+
+    if (!isFocused || selection === null)
+        return null;
+
+    const line = get(lineAtomFamily({ 
+        frameNumber: selection.frameNumber,
+        channelNumber: selection.channelNumber,
+        lineNumber: selection.lineNumber 
+    }));
+
+    return LineUpdateCommandFactory.create(selection, keyboardEvent, octave, line);
+});
